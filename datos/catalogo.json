@@ -14,146 +14,164 @@
     {
       "sku": "AURICULARES",
       "nombre": "Auriculares Bluetooth",
-      "precio": 29990,
+      "precio": 24990,
       "stock": 40,
       "categoria": "Audio",
-      "descripcion": "Auriculares inalámbricos con 20 horas de batería."
+      "descripcion": "Auriculares inalámbricos con 20 horas de batería.",
+      "imagen": "https://live.staticflickr.com/3829/11270038074_e84fbecbeb.jpg"
     },
     {
       "sku": "AURICULARES-PRO",
       "nombre": "Auriculares con cancelación de ruido",
-      "precio": 44990,
+      "precio": 59990,
       "stock": 12,
       "categoria": "Audio",
-      "descripcion": "Auriculares premium con cancelación activa de ruido."
+      "descripcion": "Auriculares premium con cancelación activa de ruido.",
+      "imagen": "https://live.staticflickr.com/65535/52436478301_811f7eaf2d_b.jpg"
     },
     {
       "sku": "PARLANTE",
       "nombre": "Parlante portátil Bluetooth",
-      "precio": 49990,
+      "precio": 34990,
       "stock": 10,
       "categoria": "Audio",
-      "descripcion": "Parlante portátil con 12 horas de autonomía."
+      "descripcion": "Parlante portátil con 12 horas de autonomía.",
+      "imagen": "https://live.staticflickr.com/8072/8272741081_cbe0b2ac0a_b.jpg"
     },
     {
       "sku": "PARLANTE-PRO",
       "nombre": "Parlante portátil resistente al agua",
-      "precio": 69990,
+      "precio": 54990,
       "stock": 25,
       "categoria": "Audio",
-      "descripcion": "Parlante resistente al agua, ideal para exteriores."
+      "descripcion": "Parlante resistente al agua, ideal para exteriores.",
+      "imagen": "https://live.staticflickr.com/5602/15487686368_cdf0ab9b2a_b.jpg"
     },
     {
       "sku": "CABLE-HDMI",
       "nombre": "Cable HDMI 2 m",
-      "precio": 7990,
+      "precio": 6990,
       "stock": 80,
       "categoria": "Accesorios",
-      "descripcion": "Cable HDMI de alta velocidad, 2 metros."
+      "descripcion": "Cable HDMI de alta velocidad, 2 metros.",
+      "imagen": "https://live.staticflickr.com/2698/4445986156_404cfa5a41_b.jpg"
     },
     {
       "sku": "CARGADOR",
       "nombre": "Cargador rápido 65 W",
-      "precio": 19990,
+      "precio": 22990,
       "stock": 60,
       "categoria": "Accesorios",
-      "descripcion": "Cargador USB-C de 65 W para notebooks y celulares."
+      "descripcion": "Cargador USB-C de 65 W para notebooks y celulares.",
+      "imagen": "https://live.staticflickr.com/65535/49401748947_015593f4b9_b.jpg"
     },
     {
       "sku": "SOPORTE",
       "nombre": "Soporte para notebook",
-      "precio": 12990,
+      "precio": 14990,
       "stock": 45,
       "categoria": "Accesorios",
-      "descripcion": "Soporte ajustable de aluminio para notebook."
+      "descripcion": "Soporte ajustable de aluminio para notebook.",
+      "imagen": "https://live.staticflickr.com/2640/3802229064_3dec6f22e6_b.jpg"
     },
     {
       "sku": "POWERBANK",
       "nombre": "Power bank 20000 mAh",
-      "precio": 34990,
+      "precio": 29990,
       "stock": 35,
       "categoria": "Energía",
-      "descripcion": "Batería externa de 20000 mAh con salida USB-C."
+      "descripcion": "Batería externa de 20000 mAh con salida USB-C.",
+      "imagen": "https://live.staticflickr.com/3839/14627546992_5918345253_b.jpg"
     },
     {
       "sku": "MOUSE",
       "nombre": "Mouse inalámbrico",
-      "precio": 14990,
+      "precio": 12990,
       "stock": 50,
       "categoria": "Periféricos",
-      "descripcion": "Mouse inalámbrico ergonómico de 6 botones."
+      "descripcion": "Mouse inalámbrico ergonómico de 6 botones.",
+      "imagen": "https://live.staticflickr.com/7242/6848810640_95f2076266_b.jpg"
     },
     {
       "sku": "TECLADO",
       "nombre": "Teclado mecánico",
-      "precio": 44990,
+      "precio": 39990,
       "stock": 25,
       "categoria": "Periféricos",
-      "descripcion": "Teclado mecánico con switches marrones y retroiluminación."
+      "descripcion": "Teclado mecánico con switches marrones y retroiluminación.",
+      "imagen": "https://live.staticflickr.com/4846/32074239348_4851038033_b.jpg"
     },
     {
       "sku": "WEBCAM",
       "nombre": "Webcam 1080p",
-      "precio": 39990,
+      "precio": 29990,
       "stock": 18,
       "categoria": "Periféricos",
-      "descripcion": "Cámara web Full HD con micrófono integrado."
+      "descripcion": "Cámara web Full HD con micrófono integrado.",
+      "imagen": "https://live.staticflickr.com/79/229792440_b8c1aa47c8_b.jpg"
     },
     {
       "sku": "SSD",
       "nombre": "SSD 1 TB NVMe",
-      "precio": 89990,
+      "precio": 74990,
       "stock": 12,
       "categoria": "Almacenamiento",
-      "descripcion": "Unidad de estado sólido NVMe de 1 TB."
+      "descripcion": "Unidad de estado sólido NVMe de 1 TB.",
+      "imagen": "https://live.staticflickr.com/7450/16434277525_0d6f61528a_b.jpg"
     },
     {
       "sku": "SSD-512",
       "nombre": "SSD 512 GB NVMe",
-      "precio": 59990,
+      "precio": 49990,
       "stock": 30,
       "categoria": "Almacenamiento",
-      "descripcion": "Unidad de estado sólido NVMe de 512 GB."
+      "descripcion": "Unidad de estado sólido NVMe de 512 GB.",
+      "imagen": "https://live.staticflickr.com/2844/10712284924_c539813cf7_b.jpg"
     },
     {
       "sku": "MONITOR",
       "nombre": "Monitor 24 pulgadas Full HD",
-      "precio": 159990,
+      "precio": 139990,
       "stock": 15,
       "categoria": "Pantallas",
-      "descripcion": "Monitor LED de 24 pulgadas con resolución Full HD."
+      "descripcion": "Monitor LED de 24 pulgadas con resolución Full HD.",
+      "imagen": "https://live.staticflickr.com/8720/16978681515_cb2e972132.jpg"
     },
     {
       "sku": "MONITOR-27",
       "nombre": "Monitor 27 pulgadas Full HD",
-      "precio": 199990,
+      "precio": 179990,
       "stock": 25,
       "categoria": "Pantallas",
-      "descripcion": "Monitor LED de 27 pulgadas con resolución Full HD."
+      "descripcion": "Monitor LED de 27 pulgadas con resolución Full HD.",
+      "imagen": "https://live.staticflickr.com/5302/5855792974_578e097cc9.jpg"
     },
     {
       "sku": "NOTEBOOK",
       "nombre": "Notebook 14 pulgadas i5",
-      "precio": 649990,
+      "precio": 599990,
       "stock": 6,
       "categoria": "Computadores",
-      "descripcion": "Notebook de 14 pulgadas con procesador Intel Core i5."
+      "descripcion": "Notebook de 14 pulgadas con procesador Intel Core i5.",
+      "imagen": "https://live.staticflickr.com/2417/2104253867_4230e454e7_b.jpg"
     },
     {
       "sku": "TABLET",
       "nombre": "Tablet 10 pulgadas",
-      "precio": 279990,
+      "precio": 249990,
       "stock": 9,
       "categoria": "Computadores",
-      "descripcion": "Tablet de 10 pulgadas con 128 GB de almacenamiento."
+      "descripcion": "Tablet de 10 pulgadas con 128 GB de almacenamiento.",
+      "imagen": "https://live.staticflickr.com/8196/8121769775_8a08f4c76a_b.jpg"
     },
     {
       "sku": "ROUTER",
       "nombre": "Router WiFi 6",
-      "precio": 59990,
+      "precio": 49990,
       "stock": 15,
       "categoria": "Redes",
-      "descripcion": "Router inalámbrico WiFi 6 de doble banda."
+      "descripcion": "Router inalámbrico WiFi 6 de doble banda.",
+      "imagen": "https://live.staticflickr.com/8740/16199008854_2824d6e4c8_b.jpg"
     },
     {
       "sku": "CABLE-USB",
@@ -161,7 +179,8 @@
       "precio": 3990,
       "stock": 120,
       "categoria": "Accesorios",
-      "descripcion": "Cable USB-C de 1 metro para carga y datos."
+      "descripcion": "Cable USB-C de 1 metro para carga y datos.",
+      "imagen": "https://live.staticflickr.com/65535/48727128151_5d905b1431_b.jpg"
     },
     {
       "sku": "ADAPTADOR",
@@ -169,23 +188,26 @@
       "precio": 6990,
       "stock": 60,
       "categoria": "Accesorios",
-      "descripcion": "Adaptador de USB-C a HDMI para presentaciones."
+      "descripcion": "Adaptador de USB-C a HDMI para presentaciones.",
+      "imagen": "https://live.staticflickr.com/4111/5195695742_a94767bbe7_b.jpg"
     },
     {
       "sku": "PROTECTOR",
       "nombre": "Protector de pantalla",
-      "precio": 4990,
+      "precio": 3990,
       "stock": 90,
       "categoria": "Accesorios",
-      "descripcion": "Protector de vidrio templado para pantallas."
+      "descripcion": "Protector de vidrio templado para pantallas.",
+      "imagen": "https://live.staticflickr.com/4886/45450020214_53d63b197e_b.jpg"
     },
     {
       "sku": "LAPIZ-TACTIL",
       "nombre": "Lápiz táctil",
-      "precio": 7990,
+      "precio": 6990,
       "stock": 70,
       "categoria": "Accesorios",
-      "descripcion": "Lápiz táctil capacitivo para tabletas."
+      "descripcion": "Lápiz táctil capacitivo para tabletas.",
+      "imagen": "https://live.staticflickr.com/1419/4610205168_56693dec9b_b.jpg"
     }
   ],
   "eventos": {
@@ -194,11 +216,31 @@
       "cupon": "FIESTA10",
       "producto_2x1": "CABLE-HDMI",
       "reglas": [
-        {"sku": "PARLANTE", "por_persona": 0.1, "minimo": 1},
-        {"sku": "AURICULARES", "por_persona": 0.2, "minimo": 0},
-        {"sku": "CABLE-HDMI", "por_persona": 0.5, "minimo": 0},
-        {"sku": "POWERBANK", "por_persona": 0.1, "minimo": 0},
-        {"sku": "CARGADOR", "por_persona": 0.1, "minimo": 0}
+        {
+          "sku": "PARLANTE",
+          "por_persona": 0.1,
+          "minimo": 1
+        },
+        {
+          "sku": "AURICULARES",
+          "por_persona": 0.2,
+          "minimo": 0
+        },
+        {
+          "sku": "CABLE-HDMI",
+          "por_persona": 0.5,
+          "minimo": 0
+        },
+        {
+          "sku": "POWERBANK",
+          "por_persona": 0.1,
+          "minimo": 0
+        },
+        {
+          "sku": "CARGADOR",
+          "por_persona": 0.1,
+          "minimo": 0
+        }
       ]
     },
     "vuelta_a_clases": {
@@ -206,11 +248,31 @@
       "cupon": "ESCUELA10",
       "producto_2x1": "MOUSE",
       "reglas": [
-        {"sku": "TABLET", "por_persona": 0.2, "minimo": 1},
-        {"sku": "MOUSE", "por_persona": 1, "minimo": 0},
-        {"sku": "TECLADO", "por_persona": 0.5, "minimo": 0},
-        {"sku": "AURICULARES", "por_persona": 0.5, "minimo": 0},
-        {"sku": "SSD", "por_persona": 0.1, "minimo": 0}
+        {
+          "sku": "TABLET",
+          "por_persona": 0.2,
+          "minimo": 1
+        },
+        {
+          "sku": "MOUSE",
+          "por_persona": 1,
+          "minimo": 0
+        },
+        {
+          "sku": "TECLADO",
+          "por_persona": 0.5,
+          "minimo": 0
+        },
+        {
+          "sku": "AURICULARES",
+          "por_persona": 0.5,
+          "minimo": 0
+        },
+        {
+          "sku": "SSD",
+          "por_persona": 0.1,
+          "minimo": 0
+        }
       ]
     },
     "trabajo_remoto": {
@@ -218,11 +280,31 @@
       "cupon": "HOME10",
       "producto_2x1": "SOPORTE",
       "reglas": [
-        {"sku": "MONITOR", "por_persona": 1, "minimo": 1},
-        {"sku": "TECLADO", "por_persona": 1, "minimo": 0},
-        {"sku": "MOUSE", "por_persona": 1, "minimo": 0},
-        {"sku": "WEBCAM", "por_persona": 0.5, "minimo": 0},
-        {"sku": "SOPORTE", "por_persona": 1, "minimo": 0}
+        {
+          "sku": "MONITOR",
+          "por_persona": 1,
+          "minimo": 1
+        },
+        {
+          "sku": "TECLADO",
+          "por_persona": 1,
+          "minimo": 0
+        },
+        {
+          "sku": "MOUSE",
+          "por_persona": 1,
+          "minimo": 0
+        },
+        {
+          "sku": "WEBCAM",
+          "por_persona": 0.5,
+          "minimo": 0
+        },
+        {
+          "sku": "SOPORTE",
+          "por_persona": 1,
+          "minimo": 0
+        }
       ]
     },
     "accesorios_basicos": {
@@ -230,11 +312,31 @@
       "cupon": "ACC10",
       "producto_2x1": "CABLE-USB",
       "reglas": [
-        {"sku": "CABLE-USB", "por_persona": 1, "minimo": 0},
-        {"sku": "PROTECTOR", "por_persona": 0.5, "minimo": 0},
-        {"sku": "ADAPTADOR", "por_persona": 0.2, "minimo": 0},
-        {"sku": "LAPIZ-TACTIL", "por_persona": 0.1, "minimo": 0},
-        {"sku": "SOPORTE", "por_persona": 0.1, "minimo": 0}
+        {
+          "sku": "CABLE-USB",
+          "por_persona": 1,
+          "minimo": 0
+        },
+        {
+          "sku": "PROTECTOR",
+          "por_persona": 0.5,
+          "minimo": 0
+        },
+        {
+          "sku": "ADAPTADOR",
+          "por_persona": 0.2,
+          "minimo": 0
+        },
+        {
+          "sku": "LAPIZ-TACTIL",
+          "por_persona": 0.1,
+          "minimo": 0
+        },
+        {
+          "sku": "SOPORTE",
+          "por_persona": 0.1,
+          "minimo": 0
+        }
       ]
     }
   }

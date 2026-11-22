@@ -42,7 +42,7 @@ SHOPIFY_CLIENT_SECRET=shpss_...         # secreto de la app en el Dev Dashboard
 
 > `.env` está excluido por `.gitignore`. Nunca subas credenciales a GitHub.
 
-La app de Shopify debe estar **instalada en la tienda** y tener los scopes `read_products`, `write_products`, `read_locations`, `read_inventory` y `write_inventory`.
+La app de Shopify debe estar **instalada en la tienda** y tener los scopes de productos e inventario (`write_products` y `write_inventory`, que implican lectura). `read_locations` no es obligatorio: el script solo consulta el ID de la ubicación, no su nombre.
 
 ---
 
@@ -70,9 +70,9 @@ Ejemplo de salida:
 
 ```
 === cumpleanos | 10 personas | cupón=FIESTA10 ===
-  Imperativo           items=5, faltantes=0, 2x1=$2990, cupon=$8630, envio=$0, total=$77670
-  Orientado a objetos  items=5, faltantes=0, 2x1=$2990, cupon=$8630, envio=$0, total=$77670
-  Funcional            items=5, faltantes=0, 2x1=$2990, cupon=$8630, envio=$0, total=$77670
+  Imperativo           items=5, faltantes=0, 2x1=$13980, cupon=$15892, envio=$0, total=$143028
+  Orientado a objetos  items=5, faltantes=0, 2x1=$13980, cupon=$15892, envio=$0, total=$143028
+  Funcional            items=5, faltantes=0, 2x1=$13980, cupon=$15892, envio=$0, total=$143028
   >>> Paridad: OK
 ```
 
@@ -113,7 +113,8 @@ El script:
 
 - Consulta los SKUs existentes para no duplicar productos (idempotente).
 - Obtiene la ubicación de inventario principal.
-- Crea productos con precio, SKU, stock y categoría.
+- Crea productos con precio, SKU, stock, categoría e imagen.
+- Sincroniza precio e imagen de los productos que ya existen.
 - Crea colecciones por categoría y agrega los productos.
 
 Regenerar la documentación línea por línea:

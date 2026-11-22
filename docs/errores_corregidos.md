@@ -21,6 +21,9 @@ Este registro describe los fallos reales que aparecieron durante la construcció
 | 15 | `Access denied for name field. Required access: read_locations` al consultar `locations` | El token no incluye `read_locations` ni `read_markets_home`. | Se quitó el campo `name` de `LOCATIONS_QUERY`; solo se necesita el `id` para asignar el inventario. |
 | 16 | `Field 'variants' is not defined by type 'ProductInput'` | Shopify 2026 cambió el modelo: las variantes ya no se crean dentro de `productCreate`. | Se creó el producto con `productCreate` y luego se agregó su variante con `productVariantsBulkCreate` (estrategia `DEFAULT`), usando `inventoryItem.sku`, `inventoryQuantities` y `optionValues`. |
 | 17 | `collectionAddProducts is missing required arguments: id` / `doesn't accept argument 'collectionId'` | La API 2026 renombró los argumentos del mutation. | Se cambió la firma a `collectionAddProducts(id: $id, productIds: $productIds)`. Además se hizo `crear_colecciones()` idempotente: consulta las colecciones existentes y solo agrega los productos que faltan. |
+| 18 | Aparecía un artículo ajeno al pasar al checkout | La tienda conservaba 17 productos de ejemplo de Shopify (snowboards y gift card) activos, visibles en el catálogo y en el flujo de compra. | Se consultaron todos los productos y se archivaron los que no tenían el tag `carrito-evento` mediante `productUpdate(status: ARCHIVED)`. Quedan activos solo los 22 productos tecnológicos. |
+| 19 | Precios poco realistas para Chile | Los valores iniciales eran arbitrarios aunque la moneda de la tienda ya era CLP. | Se ajustaron los 22 precios a montos de mercado chileno (por ejemplo, notebook $599.990, monitor 24" $139.990, SSD 1 TB $74.990), manteniendo terminaciones habituales en CLP. `scripts/poblar_catalogo.py` ahora actualiza precios de productos existentes con `productVariantsBulkUpdate`. |
+| 20 | Los productos no tenían imágenes | `productCreate` no incluía multimedia y el script original solo creaba variantes. | Se buscaron fotos reales con licencia comercial en Openverse/Flickr (sin marca de agua), se verificó que las 22 URL respondieran `200 image/jpeg` y se guardaron en `datos/catalogo.json` como campo `imagen`. El script agrega `media` al crear y usa `productCreateMedia` para productos existentes. |
 
 ## Estado final verificado
 
@@ -28,4 +31,4 @@ Este registro describe los fallos reales que aparecieron durante la construcció
 - `python -m unittest discover -s tests -v` → 5 pruebas, todas OK.
 - `python shopify_client.py` → `Conectado a: TechStore (techstore-d8vn3rhk.myshopify.com)`.
 - `python -m scripts.poblar_catalogo --dry-run` → 25 SKUs existentes, 0 productos por crear.
-- `python -m scripts.poblar_catalogo` → 22 productos y 8 colecciones creados correctamente.
+- `python -m scripts.poblar_catalogo` → 22 productos activos con precio CLP y una imagen cada uno; 8 colecciones completas; 17 productos de ejemplo archivados.

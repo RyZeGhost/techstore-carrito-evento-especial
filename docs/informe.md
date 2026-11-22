@@ -10,20 +10,22 @@
 
 La tienda se montó sobre **Shopify**, plataforma validada por el enunciado.
 
-### Configuración realizada / prevista
+### Configuración realizada
 
 | Elemento | Exigencia | Estado |
 |---|---|---|
-| Catálogo y navegación | Mínimo | Catálogo de **productos tecnológicos** definido en `datos/catalogo.json` (22 SKU, 8 categorías: Audio, Accesorios, Energía, Periféricos, Almacenamiento, Pantallas, Computadores y Redes). Carga a Shopify mediante `scripts/poblar_catalogo.py`. |
+| Catálogo y navegación | Mínimo | Catálogo de **productos tecnológicos** definido en `datos/catalogo.json` (22 SKU, 8 categorías: Audio, Accesorios, Energía, Periféricos, Almacenamiento, Pantallas, Computadores y Redes). Cada SKU incluye precio en **CLP** y una imagen real libre de marca de agua. Carga a Shopify mediante `scripts/poblar_catalogo.py`. |
 | Carrito y checkout | Mínimo | Provisto por Shopify en modo de prueba. |
-| Pasarela de pagos | Mínimo | Configurar en **Configuración → Pagos → Proveedores de pago de prueba** (Shopify Payments test mode / Bogus Gateway). |
-| Identidad visual (tema) | Mínimo | Configurar un tema coherente con TechStore en **Online Store → Themes**. |
+| Pasarela de pagos | Mínimo | Configurada en **Configuración → Pagos → Proveedores de pago de prueba** (Shopify Payments test mode / Bogus Gateway). |
+| Identidad visual (tema) | Mínimo | Tema coherente con TechStore configurado en **Online Store → Themes**. |
 | Gestión de usuarios | Recomendado | Habilitar cuentas de cliente en **Configuración → Clientes**. |
 | Reseñas y prueba social | Recomendado | Instalar una app de reseñas; no exigible. |
 | Catálogo e inventario (backend) | Recomendado | Los productos se crean con `inventoryManagement: SHOPIFY` y stock inicial desde el JSON. |
-| Pedidos y envíos | Recomendado | Configurar tarifas de envío acordes al umbral de envío gratis ($50.000). |
+| Pedidos y envíos | Recomendado | Tarifa plana de $3.990 y envío gratis sobre $50.000, coherentes con `datos/catalogo.json`. Los 17 productos de ejemplo de Shopify se archivaron para que no aparezcan artículos ajenos en el checkout. |
 | Marketing y promociones | Recomendado | Reglas 2x1 y cupones modeladas en el carrito; pueden replicarse como descuentos de Shopify. |
 | Analítica, roles, integraciones | Referencial | No exigidas. |
+
+La evidencia visual de esta etapa (catálogo, navegación, carrito, checkout en modo prueba y repositorio de GitHub) se adjunta en la presentación.
 
 ### Integración desde Python
 
@@ -45,7 +47,7 @@ Conectado a: TechStore (techstore-d8vn3rhk.myshopify.com)
 
 ### Regla de negocio elegida
 
-**Carrito por ocasión y cantidad de personas** (validable con el docente). El usuario elige uno de tres eventos:
+**Carrito por ocasión y cantidad de personas** (validable con el docente). El usuario elige uno de cuatro eventos:
 
 | Evento | Reglas principales | 2x1 | Cupón |
 |---|---|---|---|
@@ -87,17 +89,17 @@ Reglas transversales:
 
 | Escenario | Items | Faltantes | 2x1 | Cupón | Envío | Total |
 |---|---:|---:|---:|---:|---:|---:|
-| cumpleanos, 10 pers., FIESTA10 | 5 | 0 | 15.980 | 18.892 | 0 | 170.028 |
-| trabajo_remoto, 12 pers., HOME10 | 5 | 0 | 77.940 | 295.752 | 0 | 2.661.768 |
-| vuelta_a_clases, 12 pers., ESCUELA10 | 5 | 0 | 89.940 | 155.977 | 0 | 1.403.793 |
-| cumpleanos, 200 pers., sin cupón | 5 | 1 | 319.600 | 0 | 0 | 4.018.600 |
+| cumpleanos, 10 pers., FIESTA10 | 5 | 0 | 13.980 | 15.892 | 0 | 143.028 |
+| trabajo_remoto, 12 pers., HOME10 | 5 | 0 | 89.940 | 258.552 | 0 | 2.326.968 |
+| vuelta_a_clases, 12 pers., ESCUELA10 | 5 | 0 | 77.940 | 136.777 | 0 | 1.230.993 |
+| cumpleanos, 200 pers., sin cupón | 5 | 1 | 279.600 | 0 | 0 | 3.438.600 |
 | accesorios_basicos, 1 persona, sin cupón | 5 | 0 | 0 | 0 | 3.990 | 40.940 |
 
 Las tres implementaciones devuelven diccionarios **exactamente iguales** en todos los casos; `tests/test_paridad.py` verifica esto automáticamente junto con validaciones, cupón inválido y envío.
 
 ### Errores y correcciones
 
-Ver [`errores_corregidos.md`](errores_corregidos.md). Incluye 13 incidencias reales, desde credenciales y scopes de Shopify hasta ajustes en los casos de prueba.
+Ver [`errores_corregidos.md`](errores_corregidos.md). Incluye 20 incidencias reales, desde credenciales y scopes de Shopify hasta cambios de la API 2026, imágenes, precios y limpieza del checkout.
 
 ### Explicación del código
 

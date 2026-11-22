@@ -24,7 +24,8 @@ PRODUCTOS_QUERY = """
     nodes {
       id
       title
-      variants(first: 250) { nodes { sku } }
+      variants(first: 250) { nodes { id sku price } }
+      media(first: 20) { nodes { id } }
     }
   }
 }
@@ -53,6 +54,24 @@ mutation VarianteCrear($productId: ID!, $variants: [ProductVariantsBulkInput!]!)
     strategy: DEFAULT
   ) {
     productVariants { id sku }
+    userErrors { field message }
+  }
+}
+"""
+
+VARIANT_UPDATE = """
+mutation VarianteActualizar($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+  productVariantsBulkUpdate(productId: $productId, variants: $variants) {
+    productVariants { id sku price }
+    userErrors { field message }
+  }
+}
+"""
+
+MEDIA_CREATE = """
+mutation ImagenAgregar($productId: ID!, $media: [CreateMediaInput!]!) {
+  productCreateMedia(productId: $productId, media: $media) {
+    media { id mediaContentType }
     userErrors { field message }
   }
 }
@@ -118,6 +137,11 @@ def crear_producto(producto, location_id):
         "vendor": "TechStore",
         "status": "ACTIVE",
         "tags": [producto["categoria"], "carrito-evento"],
+        "media": [{
+            "alt": producto["nombre"],
+            "mediaContentType": "IMAGE",
+            "originalSource": producto["imagen"],
+        }],
     }
     respuesta = graphql_query(PRODUCT_CREATE, {"input": entrada})["productCreate"]
     if respuesta["userErrors"]:
@@ -150,6 +174,37 @@ def crear_producto(producto, location_id):
             f"{respuesta_variante['userErrors']}"
         )
     return respuesta["product"]
+
+
+def sincronizar_producto(producto, nodo):
+    """Ajusta precio e imagen de un producto que ya existe en Shopify."""
+    cambios = []
+    variante = next(
+        (v for v in nodo["variants"]["nodes"] if v["sku"] == producto["sku"]), None
+    )
+    if variante and variante["price"] != str(producto["precio"]):
+        respuesta = graphql_query(VARIANT_UPDATE, {
+            "productId": nodo["id"],
+            "variants": [{"id": variante["id"], "price": str(producto["precio"])}],
+        })["productVariantsBulkUpdate"]
+        if respuesta["userErrors"]:
+            raise RuntimeError(f"Error actualizando precio: {respuesta['userErrors']}")
+        cambios.append("precio")
+
+    if not nodo["media"]["nodes"]:
+        respuesta = graphql_query(MEDIA_CREATE, {
+            "productId": nodo["id"],
+            "media": [{
+                "alt": producto["nombre"],
+                "mediaContentType": "IMAGE",
+                "originalSource": producto["imagen"],
+            }],
+        })["productCreateMedia"]
+        if respuesta["userErrors"]:
+            raise RuntimeError(f"Error agregando imagen: {respuesta['userErrors']}")
+        cambios.append("imagen")
+
+    return cambios
 
 
 def handle_de(texto):
@@ -212,6 +267,12 @@ def main():
     existentes, nodos = skus_existentes()
     print(f"SKUs existentes en la tienda: {len(existentes)}")
 
+    nodos_por_sku = {}
+    for nodo in nodos:
+        for variante in nodo["variants"]["nodes"]:
+            if variante["sku"]:
+                nodos_por_sku[variante["sku"]] = nodo
+
     pendientes = [
         p for p in catalogo["productos"] if p["sku"] not in existentes
     ]
@@ -219,20 +280,32 @@ def main():
 
     if args.dry_run:
         for producto in pendientes:
-            print(f"  [DRY RUN] {producto['sku']} - {producto['nombre']}")
+            print(f"  [DRY RUN] Crear {producto['sku']} - {producto['nombre']}")
+        for producto in catalogo["productos"]:
+            nodo = nodos_por_sku.get(producto["sku"])
+            if nodo:
+                sin_precio = any(
+                    v["sku"] == producto["sku"] and v["price"] != str(producto["precio"])
+                    for v in nodo["variants"]["nodes"]
+                )
+                if sin_precio or not nodo["media"]["nodes"]:
+                    print(f"  [DRY RUN] Sincronizar {producto['sku']}")
         return 0
 
-    location_id = location_principal()
-    ids_por_sku = {}
-    for nodo in nodos:
-        for variante in nodo["variants"]["nodes"]:
-            if variante["sku"]:
-                ids_por_sku[variante["sku"]] = nodo["id"]
+    location_id = location_principal() if pendientes else None
+    ids_por_sku = {sku: nodo["id"] for sku, nodo in nodos_por_sku.items()}
 
     for producto in pendientes:
         creado = crear_producto(producto, location_id)
         ids_por_sku[producto["sku"]] = creado["id"]
         print(f"  Creado {producto['sku']} -> {creado['handle']}")
+
+    for producto in catalogo["productos"]:
+        nodo = nodos_por_sku.get(producto["sku"])
+        if nodo:
+            cambios = sincronizar_producto(producto, nodo)
+            if cambios:
+                print(f"  Actualizado {producto['sku']}: {', '.join(cambios)}")
 
     crear_colecciones(catalogo, ids_por_sku)
     return 0

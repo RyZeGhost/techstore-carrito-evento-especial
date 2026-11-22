@@ -41,9 +41,10 @@ def explicar_linea(linea, comentario_pendiente):
     if not texto:  # Línea en blanco: separación visual.
         return "", "Línea en blanco: separa bloques lógicos.", comentario_pendiente
 
-    # Código sin comentario propio: se explica con el comentario vigente.
+    # Código sin comentario propio: se explica con el comentario vigente,
+    # que se consume aquí para no repetirlo en todo el resto del archivo.
     explicacion = comentario_pendiente or "Declaración o expresión del algoritmo; ver el bloque comentado anterior."
-    return texto, explicacion, comentario_pendiente
+    return texto, explicacion, ""
 
 
 def main():
