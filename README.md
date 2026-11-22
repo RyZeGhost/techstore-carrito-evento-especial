@@ -32,13 +32,19 @@ Copy-Item .env.example .env
 Contenido de `.env`:
 
 ```ini
-SHOPIFY_STORE_URL=techstore-d8vn3rhk.myshopify.com
-SHOPIFY_ACCESS_TOKEN=shpat_...          # usado por main.py (ShopifyAPI)
-SHOPIFY_API_VERSION=2026-10
 SHOPIFY_SHOP=techstore-d8vn3rhk.myshopify.com
-SHOPIFY_CLIENT_ID=e8d52a9b0224bae336b05c4cd79aaa0a
+SHOPIFY_CLIENT_ID=tu-client-id
 SHOPIFY_CLIENT_SECRET=shpss_...         # secreto de la app en el Dev Dashboard
+
+# Heredados del primer enfoque (REST). Ya no son necesarios:
+SHOPIFY_STORE_URL=techstore-d8vn3rhk.myshopify.com
+SHOPIFY_ACCESS_TOKEN=shpat_...
+SHOPIFY_API_VERSION=2026-10
+
+PUERTO_API=8000
 ```
+
+> `shpss_...` es el **Client Secret** y se usa solo para pedir el token con `client_credentials`. Usarlo como `SHOPIFY_ACCESS_TOKEN` produce HTTP 401. `main.py` y los scripts ya no dependen de un token `shpat_`.
 
 > `.env` está excluido por `.gitignore`. Nunca subas credenciales a GitHub.
 
@@ -56,6 +62,17 @@ Salida esperada:
 
 ```
 Conectado a: TechStore (techstore-d8vn3rhk.myshopify.com)
+```
+
+También puedes verificarlo con `main.py` (muestra la versión de la API):
+
+```powershell
+.\.venv\Scripts\python.exe main.py --info
+```
+
+```
+Conectado exitosamente a: TechStore (techstore-d8vn3rhk.myshopify.com)
+  API version: 2026-01
 ```
 
 ---
@@ -125,15 +142,45 @@ Regenerar la documentación línea por línea:
 
 ---
 
-## 6. Estructura del proyecto
+## 6. API HTTP del carrito
+
+Servicio mínimo que expone los tres paradigmas sin dependencias adicionales:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.api_carrito
+```
+
+En otra terminal:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/health
+Invoke-RestMethod http://127.0.0.1:8000/eventos
+$cuerpo = '{"evento":"cumpleanos","personas":10,"cupon":"FIESTA10","paradigma":"todos"}'
+$r = Invoke-RestMethod http://127.0.0.1:8000/carrito -Method Post -ContentType "application/json" -Body $cuerpo
+$r.imperativo.total       # 143028
+$r.orientado_objetos.total
+$r.funcional.total
+```
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/health` | Estado y cantidad de productos |
+| GET | `/eventos` | Eventos y sus reglas |
+| POST | `/carrito` | Resultado de uno o los tres paradigmas |
+
+El campo `paradigma` acepta `imperativo`, `orientado_objetos`, `funcional` o `todos` (por defecto). Las entradas inválidas devuelven HTTP 400 con un mensaje describiendo el error. El puerto se puede cambiar con `PUERTO_API` en `.env`.
+
+---
+
+## 7. Estructura del proyecto
 
 ```
 .
 ├── .env.example               Plantilla de credenciales
 ├── .gitignore                 Excluye .env y el entorno virtual
 ├── requirements.txt           Dependencias
-├── main.py                    Verificación con ShopifyAPI (token shpat_)
-├── shopify_client.py          Cliente GraphQL con client credentials
+├── main.py                    Verificación de conexión (GraphQL, client credentials)
+├── shopify_client.py          Cliente GraphQL con backoff exponencial
 ├── datos/
 │   └── catalogo.json          Fuente única de productos y reglas
 ├── carrito/
@@ -145,6 +192,7 @@ Regenerar la documentación línea por línea:
 │   └── __init__.py
 ├── scripts/
 │   ├── poblar_catalogo.py     Carga de productos y colecciones a Shopify
+│   ├── api_carrito.py         API HTTP de los tres paradigmas
 │   └── generar_documentacion.py
 ├── tests/
 │   └── test_paridad.py        Pruebas automáticas
@@ -152,14 +200,16 @@ Regenerar la documentación línea por línea:
     ├── informe.md             Informe final
     ├── explicacion_lineas.md  Explicación línea por línea
     ├── errores_corregidos.md  Errores y correcciones
-    └── prompts.md             Registro de prompts
+    ├── prompts.md             Registro de prompts
+    └── presentacion.md        Diapositivas de la exposición
 ```
 
 ---
 
-## 7. Documentación
+## 8. Documentación
 
 - [Informe final](docs/informe.md)
 - [Explicación línea por línea](docs/explicacion_lineas.md)
 - [Errores encontrados y corregidos](docs/errores_corregidos.md)
 - [Registro de prompts](docs/prompts.md)
+- [Presentación final](docs/presentacion.md)

@@ -99,12 +99,39 @@ Las tres implementaciones devuelven diccionarios **exactamente iguales** en todo
 
 ### Errores y correcciones
 
-Ver [`errores_corregidos.md`](errores_corregidos.md). Incluye 20 incidencias reales, desde credenciales y scopes de Shopify hasta cambios de la API 2026, imágenes, precios y limpieza del checkout.
+Ver [`errores_corregidos.md`](errores_corregidos.md). Incluye 23 incidencias reales, desde credenciales y scopes de Shopify hasta cambios de la API 2026, imágenes, precios, limpieza del checkout, validación del catálogo y límites de tasa.
 
 ### Explicación del código
 
 - [`explicacion_lineas.md`](explicacion_lineas.md): tabla línea por línea de los módulos principales.
-- `docs/prompts.md`: registro completo de los prompts usados con IA generativa.
+- [`prompts.md`](prompts.md): registro completo de los 27 prompts usados con IA generativa (9 por paradigma).
+- [`presentacion.md`](presentacion.md): diapositivas de la exposición final.
+
+### Integración como servicio HTTP
+
+Además de la carga a Shopify, `scripts/api_carrito.py` expone el componente sin añadir dependencias (solo librería estándar):
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/health` | Estado del servicio y cantidad de productos |
+| GET | `/eventos` | Eventos disponibles con sus reglas |
+| POST | `/carrito` | Calcula el carrito en `imperativo`, `orientado_objetos`, `funcional` o `todos` |
+
+Ejemplo de petición y respuesta (paradigma `todos`):
+
+```json
+{"evento": "cumpleanos", "personas": 10, "cupon": "FIESTA10", "paradigma": "todos"}
+```
+
+```json
+{
+  "imperativo": {"total": 143028, "..." : "..."},
+  "orientado_objetos": {"total": 143028, "..." : "..."},
+  "funcional": {"total": 143028, "..." : "..."}
+}
+```
+
+Las entradas inválidas devuelven HTTP 400 con un mensaje descriptivo. La verificación realizada confirmó los tres totales idénticos y el rechazo de `personas = -1`.
 
 ---
 

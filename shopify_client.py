@@ -1,16 +1,17 @@
-"""Cliente simple para la Admin API de Shopify usando client credentials.
+"""Cliente para la Admin GraphQL API de Shopify usando client credentials.
 
 Variables esperadas en .env:
     SHOPIFY_SHOP=techstore-d8vn3rhk.myshopify.com
     SHOPIFY_CLIENT_ID=...
     SHOPIFY_CLIENT_SECRET=shpss_...
 
-Nota: el endpoint real de Shopify es https://<shop>.myshopify.com/admin/...
-por eso SHOPIFY_SHOP=techstore se normaliza a techstore.myshopify.com.
+Incluye backoff exponencial ante límites de tasa (HTTP 429 y errores
+THROTTLED de GraphQL), según las buenas prácticas del enunciado.
 """
 
 import os
 import re
+import time
 
 import requests
 from dotenv import load_dotenv
@@ -21,6 +22,7 @@ SHOP = os.getenv("SHOPIFY_SHOP", "").strip()
 CLIENT_ID = os.getenv("SHOPIFY_CLIENT_ID", "").strip()
 CLIENT_SECRET = os.getenv("SHOPIFY_CLIENT_SECRET", "").strip()
 API_VERSION = "2026-01"
+INTENTOS = 5
 
 _TOKEN = None
 
@@ -47,6 +49,7 @@ def resumen_error(respuesta: requests.Response) -> str:
 
 
 def validar_configuracion() -> None:
+    """Verifica que existan las tres credenciales antes de llamar a la API."""
     faltantes = [
         nombre
         for nombre, valor in (
@@ -57,9 +60,29 @@ def validar_configuracion() -> None:
         if not valor
     ]
     if faltantes:
-        raise RuntimeError(
-            "Faltan variables en .env: " + ", ".join(faltantes)
-        )
+        raise RuntimeError("Faltan variables en .env: " + ", ".join(faltantes))
+
+
+def peticion_con_reintento(constructor, descripcion: str) -> requests.Response:
+    """Ejecuta una petición con espera exponencial si Shopify limita la tasa."""
+    for intento in range(1, INTENTOS + 1):
+        try:
+            respuesta = constructor()
+        except requests.RequestException as error:
+            if intento == INTENTOS:
+                raise RuntimeError(f"{descripcion}: {error}") from error
+            espera = 2 ** (intento - 1)
+            print(f"  {descripcion}: error de red; reintentando en {espera}s...")
+            time.sleep(espera)
+            continue
+
+        if respuesta.status_code == 429 and intento < INTENTOS:
+            espera = 2 ** (intento - 1)
+            print(f"  Límite de tasa alcanzado ({descripcion}); reintentando en {espera}s...")
+            time.sleep(espera)
+            continue
+        return respuesta
+    raise RuntimeError(f"No se pudo completar: {descripcion}")
 
 
 def get_shopify_token() -> str:
@@ -70,14 +93,17 @@ def get_shopify_token() -> str:
 
     validar_configuracion()
     url = f"https://{normalizar_shop(SHOP)}/admin/oauth/access_token"
-    respuesta = requests.post(
-        url,
-        data={
-            "grant_type": "client_credentials",
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-        },
-        timeout=30,
+    respuesta = peticion_con_reintento(
+        lambda: requests.post(
+            url,
+            data={
+                "grant_type": "client_credentials",
+                "client_id": CLIENT_ID,
+                "client_secret": CLIENT_SECRET,
+            },
+            timeout=30,
+        ),
+        "solicitud de token",
     )
     if respuesta.status_code != 200:
         raise RuntimeError(
@@ -93,27 +119,43 @@ def get_shopify_token() -> str:
 
 
 def graphql_query(query: str, variables: dict | None = None) -> dict:
-    """Ejecuta una consulta en la Admin GraphQL API y devuelve el bloque 'data'."""
-    url = (
-        f"https://{normalizar_shop(SHOP)}/admin/api/{API_VERSION}/graphql.json"
-    )
-    respuesta = requests.post(
-        url,
-        json={"query": query, "variables": variables or {}},
-        headers={
-            "X-Shopify-Access-Token": get_shopify_token(),
-            "Content-Type": "application/json",
-        },
-        timeout=30,
-    )
-    if respuesta.status_code != 200:
-        raise RuntimeError(
-            f"Error {respuesta.status_code} en GraphQL: {resumen_error(respuesta)}"
+    """Ejecuta una consulta GraphQL y devuelve el bloque 'data'."""
+    url = f"https://{normalizar_shop(SHOP)}/admin/api/{API_VERSION}/graphql.json"
+
+    for intento in range(1, INTENTOS + 1):
+        respuesta = peticion_con_reintento(
+            lambda: requests.post(
+                url,
+                json={"query": query, "variables": variables or {}},
+                headers={
+                    "X-Shopify-Access-Token": get_shopify_token(),
+                    "Content-Type": "application/json",
+                },
+                timeout=30,
+            ),
+            "consulta GraphQL",
         )
-    resultado = respuesta.json()
-    if resultado.get("errors"):
-        raise RuntimeError(f"Errores de GraphQL: {resultado['errors']}")
-    return resultado.get("data", {})
+        if respuesta.status_code != 200:
+            raise RuntimeError(
+                f"Error {respuesta.status_code} en GraphQL: {resumen_error(respuesta)}"
+            )
+        resultado = respuesta.json()
+        errores = resultado.get("errors") or []
+
+        es_throttled = any(
+            error.get("extensions", {}).get("code") == "THROTTLED"
+            for error in errores
+        )
+        if es_throttled and intento < INTENTOS:
+            espera = 2 ** (intento - 1)
+            print(f"  GraphQL limitó la tasa; reintentando en {espera}s...")
+            time.sleep(espera)
+            continue
+        if errores:
+            raise RuntimeError(f"Errores de GraphQL: {errores}")
+        return resultado.get("data", {})
+
+    raise RuntimeError("La consulta GraphQL agotó los reintentos por límite de tasa")
 
 
 if __name__ == "__main__":

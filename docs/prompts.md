@@ -75,4 +75,6 @@ El desarrollo se realizó con asistencia de IA. A continuación se registran los
 - Los prompts fueron evolucionando desde la definición del modelo de datos hasta la validación final.
 - Cada respuesta generada fue **supervisada**: se ejecutó, se comparó contra los otros paradigmas y se corrigió cuando fue necesario.
 - Prompt adicional recibido durante la revisión: *"La tienda debe ser de productos tecnológicos; ajusta el catálogo, los eventos y la documentación"*. A partir de él se generó el catálogo actual de 22 SKU y se renombró el evento `asado` a `trabajo_remoto`.
+- Otro prompt de revisión: *"Agrega imágenes sin marca de agua y precios realistas de Chile a los productos de tecnología"*. Dio lugar a las imágenes de Openverse/Flickr, los precios en CLP y la sincronización de productos existentes.
+- Prompt final: *"Continúa con lo solicitado"*. Se usó para cerrar la integración: backoff exponencial, validación del catálogo, `main.py` sobre GraphQL, API HTTP de los tres paradigmas y presentación en diapositivas.
 - Las correcciones reales se detallan en [`errores_corregidos.md`](errores_corregidos.md).

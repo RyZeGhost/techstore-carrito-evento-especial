@@ -8,160 +8,261 @@ comentario del bloque que le precede inmediatamente.
 
 | Línea | Código | Explicación |
 |---:|---|---|
-| 1 | `"""Cliente simple para la Admin API de Shopify usando client credentials.` | Docstring: describe el propósito del bloque. |
+| 1 | `"""Cliente para la Admin GraphQL API de Shopify usando client credentials.` | Docstring: describe el propósito del bloque. |
 | 2 | `` | Línea en blanco: separa bloques lógicos. |
 | 3 | `Variables esperadas en .env:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 4 | `SHOPIFY_SHOP=techstore-d8vn3rhk.myshopify.com` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 5 | `SHOPIFY_CLIENT_ID=...` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 6 | `SHOPIFY_CLIENT_SECRET=shpss_...` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 7 | `` | Línea en blanco: separa bloques lógicos. |
-| 8 | `Nota: el endpoint real de Shopify es https://<shop>.myshopify.com/admin/...` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 9 | `por eso SHOPIFY_SHOP=techstore se normaliza a techstore.myshopify.com.` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 8 | `Incluye backoff exponencial ante límites de tasa (HTTP 429 y errores` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 9 | `THROTTLED de GraphQL), según las buenas prácticas del enunciado.` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 10 | `"""` | Docstring: describe el propósito del bloque. |
 | 11 | `` | Línea en blanco: separa bloques lógicos. |
 | 12 | `import os` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 13 | `import re` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 14 | `` | Línea en blanco: separa bloques lógicos. |
-| 15 | `import requests` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 16 | `from dotenv import load_dotenv` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 17 | `` | Línea en blanco: separa bloques lógicos. |
-| 18 | `load_dotenv()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 19 | `` | Línea en blanco: separa bloques lógicos. |
-| 20 | `SHOP = os.getenv("SHOPIFY_SHOP", "").strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 21 | `CLIENT_ID = os.getenv("SHOPIFY_CLIENT_ID", "").strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 22 | `CLIENT_SECRET = os.getenv("SHOPIFY_CLIENT_SECRET", "").strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 23 | `API_VERSION = "2026-01"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 24 | `` | Línea en blanco: separa bloques lógicos. |
-| 25 | `_TOKEN = None` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 14 | `import time` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 15 | `` | Línea en blanco: separa bloques lógicos. |
+| 16 | `import requests` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 17 | `from dotenv import load_dotenv` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 18 | `` | Línea en blanco: separa bloques lógicos. |
+| 19 | `load_dotenv()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 20 | `` | Línea en blanco: separa bloques lógicos. |
+| 21 | `SHOP = os.getenv("SHOPIFY_SHOP", "").strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 22 | `CLIENT_ID = os.getenv("SHOPIFY_CLIENT_ID", "").strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 23 | `CLIENT_SECRET = os.getenv("SHOPIFY_CLIENT_SECRET", "").strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 24 | `API_VERSION = "2026-01"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 25 | `INTENTOS = 5` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 26 | `` | Línea en blanco: separa bloques lógicos. |
-| 27 | `` | Línea en blanco: separa bloques lógicos. |
-| 28 | `def normalizar_shop(shop: str) -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 29 | `"""Acepta 'techstore', 'techstore.myshopify.com' o la URL completa con /admin."""` | Docstring: describe el propósito del bloque. |
-| 30 | `shop = shop.strip().replace("https://", "").replace("http://", "").rstrip("/")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 31 | `if shop.endswith("/admin"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 32 | `shop = shop[: -len("/admin")]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 33 | `if "." not in shop:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 34 | `shop += ".myshopify.com"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 35 | `return shop` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 36 | `` | Línea en blanco: separa bloques lógicos. |
-| 37 | `` | Línea en blanco: separa bloques lógicos. |
-| 38 | `def resumen_error(respuesta: requests.Response) -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 39 | `"""Extrae el mensaje útil de una respuesta de error (JSON o HTML)."""` | Docstring: describe el propósito del bloque. |
-| 40 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 41 | `return str(respuesta.json())[:300]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 42 | `except ValueError:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 43 | `titulo = re.search(r"<title>(.*?)</title>", respuesta.text, re.DOTALL)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 44 | `if titulo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 45 | `return titulo.group(1).strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 46 | `return respuesta.text[:300]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 47 | `` | Línea en blanco: separa bloques lógicos. |
-| 48 | `` | Línea en blanco: separa bloques lógicos. |
-| 49 | `def validar_configuracion() -> None:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 50 | `faltantes = [` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 51 | `nombre` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 52 | `for nombre, valor in (` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 53 | `("SHOPIFY_SHOP", SHOP),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 54 | `("SHOPIFY_CLIENT_ID", CLIENT_ID),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 55 | `("SHOPIFY_CLIENT_SECRET", CLIENT_SECRET),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 56 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 57 | `if not valor` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 58 | `]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 59 | `if faltantes:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 60 | `raise RuntimeError(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 61 | `"Faltan variables en .env: " + ", ".join(faltantes)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 62 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 63 | `` | Línea en blanco: separa bloques lógicos. |
+| 27 | `_TOKEN = None` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 28 | `` | Línea en blanco: separa bloques lógicos. |
+| 29 | `` | Línea en blanco: separa bloques lógicos. |
+| 30 | `def normalizar_shop(shop: str) -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 31 | `"""Acepta 'techstore', 'techstore.myshopify.com' o la URL completa con /admin."""` | Docstring: describe el propósito del bloque. |
+| 32 | `shop = shop.strip().replace("https://", "").replace("http://", "").rstrip("/")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 33 | `if shop.endswith("/admin"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 34 | `shop = shop[: -len("/admin")]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 35 | `if "." not in shop:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 36 | `shop += ".myshopify.com"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 37 | `return shop` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 38 | `` | Línea en blanco: separa bloques lógicos. |
+| 39 | `` | Línea en blanco: separa bloques lógicos. |
+| 40 | `def resumen_error(respuesta: requests.Response) -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 41 | `"""Extrae el mensaje útil de una respuesta de error (JSON o HTML)."""` | Docstring: describe el propósito del bloque. |
+| 42 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 43 | `return str(respuesta.json())[:300]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 44 | `except ValueError:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 45 | `titulo = re.search(r"<title>(.*?)</title>", respuesta.text, re.DOTALL)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 46 | `if titulo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 47 | `return titulo.group(1).strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 48 | `return respuesta.text[:300]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 49 | `` | Línea en blanco: separa bloques lógicos. |
+| 50 | `` | Línea en blanco: separa bloques lógicos. |
+| 51 | `def validar_configuracion() -> None:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 52 | `"""Verifica que existan las tres credenciales antes de llamar a la API."""` | Docstring: describe el propósito del bloque. |
+| 53 | `faltantes = [` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 54 | `nombre` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 55 | `for nombre, valor in (` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 56 | `("SHOPIFY_SHOP", SHOP),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 57 | `("SHOPIFY_CLIENT_ID", CLIENT_ID),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 58 | `("SHOPIFY_CLIENT_SECRET", CLIENT_SECRET),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 59 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 60 | `if not valor` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 61 | `]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 62 | `if faltantes:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 63 | `raise RuntimeError("Faltan variables en .env: " + ", ".join(faltantes))` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 64 | `` | Línea en blanco: separa bloques lógicos. |
-| 65 | `def get_shopify_token() -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 66 | `"""Obtiene (y reutiliza) un access token mediante client_credentials."""` | Docstring: describe el propósito del bloque. |
-| 67 | `global _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 68 | `if _TOKEN:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 69 | `return _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 70 | `` | Línea en blanco: separa bloques lógicos. |
-| 71 | `validar_configuracion()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 72 | `url = f"https://{normalizar_shop(SHOP)}/admin/oauth/access_token"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 73 | `respuesta = requests.post(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 74 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 75 | `data={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 76 | `"grant_type": "client_credentials",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 77 | `"client_id": CLIENT_ID,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 78 | `"client_secret": CLIENT_SECRET,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 79 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 80 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 81 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 82 | `if respuesta.status_code != 200:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 83 | `raise RuntimeError(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 84 | `f"Error {respuesta.status_code} al pedir el token: "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 85 | `f"{resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 86 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 87 | `datos = respuesta.json()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 88 | `if "access_token" not in datos:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 89 | `raise RuntimeError(f"Shopify no devolvió access_token: {datos}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 90 | `` | Línea en blanco: separa bloques lógicos. |
-| 91 | `_TOKEN = datos["access_token"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 65 | `` | Línea en blanco: separa bloques lógicos. |
+| 66 | `def peticion_con_reintento(constructor, descripcion: str) -> requests.Response:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 67 | `"""Ejecuta una petición con espera exponencial si Shopify limita la tasa."""` | Docstring: describe el propósito del bloque. |
+| 68 | `for intento in range(1, INTENTOS + 1):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 69 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 70 | `respuesta = constructor()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 71 | `except requests.RequestException as error:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 72 | `if intento == INTENTOS:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 73 | `raise RuntimeError(f"{descripcion}: {error}") from error` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 74 | `espera = 2 ** (intento - 1)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 75 | `print(f"  {descripcion}: error de red; reintentando en {espera}s...")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 76 | `time.sleep(espera)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 77 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 78 | `` | Línea en blanco: separa bloques lógicos. |
+| 79 | `if respuesta.status_code == 429 and intento < INTENTOS:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 80 | `espera = 2 ** (intento - 1)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 81 | `print(f"  Límite de tasa alcanzado ({descripcion}); reintentando en {espera}s...")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 82 | `time.sleep(espera)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 83 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 84 | `return respuesta` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 85 | `raise RuntimeError(f"No se pudo completar: {descripcion}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 86 | `` | Línea en blanco: separa bloques lógicos. |
+| 87 | `` | Línea en blanco: separa bloques lógicos. |
+| 88 | `def get_shopify_token() -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 89 | `"""Obtiene (y reutiliza) un access token mediante client_credentials."""` | Docstring: describe el propósito del bloque. |
+| 90 | `global _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 91 | `if _TOKEN:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 92 | `return _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 93 | `` | Línea en blanco: separa bloques lógicos. |
-| 94 | `` | Línea en blanco: separa bloques lógicos. |
-| 95 | `def graphql_query(query: str, variables: dict \| None = None) -> dict:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 96 | `"""Ejecuta una consulta en la Admin GraphQL API y devuelve el bloque 'data'."""` | Docstring: describe el propósito del bloque. |
-| 97 | `url = (` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 98 | `f"https://{normalizar_shop(SHOP)}/admin/api/{API_VERSION}/graphql.json"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 99 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 100 | `respuesta = requests.post(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 101 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 102 | `json={"query": query, "variables": variables or {}},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 103 | `headers={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 104 | `"X-Shopify-Access-Token": get_shopify_token(),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 105 | `"Content-Type": "application/json",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 106 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 107 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 108 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 109 | `if respuesta.status_code != 200:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 110 | `raise RuntimeError(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 111 | `f"Error {respuesta.status_code} en GraphQL: {resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 94 | `validar_configuracion()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 95 | `url = f"https://{normalizar_shop(SHOP)}/admin/oauth/access_token"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 96 | `respuesta = peticion_con_reintento(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 97 | `lambda: requests.post(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 98 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 99 | `data={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 100 | `"grant_type": "client_credentials",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 101 | `"client_id": CLIENT_ID,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 102 | `"client_secret": CLIENT_SECRET,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 103 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 104 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 105 | `),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 106 | `"solicitud de token",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 107 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 108 | `if respuesta.status_code != 200:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 109 | `raise RuntimeError(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 110 | `f"Error {respuesta.status_code} al pedir el token: "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 111 | `f"{resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 112 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 113 | `resultado = respuesta.json()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 114 | `if resultado.get("errors"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 115 | `raise RuntimeError(f"Errores de GraphQL: {resultado['errors']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 116 | `return resultado.get("data", {})` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 117 | `` | Línea en blanco: separa bloques lógicos. |
-| 118 | `` | Línea en blanco: separa bloques lógicos. |
-| 119 | `if __name__ == "__main__":` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 120 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 121 | `datos = graphql_query("{ shop { name myshopifyDomain } }")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 122 | `tienda = datos["shop"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 123 | `print(f"Conectado a: {tienda['name']} ({tienda['myshopifyDomain']})")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 124 | `except (RuntimeError, requests.RequestException, KeyError) as error:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 125 | `print(f"Error de conexión: {error}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 113 | `datos = respuesta.json()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 114 | `if "access_token" not in datos:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 115 | `raise RuntimeError(f"Shopify no devolvió access_token: {datos}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 116 | `` | Línea en blanco: separa bloques lógicos. |
+| 117 | `_TOKEN = datos["access_token"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 118 | `return _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 119 | `` | Línea en blanco: separa bloques lógicos. |
+| 120 | `` | Línea en blanco: separa bloques lógicos. |
+| 121 | `def graphql_query(query: str, variables: dict \| None = None) -> dict:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 122 | `"""Ejecuta una consulta GraphQL y devuelve el bloque 'data'."""` | Docstring: describe el propósito del bloque. |
+| 123 | `url = f"https://{normalizar_shop(SHOP)}/admin/api/{API_VERSION}/graphql.json"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 124 | `` | Línea en blanco: separa bloques lógicos. |
+| 125 | `for intento in range(1, INTENTOS + 1):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 126 | `respuesta = peticion_con_reintento(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 127 | `lambda: requests.post(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 128 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 129 | `json={"query": query, "variables": variables or {}},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 130 | `headers={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 131 | `"X-Shopify-Access-Token": get_shopify_token(),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 132 | `"Content-Type": "application/json",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 133 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 134 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 135 | `),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 136 | `"consulta GraphQL",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 137 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 138 | `if respuesta.status_code != 200:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 139 | `raise RuntimeError(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 140 | `f"Error {respuesta.status_code} en GraphQL: {resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 141 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 142 | `resultado = respuesta.json()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 143 | `errores = resultado.get("errors") or []` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 144 | `` | Línea en blanco: separa bloques lógicos. |
+| 145 | `es_throttled = any(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 146 | `error.get("extensions", {}).get("code") == "THROTTLED"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 147 | `for error in errores` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 148 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 149 | `if es_throttled and intento < INTENTOS:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 150 | `espera = 2 ** (intento - 1)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 151 | `print(f"  GraphQL limitó la tasa; reintentando en {espera}s...")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 152 | `time.sleep(espera)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 153 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 154 | `if errores:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 155 | `raise RuntimeError(f"Errores de GraphQL: {errores}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 156 | `return resultado.get("data", {})` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 157 | `` | Línea en blanco: separa bloques lógicos. |
+| 158 | `raise RuntimeError("La consulta GraphQL agotó los reintentos por límite de tasa")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 159 | `` | Línea en blanco: separa bloques lógicos. |
+| 160 | `` | Línea en blanco: separa bloques lógicos. |
+| 161 | `if __name__ == "__main__":` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 162 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 163 | `datos = graphql_query("{ shop { name myshopifyDomain } }")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 164 | `tienda = datos["shop"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 165 | `print(f"Conectado a: {tienda['name']} ({tienda['myshopifyDomain']})")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 166 | `except (RuntimeError, requests.RequestException, KeyError) as error:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 167 | `print(f"Error de conexión: {error}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 
 ## `carrito/datos.py`
 
 | Línea | Código | Explicación |
 |---:|---|---|
-| 1 | `"""Carga y acceso al catálogo compartido por las tres implementaciones.` | Docstring: describe el propósito del bloque. |
+| 1 | `"""Carga, validación y acceso al catálogo compartido por las tres implementaciones.` | Docstring: describe el propósito del bloque. |
 | 2 | `` | Línea en blanco: separa bloques lógicos. |
 | 3 | `Este módulo es la única fuente de datos: las tres versiones del carrito` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 4 | `reciben el mismo diccionario, por lo que cualquier diferencia de resultado` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 5 | `se debe al paradigma y no a los datos de entrada.` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 6 | `"""` | Docstring: describe el propósito del bloque. |
-| 7 | `` | Línea en blanco: separa bloques lógicos. |
-| 8 | `import json` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 9 | `from pathlib import Path` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 10 | `` | Línea en blanco: separa bloques lógicos. |
-| 11 | `# Ruta por defecto, calculada desde la ubicación de este archivo y no desde` | Ruta por defecto, calculada desde la ubicación de este archivo y no desde |
-| 12 | `# el directorio de ejecución, para que funcione desde cualquier carpeta.` | el directorio de ejecución, para que funcione desde cualquier carpeta. |
-| 13 | `RUTA_CATALOGO = Path(__file__).resolve().parent.parent / "datos" / "catalogo.json"` | el directorio de ejecución, para que funcione desde cualquier carpeta. |
-| 14 | `` | Línea en blanco: separa bloques lógicos. |
-| 15 | `` | Línea en blanco: separa bloques lógicos. |
-| 16 | `def cargar_catalogo(ruta=RUTA_CATALOGO):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 17 | `"""Lee el JSON y devuelve un diccionario con la configuración del catálogo."""` | Docstring: describe el propósito del bloque. |
-| 18 | `with open(ruta, "r", encoding="utf-8") as archivo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 19 | `return json.load(archivo)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 20 | `` | Línea en blanco: separa bloques lógicos. |
-| 21 | `` | Línea en blanco: separa bloques lógicos. |
-| 22 | `def indice_productos(catalogo):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 23 | `"""Construye un índice {sku: producto} para búsquedas O(1)."""` | Docstring: describe el propósito del bloque. |
-| 24 | `return {producto["sku"]: producto for producto in catalogo["productos"]}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 6 | `` | Línea en blanco: separa bloques lógicos. |
+| 7 | `La validación del esquema evita enviar datos incompletos a Shopify.` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 8 | `"""` | Docstring: describe el propósito del bloque. |
+| 9 | `` | Línea en blanco: separa bloques lógicos. |
+| 10 | `import json` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 11 | `from pathlib import Path` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 12 | `` | Línea en blanco: separa bloques lógicos. |
+| 13 | `# Ruta por defecto, calculada desde la ubicación de este archivo y no desde` | Ruta por defecto, calculada desde la ubicación de este archivo y no desde |
+| 14 | `# el directorio de ejecución, para que funcione desde cualquier carpeta.` | el directorio de ejecución, para que funcione desde cualquier carpeta. |
+| 15 | `RUTA_CATALOGO = Path(__file__).resolve().parent.parent / "datos" / "catalogo.json"` | el directorio de ejecución, para que funcione desde cualquier carpeta. |
+| 16 | `` | Línea en blanco: separa bloques lógicos. |
+| 17 | `` | Línea en blanco: separa bloques lógicos. |
+| 18 | `def validar_catalogo(catalogo):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 19 | `"""Comprueba que el JSON tenga las claves y tipos que espera el carrito."""` | Docstring: describe el propósito del bloque. |
+| 20 | `if not isinstance(catalogo, dict):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 21 | `raise ValueError("El catálogo debe ser un objeto JSON")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 22 | `` | Línea en blanco: separa bloques lógicos. |
+| 23 | `for clave in ("moneda", "envio", "sustitutos", "productos", "eventos"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 24 | `if clave not in catalogo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 25 | `raise ValueError(f"Falta la clave obligatoria '{clave}' en el catálogo")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 26 | `` | Línea en blanco: separa bloques lógicos. |
+| 27 | `envio = catalogo["envio"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 28 | `for clave in ("costo", "gratis_desde"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 29 | `if not isinstance(envio.get(clave), int) or envio[clave] < 0:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 30 | `raise ValueError(f"envio.{clave} debe ser un entero no negativo")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 31 | `` | Línea en blanco: separa bloques lógicos. |
+| 32 | `if not isinstance(catalogo["productos"], list) or not catalogo["productos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 33 | `raise ValueError("productos debe ser una lista no vacía")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 34 | `` | Línea en blanco: separa bloques lógicos. |
+| 35 | `skus = set()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 36 | `for producto in catalogo["productos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 37 | `for clave in ("sku", "nombre", "precio", "stock", "categoria",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 38 | `"descripcion", "imagen"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 39 | `if clave not in producto:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 40 | `raise ValueError(f"Falta '{clave}' en el producto {producto.get('sku')}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 41 | `if producto["sku"] in skus:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 42 | `raise ValueError(f"SKU duplicado: {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 43 | `skus.add(producto["sku"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 44 | `if not isinstance(producto["precio"], int) or producto["precio"] <= 0:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 45 | `raise ValueError(f"precio inválido en {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 46 | `if not isinstance(producto["stock"], int) or producto["stock"] < 0:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 47 | `raise ValueError(f"stock inválido en {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 48 | `if not str(producto["imagen"]).startswith("https://"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 49 | `raise ValueError(f"imagen inválida en {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 50 | `` | Línea en blanco: separa bloques lógicos. |
+| 51 | `for sku, sustituto in catalogo["sustitutos"].items():` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 52 | `if sku not in skus or sustituto not in skus:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 53 | `raise ValueError(f"Sustituto inválido: {sku} -> {sustituto}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 54 | `` | Línea en blanco: separa bloques lógicos. |
+| 55 | `if not isinstance(catalogo["eventos"], dict) or not catalogo["eventos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 56 | `raise ValueError("eventos debe ser un objeto no vacío")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 57 | `` | Línea en blanco: separa bloques lógicos. |
+| 58 | `for nombre, evento in catalogo["eventos"].items():` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 59 | `for clave in ("nombre", "cupon", "producto_2x1", "reglas"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 60 | `if clave not in evento:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 61 | `raise ValueError(f"Falta '{clave}' en el evento {nombre}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 62 | `if evento["producto_2x1"] not in skus:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 63 | `raise ValueError(f"producto_2x1 inexistente en el evento {nombre}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 64 | `for regla in evento["reglas"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 65 | `if regla["sku"] not in skus:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 66 | `raise ValueError(f"SKU de regla inexistente: {regla['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 67 | `if regla["por_persona"] < 0 or regla["minimo"] < 0:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 68 | `raise ValueError(f"Cantidades negativas en el evento {nombre}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 69 | `` | Línea en blanco: separa bloques lógicos. |
+| 70 | `return True` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 71 | `` | Línea en blanco: separa bloques lógicos. |
+| 72 | `` | Línea en blanco: separa bloques lógicos. |
+| 73 | `def cargar_catalogo(ruta=RUTA_CATALOGO):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 74 | `"""Lee el JSON, valida su esquema y devuelve el diccionario del catálogo."""` | Docstring: describe el propósito del bloque. |
+| 75 | `with open(ruta, "r", encoding="utf-8") as archivo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 76 | `catalogo = json.load(archivo)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 77 | `validar_catalogo(catalogo)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 78 | `return catalogo` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 79 | `` | Línea en blanco: separa bloques lógicos. |
+| 80 | `` | Línea en blanco: separa bloques lógicos. |
+| 81 | `def indice_productos(catalogo):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 82 | `"""Construye un índice {sku: producto} para búsquedas O(1)."""` | Docstring: describe el propósito del bloque. |
+| 83 | `return {producto["sku"]: producto for producto in catalogo["productos"]}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 
 ## `carrito/imperativo.py`
 
