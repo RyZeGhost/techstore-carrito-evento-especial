@@ -16,12 +16,16 @@ Este registro describe los fallos reales que aparecieron durante la construcció
 | 10 | Traceback extenso con HTML en errores HTTP | `raise_for_status()` no mostraba el cuerpo; la página de error de OAuth ensuciaba la salida. | Se añadió `resumen_error()` en `shopify_client.py`, que extrae el `<title>` del HTML o el JSON del error. |
 | 11 | Error de tipeo `diccionarioPython` y carácter extraño en docstrings | Errores de redacción al generar los módulos. | Se corrigieron los docstrings de `carrito/datos.py` y `carrito/orientado_objetos.py`. |
 | 12 | El caso de prueba de envío pagado dejó de ejercitar esa ruta | Al cambiar el catálogo a tecnología, el carrito mínimo subió por encima de `$50.000` y el envío quedaba gratis. | Se incorporó el evento `accesorios_basicos` (productos económicos) y el caso `accesorios_basicos, 1 persona`, con total `$40.940` y envío `$3.990`. |
-| 13 | `Access denied for products field. (ACCESS_DENIED)` al poblar el catálogo | La app instalada solo tenía scopes de lectura básica; faltaban `read_products`, `write_products`, `read_locations` y `read_inventory/write_inventory`. | **Pendiente de corregir por el usuario:** agregar esos scopes a una nueva versión de la app en el Dev Dashboard, liberarla y aprobar el cambio en la tienda. El script `scripts/poblar_catalogo.py` ya está listo y es idempotente. |
+| 13 | `Access denied for products field. (ACCESS_DENIED)` al poblar el catálogo | La app instalada solo tenía los scopes `write_checkout_and_accounts_configurations` y `write_content`. | El usuario creó una nueva versión de la app en el Dev Dashboard con `read_products`, `write_products`, `write_inventory`, etc., la liberó y aprobó el cambio en la tienda. El token volvió a solicitarse y ya incluye los scopes necesarios. |
 | 14 | El catálogo inicial no representaba una tienda tecnológica | Los primeros productos eran de fiesta y útiles escolares, pero el docente indicó que TechStore debía vender tecnología. | Se reemplazó `datos/catalogo.json` por 22 SKU tecnológicos (audio, periféricos, almacenamiento, pantallas, computadores, redes y accesorios), se renombró el evento `asado` a `trabajo_remoto`, se agregó `accesorios_basicos` y se actualizaron reglas, sustitutos, pruebas y documentación. |
+| 15 | `Access denied for name field. Required access: read_locations` al consultar `locations` | El token no incluye `read_locations` ni `read_markets_home`. | Se quitó el campo `name` de `LOCATIONS_QUERY`; solo se necesita el `id` para asignar el inventario. |
+| 16 | `Field 'variants' is not defined by type 'ProductInput'` | Shopify 2026 cambió el modelo: las variantes ya no se crean dentro de `productCreate`. | Se creó el producto con `productCreate` y luego se agregó su variante con `productVariantsBulkCreate` (estrategia `DEFAULT`), usando `inventoryItem.sku`, `inventoryQuantities` y `optionValues`. |
+| 17 | `collectionAddProducts is missing required arguments: id` / `doesn't accept argument 'collectionId'` | La API 2026 renombró los argumentos del mutation. | Se cambió la firma a `collectionAddProducts(id: $id, productIds: $productIds)`. Además se hizo `crear_colecciones()` idempotente: consulta las colecciones existentes y solo agrega los productos que faltan. |
 
 ## Estado final verificado
 
 - `python -m carrito.demo` → los cinco casos producen resultados idénticos en los tres paradigmas.
-- `python -m unittest discover -s tests -v` → 4 pruebas, todas OK.
+- `python -m unittest discover -s tests -v` → 5 pruebas, todas OK.
 - `python shopify_client.py` → `Conectado a: TechStore (techstore-d8vn3rhk.myshopify.com)`.
-- Poblado de catálogo → bloqueado únicamente por los scopes indicados en el punto 13.
+- `python -m scripts.poblar_catalogo --dry-run` → 25 SKUs existentes, 0 productos por crear.
+- `python -m scripts.poblar_catalogo` → 22 productos y 8 colecciones creados correctamente.

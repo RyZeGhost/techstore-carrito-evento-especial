@@ -746,171 +746,235 @@ comentario del bloque que le precede inmediatamente.
 | 9 | `` | Línea en blanco: separa bloques lógicos. |
 | 10 | `import argparse` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 11 | `import sys` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 12 | `from pathlib import Path` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 13 | `` | Línea en blanco: separa bloques lógicos. |
-| 14 | `# Permite importar el módulo de la raíz aunque se ejecute como paquete.` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 15 | `sys.path.insert(0, str(Path(__file__).resolve().parent.parent))` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 16 | `` | Línea en blanco: separa bloques lógicos. |
-| 17 | `from carrito.datos import cargar_catalogo` | noqa: E402 |
-| 18 | `from shopify_client import graphql_query` | noqa: E402 |
-| 19 | `` | Línea en blanco: separa bloques lógicos. |
-| 20 | `PRODUCTOS_QUERY = """` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 21 | `{` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 22 | `products(first: 250) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 23 | `nodes {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 24 | `id` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 25 | `title` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 26 | `variants(first: 250) { nodes { sku } }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 27 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 12 | `import unicodedata` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 13 | `from pathlib import Path` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 14 | `` | Línea en blanco: separa bloques lógicos. |
+| 15 | `# Permite importar el módulo de la raíz aunque se ejecute como paquete.` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 16 | `sys.path.insert(0, str(Path(__file__).resolve().parent.parent))` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 17 | `` | Línea en blanco: separa bloques lógicos. |
+| 18 | `from carrito.datos import cargar_catalogo` | noqa: E402 |
+| 19 | `from shopify_client import graphql_query` | noqa: E402 |
+| 20 | `` | Línea en blanco: separa bloques lógicos. |
+| 21 | `PRODUCTOS_QUERY = """` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 22 | `{` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 23 | `products(first: 250) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 24 | `nodes {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 25 | `id` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 26 | `title` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 27 | `variants(first: 250) { nodes { sku } }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
 | 28 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
 | 29 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 30 | `"""` | Docstring: describe el propósito del bloque. |
-| 31 | `` | Línea en blanco: separa bloques lógicos. |
-| 32 | `LOCATIONS_QUERY = """` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 33 | `{` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 34 | `locations(first: 10) { nodes { id name } }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 35 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 36 | `"""` | Docstring: describe el propósito del bloque. |
-| 37 | `` | Línea en blanco: separa bloques lógicos. |
-| 38 | `PRODUCT_CREATE = """` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 39 | `mutation ProductoCrear($input: ProductInput!) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 40 | `productCreate(input: $input) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 41 | `product { id title handle }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 42 | `userErrors { field message }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 43 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 30 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 31 | `"""` | Docstring: describe el propósito del bloque. |
+| 32 | `` | Línea en blanco: separa bloques lógicos. |
+| 33 | `LOCATIONS_QUERY = """` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 34 | `{` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 35 | `locations(first: 10) { nodes { id } }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 36 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 37 | `"""` | Docstring: describe el propósito del bloque. |
+| 38 | `` | Línea en blanco: separa bloques lógicos. |
+| 39 | `PRODUCT_CREATE = """` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 40 | `mutation ProductoCrear($input: ProductInput!) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 41 | `productCreate(input: $input) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 42 | `product { id title handle }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 43 | `userErrors { field message }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
 | 44 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 45 | `"""` | Docstring: describe el propósito del bloque. |
-| 46 | `` | Línea en blanco: separa bloques lógicos. |
-| 47 | `COLLECTION_CREATE = """` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 48 | `mutation ColeccionCrear($input: CollectionInput!) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 49 | `collectionCreate(input: $input) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 50 | `collection { id title handle }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 51 | `userErrors { field message }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 52 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 53 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 54 | `"""` | Docstring: describe el propósito del bloque. |
-| 55 | `` | Línea en blanco: separa bloques lógicos. |
-| 56 | `COLLECTION_ADD = """` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 57 | `mutation AgregarProductos($id: ID!, $ids: [ID!]!) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 58 | `collectionAddProducts(collectionId: $id, productIds: $ids) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 59 | `collection { id title }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 60 | `userErrors { field message }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 61 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 62 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 63 | `"""` | Docstring: describe el propósito del bloque. |
-| 64 | `` | Línea en blanco: separa bloques lógicos. |
-| 65 | `` | Línea en blanco: separa bloques lógicos. |
-| 66 | `def skus_existentes():` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 67 | `"""Devuelve el conjunto de SKUs ya creados en la tienda."""` | Docstring: describe el propósito del bloque. |
-| 68 | `datos = graphql_query(PRODUCTOS_QUERY)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 69 | `skus = set()` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 70 | `for producto in datos["products"]["nodes"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 71 | `for variante in producto["variants"]["nodes"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 72 | `if variante["sku"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 73 | `skus.add(variante["sku"])` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 74 | `return skus, datos["products"]["nodes"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 75 | `` | Línea en blanco: separa bloques lógicos. |
-| 76 | `` | Línea en blanco: separa bloques lógicos. |
-| 77 | `def location_principal():` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 78 | `"""Devuelve el ID de la primera ubicación de inventario."""` | Docstring: describe el propósito del bloque. |
-| 79 | `datos = graphql_query(LOCATIONS_QUERY)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 80 | `ubicaciones = datos["locations"]["nodes"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 81 | `if not ubicaciones:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 82 | `raise RuntimeError("No hay ubicaciones de inventario configuradas")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 83 | `return ubicaciones[0]["id"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 84 | `` | Línea en blanco: separa bloques lógicos. |
-| 85 | `` | Línea en blanco: separa bloques lógicos. |
-| 86 | `def crear_producto(producto, location_id):` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 87 | `"""Crea un producto con precio, SKU, stock y etiquetas."""` | Docstring: describe el propósito del bloque. |
-| 88 | `entrada = {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 89 | `"title": producto["nombre"],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 90 | `"descriptionHtml": f"<p>{producto['descripcion']}</p>",` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 91 | `"productType": producto["categoria"],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 92 | `"vendor": "TechStore",` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 93 | `"status": "ACTIVE",` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 94 | `"tags": [producto["categoria"], "carrito-evento"],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 95 | `"variants": [{` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 96 | `"sku": producto["sku"],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 97 | `"price": str(producto["precio"]),` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 98 | `"inventoryManagement": "SHOPIFY",` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 99 | `"inventoryPolicy": "CONTINUE",` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 100 | `"inventoryQuantities": [{` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 101 | `"availableQuantity": producto["stock"],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 102 | `"locationId": location_id,` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 103 | `}],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 104 | `}],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 105 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 106 | `respuesta = graphql_query(PRODUCT_CREATE, {"input": entrada})["productCreate"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 107 | `if respuesta["userErrors"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 108 | `raise RuntimeError(f"Error creando {producto['sku']}: {respuesta['userErrors']}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 109 | `return respuesta["product"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 45 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 46 | `"""` | Docstring: describe el propósito del bloque. |
+| 47 | `` | Línea en blanco: separa bloques lógicos. |
+| 48 | `VARIANT_CREATE = """` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 49 | `mutation VarianteCrear($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 50 | `productVariantsBulkCreate(` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 51 | `productId: $productId,` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 52 | `variants: $variants,` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 53 | `strategy: DEFAULT` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 54 | `) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 55 | `productVariants { id sku }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 56 | `userErrors { field message }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 57 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 58 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 59 | `"""` | Docstring: describe el propósito del bloque. |
+| 60 | `` | Línea en blanco: separa bloques lógicos. |
+| 61 | `COLLECTION_CREATE = """` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 62 | `mutation ColeccionCrear($input: CollectionInput!) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 63 | `collectionCreate(input: $input) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 64 | `collection { id title handle }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 65 | `userErrors { field message }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 66 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 67 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 68 | `"""` | Docstring: describe el propósito del bloque. |
+| 69 | `` | Línea en blanco: separa bloques lógicos. |
+| 70 | `COLECCIONES_QUERY = """` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 71 | `{` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 72 | `collections(first: 250) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 73 | `nodes {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 74 | `id` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 75 | `handle` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 76 | `products(first: 250) { nodes { id } }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 77 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 78 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 79 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 80 | `"""` | Docstring: describe el propósito del bloque. |
+| 81 | `` | Línea en blanco: separa bloques lógicos. |
+| 82 | `COLLECTION_ADD = """` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 83 | `mutation AgregarProductos($id: ID!, $productIds: [ID!]!) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 84 | `collectionAddProducts(id: $id, productIds: $productIds) {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 85 | `collection { id title }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 86 | `userErrors { field message }` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 87 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 88 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 89 | `"""` | Docstring: describe el propósito del bloque. |
+| 90 | `` | Línea en blanco: separa bloques lógicos. |
+| 91 | `` | Línea en blanco: separa bloques lógicos. |
+| 92 | `def skus_existentes():` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 93 | `"""Devuelve el conjunto de SKUs ya creados en la tienda."""` | Docstring: describe el propósito del bloque. |
+| 94 | `datos = graphql_query(PRODUCTOS_QUERY)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 95 | `skus = set()` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 96 | `for producto in datos["products"]["nodes"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 97 | `for variante in producto["variants"]["nodes"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 98 | `if variante["sku"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 99 | `skus.add(variante["sku"])` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 100 | `return skus, datos["products"]["nodes"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 101 | `` | Línea en blanco: separa bloques lógicos. |
+| 102 | `` | Línea en blanco: separa bloques lógicos. |
+| 103 | `def location_principal():` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 104 | `"""Devuelve el ID de la primera ubicación de inventario."""` | Docstring: describe el propósito del bloque. |
+| 105 | `datos = graphql_query(LOCATIONS_QUERY)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 106 | `ubicaciones = datos["locations"]["nodes"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 107 | `if not ubicaciones:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 108 | `raise RuntimeError("No hay ubicaciones de inventario configuradas")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 109 | `return ubicaciones[0]["id"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
 | 110 | `` | Línea en blanco: separa bloques lógicos. |
 | 111 | `` | Línea en blanco: separa bloques lógicos. |
-| 112 | `def crear_colecciones(catalogo, productos_por_sku):` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 113 | `"""Crea una colección por cada categoría y agrega sus productos."""` | Docstring: describe el propósito del bloque. |
-| 114 | `categorias = {}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 115 | `for producto in catalogo["productos"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 116 | `categoria = producto["categoria"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 117 | `categorias.setdefault(categoria, []).append(productos_por_sku[producto["sku"]])` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 118 | `` | Línea en blanco: separa bloques lógicos. |
-| 119 | `for categoria, ids in categorias.items():` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 120 | `respuesta = graphql_query(` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 121 | `COLLECTION_CREATE,` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 122 | `{"input": {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 123 | `"title": categoria,` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 124 | `"handle": categoria.lower(),` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 125 | `"descriptionHtml": f"<p>Productos de la categoría {categoria}.</p>",` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 126 | `}},` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 127 | `)["collectionCreate"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 128 | `if respuesta["userErrors"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 129 | `print(f"  Colección {categoria}: {respuesta['userErrors']}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 130 | `continue` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 131 | `coleccion_id = respuesta["collection"]["id"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 132 | `resultado = graphql_query(` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 133 | `COLLECTION_ADD, {"id": coleccion_id, "ids": ids}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 134 | `)["collectionAddProducts"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 135 | `if resultado["userErrors"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 136 | `print(f"  Error agregando productos a {categoria}: {resultado['userErrors']}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 137 | `else:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 138 | `print(f"  Colección '{categoria}' creada con {len(ids)} productos")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 139 | `` | Línea en blanco: separa bloques lógicos. |
-| 140 | `` | Línea en blanco: separa bloques lógicos. |
-| 141 | `def main():` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 142 | `"""Punto de entrada con modo dry-run."""` | Docstring: describe el propósito del bloque. |
-| 143 | `parser = argparse.ArgumentParser(description=__doc__)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 144 | `parser.add_argument("--dry-run", action="store_true", help="no escribe en Shopify")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 145 | `args = parser.parse_args()` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 146 | `` | Línea en blanco: separa bloques lógicos. |
-| 147 | `catalogo = cargar_catalogo()` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 148 | `existentes, nodos = skus_existentes()` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 149 | `print(f"SKUs existentes en la tienda: {len(existentes)}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 150 | `` | Línea en blanco: separa bloques lógicos. |
-| 151 | `pendientes = [` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 152 | `p for p in catalogo["productos"] if p["sku"] not in existentes` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 153 | `]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 154 | `print(f"Productos a crear: {len(pendientes)}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 155 | `` | Línea en blanco: separa bloques lógicos. |
-| 156 | `if args.dry_run:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 157 | `for producto in pendientes:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 158 | `print(f"  [DRY RUN] {producto['sku']} - {producto['nombre']}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 159 | `return 0` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 112 | `def crear_producto(producto, location_id):` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 113 | `"""Crea un producto con precio, SKU, stock y etiquetas."""` | Docstring: describe el propósito del bloque. |
+| 114 | `entrada = {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 115 | `"title": producto["nombre"],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 116 | `"descriptionHtml": f"<p>{producto['descripcion']}</p>",` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 117 | `"productType": producto["categoria"],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 118 | `"vendor": "TechStore",` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 119 | `"status": "ACTIVE",` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 120 | `"tags": [producto["categoria"], "carrito-evento"],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 121 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 122 | `respuesta = graphql_query(PRODUCT_CREATE, {"input": entrada})["productCreate"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 123 | `if respuesta["userErrors"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 124 | `raise RuntimeError(f"Error creando {producto['sku']}: {respuesta['userErrors']}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 125 | `` | Línea en blanco: separa bloques lógicos. |
+| 126 | `producto_id = respuesta["product"]["id"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 127 | `variante = {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 128 | `"price": str(producto["precio"]),` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 129 | `"inventoryItem": {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 130 | `"sku": producto["sku"],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 131 | `"tracked": True,` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 132 | `"requiresShipping": True,` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 133 | `},` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 134 | `"inventoryPolicy": "CONTINUE",` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 135 | `"inventoryQuantities": [{` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 136 | `"availableQuantity": producto["stock"],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 137 | `"locationId": location_id,` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 138 | `}],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 139 | `"optionValues": [{` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 140 | `"optionName": "Title",` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 141 | `"name": producto["nombre"],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 142 | `}],` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 143 | `}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 144 | `respuesta_variante = graphql_query(` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 145 | `VARIANT_CREATE, {"productId": producto_id, "variants": [variante]}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 146 | `)["productVariantsBulkCreate"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 147 | `if respuesta_variante["userErrors"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 148 | `raise RuntimeError(` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 149 | `f"Error creando variante de {producto['sku']}: "` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 150 | `f"{respuesta_variante['userErrors']}"` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 151 | `)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 152 | `return respuesta["product"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 153 | `` | Línea en blanco: separa bloques lógicos. |
+| 154 | `` | Línea en blanco: separa bloques lógicos. |
+| 155 | `def handle_de(texto):` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 156 | `"""Convierte un texto a handle Shopify (minúsculas, sin tildes)."""` | Docstring: describe el propósito del bloque. |
+| 157 | `sin_tildes = unicodedata.normalize("NFKD", texto)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 158 | `return "".join(c for c in sin_tildes if not unicodedata.combining(c)).lower()` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 159 | `` | Línea en blanco: separa bloques lógicos. |
 | 160 | `` | Línea en blanco: separa bloques lógicos. |
-| 161 | `location_id = location_principal()` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 162 | `ids_por_sku = {}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 163 | `for nodo in nodos:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 164 | `for variante in nodo["variants"]["nodes"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 165 | `if variante["sku"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 166 | `ids_por_sku[variante["sku"]] = nodo["id"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 161 | `def crear_colecciones(catalogo, productos_por_sku):` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 162 | `"""Crea una colección por cada categoría y agrega sus productos."""` | Docstring: describe el propósito del bloque. |
+| 163 | `categorias = {}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 164 | `for producto in catalogo["productos"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 165 | `categoria = producto["categoria"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 166 | `categorias.setdefault(categoria, []).append(productos_por_sku[producto["sku"]])` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
 | 167 | `` | Línea en blanco: separa bloques lógicos. |
-| 168 | `for producto in pendientes:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 169 | `creado = crear_producto(producto, location_id)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 170 | `ids_por_sku[producto["sku"]] = creado["id"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 171 | `print(f"  Creado {producto['sku']} -> {creado['handle']}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 172 | `` | Línea en blanco: separa bloques lógicos. |
-| 173 | `crear_colecciones(catalogo, ids_por_sku)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 174 | `return 0` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 175 | `` | Línea en blanco: separa bloques lógicos. |
-| 176 | `` | Línea en blanco: separa bloques lógicos. |
-| 177 | `if __name__ == "__main__":` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
-| 178 | `raise SystemExit(main())` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 168 | `existentes = graphql_query(COLECCIONES_QUERY)["collections"]["nodes"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 169 | `por_handle = {nodo["handle"]: nodo for nodo in existentes}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 170 | `` | Línea en blanco: separa bloques lógicos. |
+| 171 | `for categoria, ids in categorias.items():` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 172 | `handle = handle_de(categoria)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 173 | `nodo = por_handle.get(handle)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 174 | `if nodo:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 175 | `coleccion_id = nodo["id"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 176 | `ya_agregados = {p["id"] for p in nodo["products"]["nodes"]}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 177 | `por_agregar = [i for i in ids if i not in ya_agregados]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 178 | `if not por_agregar:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 179 | `print(f"  Colección '{categoria}' ya estaba completa")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 180 | `continue` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 181 | `else:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 182 | `respuesta = graphql_query(` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 183 | `COLLECTION_CREATE,` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 184 | `{"input": {` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 185 | `"title": categoria,` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 186 | `"handle": handle,` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 187 | `"descriptionHtml": f"<p>Productos de la categoría {categoria}.</p>",` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 188 | `}},` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 189 | `)["collectionCreate"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 190 | `if respuesta["userErrors"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 191 | `print(f"  Colección {categoria}: {respuesta['userErrors']}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 192 | `continue` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 193 | `coleccion_id = respuesta["collection"]["id"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 194 | `por_agregar = ids` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 195 | `` | Línea en blanco: separa bloques lógicos. |
+| 196 | `resultado = graphql_query(` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 197 | `COLLECTION_ADD, {"id": coleccion_id, "productIds": por_agregar}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 198 | `)["collectionAddProducts"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 199 | `if resultado["userErrors"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 200 | `print(f"  Error agregando productos a {categoria}: {resultado['userErrors']}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 201 | `else:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 202 | `print(f"  Colección '{categoria}' con {len(por_agregar)} productos agregados")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 203 | `` | Línea en blanco: separa bloques lógicos. |
+| 204 | `` | Línea en blanco: separa bloques lógicos. |
+| 205 | `def main():` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 206 | `"""Punto de entrada con modo dry-run."""` | Docstring: describe el propósito del bloque. |
+| 207 | `parser = argparse.ArgumentParser(description=__doc__)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 208 | `parser.add_argument("--dry-run", action="store_true", help="no escribe en Shopify")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 209 | `args = parser.parse_args()` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 210 | `` | Línea en blanco: separa bloques lógicos. |
+| 211 | `catalogo = cargar_catalogo()` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 212 | `existentes, nodos = skus_existentes()` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 213 | `print(f"SKUs existentes en la tienda: {len(existentes)}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 214 | `` | Línea en blanco: separa bloques lógicos. |
+| 215 | `pendientes = [` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 216 | `p for p in catalogo["productos"] if p["sku"] not in existentes` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 217 | `]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 218 | `print(f"Productos a crear: {len(pendientes)}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 219 | `` | Línea en blanco: separa bloques lógicos. |
+| 220 | `if args.dry_run:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 221 | `for producto in pendientes:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 222 | `print(f"  [DRY RUN] {producto['sku']} - {producto['nombre']}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 223 | `return 0` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 224 | `` | Línea en blanco: separa bloques lógicos. |
+| 225 | `location_id = location_principal()` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 226 | `ids_por_sku = {}` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 227 | `for nodo in nodos:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 228 | `for variante in nodo["variants"]["nodes"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 229 | `if variante["sku"]:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 230 | `ids_por_sku[variante["sku"]] = nodo["id"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 231 | `` | Línea en blanco: separa bloques lógicos. |
+| 232 | `for producto in pendientes:` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 233 | `creado = crear_producto(producto, location_id)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 234 | `ids_por_sku[producto["sku"]] = creado["id"]` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 235 | `print(f"  Creado {producto['sku']} -> {creado['handle']}")` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 236 | `` | Línea en blanco: separa bloques lógicos. |
+| 237 | `crear_colecciones(catalogo, ids_por_sku)` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 238 | `return 0` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 239 | `` | Línea en blanco: separa bloques lógicos. |
+| 240 | `` | Línea en blanco: separa bloques lógicos. |
+| 241 | `if __name__ == "__main__":` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
+| 242 | `raise SystemExit(main())` | Permite importar el módulo de la raíz aunque se ejecute como paquete. |
 

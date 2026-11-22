@@ -9,6 +9,7 @@ El script es idempotente: si el SKU ya existe, lo omite.
 
 import argparse
 import sys
+import unicodedata
 from pathlib import Path
 
 # Permite importar el módulo de la raíz aunque se ejecute como paquete.
@@ -31,7 +32,7 @@ PRODUCTOS_QUERY = """
 
 LOCATIONS_QUERY = """
 {
-  locations(first: 10) { nodes { id name } }
+  locations(first: 10) { nodes { id } }
 }
 """
 
@@ -39,6 +40,19 @@ PRODUCT_CREATE = """
 mutation ProductoCrear($input: ProductInput!) {
   productCreate(input: $input) {
     product { id title handle }
+    userErrors { field message }
+  }
+}
+"""
+
+VARIANT_CREATE = """
+mutation VarianteCrear($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+  productVariantsBulkCreate(
+    productId: $productId,
+    variants: $variants,
+    strategy: DEFAULT
+  ) {
+    productVariants { id sku }
     userErrors { field message }
   }
 }
@@ -53,9 +67,21 @@ mutation ColeccionCrear($input: CollectionInput!) {
 }
 """
 
+COLECCIONES_QUERY = """
+{
+  collections(first: 250) {
+    nodes {
+      id
+      handle
+      products(first: 250) { nodes { id } }
+    }
+  }
+}
+"""
+
 COLLECTION_ADD = """
-mutation AgregarProductos($id: ID!, $ids: [ID!]!) {
-  collectionAddProducts(collectionId: $id, productIds: $ids) {
+mutation AgregarProductos($id: ID!, $productIds: [ID!]!) {
+  collectionAddProducts(id: $id, productIds: $productIds) {
     collection { id title }
     userErrors { field message }
   }
@@ -92,21 +118,44 @@ def crear_producto(producto, location_id):
         "vendor": "TechStore",
         "status": "ACTIVE",
         "tags": [producto["categoria"], "carrito-evento"],
-        "variants": [{
-            "sku": producto["sku"],
-            "price": str(producto["precio"]),
-            "inventoryManagement": "SHOPIFY",
-            "inventoryPolicy": "CONTINUE",
-            "inventoryQuantities": [{
-                "availableQuantity": producto["stock"],
-                "locationId": location_id,
-            }],
-        }],
     }
     respuesta = graphql_query(PRODUCT_CREATE, {"input": entrada})["productCreate"]
     if respuesta["userErrors"]:
         raise RuntimeError(f"Error creando {producto['sku']}: {respuesta['userErrors']}")
+
+    producto_id = respuesta["product"]["id"]
+    variante = {
+        "price": str(producto["precio"]),
+        "inventoryItem": {
+            "sku": producto["sku"],
+            "tracked": True,
+            "requiresShipping": True,
+        },
+        "inventoryPolicy": "CONTINUE",
+        "inventoryQuantities": [{
+            "availableQuantity": producto["stock"],
+            "locationId": location_id,
+        }],
+        "optionValues": [{
+            "optionName": "Title",
+            "name": producto["nombre"],
+        }],
+    }
+    respuesta_variante = graphql_query(
+        VARIANT_CREATE, {"productId": producto_id, "variants": [variante]}
+    )["productVariantsBulkCreate"]
+    if respuesta_variante["userErrors"]:
+        raise RuntimeError(
+            f"Error creando variante de {producto['sku']}: "
+            f"{respuesta_variante['userErrors']}"
+        )
     return respuesta["product"]
+
+
+def handle_de(texto):
+    """Convierte un texto a handle Shopify (minúsculas, sin tildes)."""
+    sin_tildes = unicodedata.normalize("NFKD", texto)
+    return "".join(c for c in sin_tildes if not unicodedata.combining(c)).lower()
 
 
 def crear_colecciones(catalogo, productos_por_sku):
@@ -116,26 +165,41 @@ def crear_colecciones(catalogo, productos_por_sku):
         categoria = producto["categoria"]
         categorias.setdefault(categoria, []).append(productos_por_sku[producto["sku"]])
 
+    existentes = graphql_query(COLECCIONES_QUERY)["collections"]["nodes"]
+    por_handle = {nodo["handle"]: nodo for nodo in existentes}
+
     for categoria, ids in categorias.items():
-        respuesta = graphql_query(
-            COLLECTION_CREATE,
-            {"input": {
-                "title": categoria,
-                "handle": categoria.lower(),
-                "descriptionHtml": f"<p>Productos de la categoría {categoria}.</p>",
-            }},
-        )["collectionCreate"]
-        if respuesta["userErrors"]:
-            print(f"  Colección {categoria}: {respuesta['userErrors']}")
-            continue
-        coleccion_id = respuesta["collection"]["id"]
+        handle = handle_de(categoria)
+        nodo = por_handle.get(handle)
+        if nodo:
+            coleccion_id = nodo["id"]
+            ya_agregados = {p["id"] for p in nodo["products"]["nodes"]}
+            por_agregar = [i for i in ids if i not in ya_agregados]
+            if not por_agregar:
+                print(f"  Colección '{categoria}' ya estaba completa")
+                continue
+        else:
+            respuesta = graphql_query(
+                COLLECTION_CREATE,
+                {"input": {
+                    "title": categoria,
+                    "handle": handle,
+                    "descriptionHtml": f"<p>Productos de la categoría {categoria}.</p>",
+                }},
+            )["collectionCreate"]
+            if respuesta["userErrors"]:
+                print(f"  Colección {categoria}: {respuesta['userErrors']}")
+                continue
+            coleccion_id = respuesta["collection"]["id"]
+            por_agregar = ids
+
         resultado = graphql_query(
-            COLLECTION_ADD, {"id": coleccion_id, "ids": ids}
+            COLLECTION_ADD, {"id": coleccion_id, "productIds": por_agregar}
         )["collectionAddProducts"]
         if resultado["userErrors"]:
             print(f"  Error agregando productos a {categoria}: {resultado['userErrors']}")
         else:
-            print(f"  Colección '{categoria}' creada con {len(ids)} productos")
+            print(f"  Colección '{categoria}' con {len(por_agregar)} productos agregados")
 
 
 def main():
