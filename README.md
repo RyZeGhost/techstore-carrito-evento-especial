@@ -7,7 +7,7 @@ TechStore es una tienda **de productos tecnológicos** (audio, periféricos, alm
 Contiene:
 
 1. Integración con una tienda Shopify real mediante la Admin GraphQL API.
-2. Carrito Evento Especial implementado en **tres paradigmas**: imperativo, orientado a objetos y funcional.
+2. Carrito Evento Especial implementado en **tres paradigmas**: imperativo, orientado a objetos y funcional, con **recomendaciones personalizadas** de productos similares y descuento en festividades.
 3. Documentación, registro de prompts y registro de errores corregidos.
 4. Control de versiones en GitHub.
 
@@ -87,10 +87,12 @@ Ejemplo de salida:
 
 ```
 === cumpleanos | 10 personas | cupón=FIESTA10 ===
-  Imperativo           items=5, faltantes=0, 2x1=$13980, cupon=$15892, envio=$0, total=$143028
-  Orientado a objetos  items=5, faltantes=0, 2x1=$13980, cupon=$15892, envio=$0, total=$143028
-  Funcional            items=5, faltantes=0, 2x1=$13980, cupon=$15892, envio=$0, total=$143028
+  Imperativo           items=5, faltantes=0, 2x1=$13980, cupon=$15892, envio=$0, total=$143028, recs=2
+  Orientado a objetos  items=5, faltantes=0, 2x1=$13980, cupon=$15892, envio=$0, total=$143028, recs=2
+  Funcional            items=5, faltantes=0, 2x1=$13980, cupon=$15892, envio=$0, total=$143028, recs=2
   >>> Paridad: OK
+    Recomendado: Parlante portátil resistente al agua (Audio) $54990 -> $46742 [festividad]
+    Recomendado: Soporte para notebook (Accesorios) $14990 -> $12742 [festividad]
 ```
 
 Uso programático:
@@ -105,6 +107,8 @@ print(resultado["total"])
 
 Las otras dos funciones son `armar_objetos` y `armar_funcional`, con la misma firma.
 
+El resultado incluye `recomendaciones`: hasta 2 productos de las categorías presentes en el carrito, con el precio más cercano al promedio de su categoría. En los eventos marcados como festivos en `datos/catalogo.json` (`cumpleanos` y `vuelta_a_clases`) se aplica un 15 % de descuento (`motivo: "festividad"`); en el resto se muestran sin descuento (`motivo: "similar"`). Son ofertas informativas: **no se suman a `items` ni modifican `total`**.
+
 ---
 
 ## 4. Pruebas automáticas
@@ -113,7 +117,7 @@ Las otras dos funciones son `armar_objetos` y `armar_funcional`, con la misma fi
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-Verifican paridad entre paradigmas, cupón inválido, envío gratis y validaciones.
+Verifican paridad entre paradigmas, cupón inválido, envío gratis, recomendaciones en festividad y sin festividad, y validaciones (7 pruebas).
 
 ---
 
@@ -158,7 +162,8 @@ Invoke-RestMethod http://127.0.0.1:8000/health
 Invoke-RestMethod http://127.0.0.1:8000/eventos
 $cuerpo = '{"evento":"cumpleanos","personas":10,"cupon":"FIESTA10","paradigma":"todos"}'
 $r = Invoke-RestMethod http://127.0.0.1:8000/carrito -Method Post -ContentType "application/json" -Body $cuerpo
-$r.imperativo.total       # 143028
+$r.imperativo.total                  # 143028
+$r.imperativo.recomendaciones.Count  # 2
 $r.orientado_objetos.total
 $r.funcional.total
 ```
@@ -185,7 +190,8 @@ El campo `paradigma` acepta `imperativo`, `orientado_objetos`, `funcional` o `to
 ├── datos/
 │   └── catalogo.json          Fuente única de productos y reglas
 ├── carrito/
-│   ├── datos.py               Carga del catálogo
+│   ├── datos.py               Carga y validación del catálogo
+│   ├── recomendaciones.py     Sugerencias por similitud y festividad
 │   ├── imperativo.py          Versión imperativa
 │   ├── orientado_objetos.py   Versión orientada a objetos
 │   ├── funcional.py           Versión funcional

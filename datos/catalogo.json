@@ -4,6 +4,12 @@
     "costo": 3990,
     "gratis_desde": 50000
   },
+  "recomendaciones": {
+    "por_categoria": 1,
+    "maximo": 2,
+    "descuento_porcentaje": 15,
+    "eventos_festivos": ["cumpleanos", "vuelta_a_clases"]
+  },
   "sustitutos": {
     "PARLANTE": "PARLANTE-PRO",
     "AURICULARES": "AURICULARES-PRO",

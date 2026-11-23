@@ -12,6 +12,7 @@ from abc import ABC, abstractmethod  # ABC = clase abstracta.
 from dataclasses import dataclass  # Reduce el código repetitivo de __init__.
 
 from carrito.datos import indice_productos  # Índice compartido de productos.
+from carrito.recomendaciones import sugerir  # Regla pura compartida.
 
 
 # --- Modelo de datos ---
@@ -129,6 +130,17 @@ class DescuentoPorcentaje(Descuento):
         return base * self.porcentaje // 100  # Entero, redondeo hacia abajo.
 
 
+class Recomendador:
+    """Encapsula la regla de sugerencias por similitud y festividad."""
+
+    def __init__(self, catalogo):
+        self.catalogo = catalogo  # Configuración de recomendaciones y productos.
+
+    def sugerir_para(self, items, evento):
+        """Devuelve sugerencias para las líneas ya armadas del carrito."""
+        return sugerir(items, self.catalogo, evento)  # Delega en la función pura.
+
+
 class PoliticaEnvio:
     """Define cuándo el envío es gratis."""
 
@@ -153,6 +165,7 @@ class Carrito:
             raise ValueError(f"Evento desconocido: {evento}")
 
         self.evento = Evento.desde_dict(catalogo["eventos"][evento])  # Config.
+        self.clave_evento = evento  # Clave exacta del JSON, para las sugerencias.
         self.personas = personas  # Cantidad de personas.
         self.productos = {  # Dict de objetos Producto.
             sku: Producto(p["sku"], p["nombre"], p["precio"], p["stock"])
@@ -164,6 +177,7 @@ class Carrito:
             catalogo["envio"]["costo"], catalogo["envio"]["gratis_desde"]
         )
         self.descuentos = [Descuento2x1()]  # Estrategias polimórficas.
+        self.recomendador = Recomendador(catalogo)  # Sugerencias personalizadas.
 
     def _resolver_regla(self, regla):
         """Aplica una regla; devuelve (item o None, faltante o None)."""
@@ -209,14 +223,19 @@ class Carrito:
         costo_envio = self.envio.calcular(base)  # Política de envío.
         total = base + costo_envio  # Total final.
 
+        # El recomendador es un colaborador más del carrito, como la política de envío.
+        items_dict = [item.como_dict() for item in items]
+        recomendaciones = self.recomendador.sugerir_para(items_dict, self.clave_evento)
+
         return {  # Misma estructura que en el paradigma imperativo.
             "evento": self.evento.nombre.lower().replace(" ", "_"),
             "personas": self.personas,
-            "items": [item.como_dict() for item in items],
+            "items": items_dict,
             "faltantes": faltantes,
             "descuentos": {"2x1": desc_2x1, "cupon": desc_cupon},
             "envio": costo_envio,
             "total": total,
+            "recomendaciones": recomendaciones,
         }
 
 

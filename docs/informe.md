@@ -66,6 +66,7 @@ Reglas transversales:
 - **Cupón:** 10 % sobre la base ya descontada, solo si coincide con el cupón del evento.
 - **Envío:** $3.990, gratis si la base supera $50.000.
 - **Aritmética:** todos los montos son enteros en CLP; el porcentaje se calcula con `// 100` para evitar errores de coma flotante y garantizar paridad.
+- **Recomendaciones personalizadas:** al cierre se sugieren hasta 2 productos de las categorías ya presentes en el carrito, priorizando el precio más cercano al promedio de esa categoría. En `cumpleanos` y `vuelta_a_clases` (eventos configurados como festivos) se aplica un 15 % de descuento sobre el precio sugerido; en los demás eventos se muestran como sugerencias sin descuento. Son ofertas informativas: **no se agregan a los ítems ni cambian el total**.
 
 ### Marco teórico de los paradigmas
 
@@ -84,24 +85,27 @@ Reglas transversales:
 | Facilidad de lectura | Alta para flujo lineal | Alta para dominio complejo | Alta para transformaciones |
 | Extensibilidad | Media (hay que tocar la función) | Alta (nueva clase de descuento) | Alta (nueva función y composición) |
 | Riesgo principal | Estado compartido accidental | Demasiadas clases para reglas simples | Curva de aprendizaje de `reduce` |
+| Recomendaciones | Llamada a `sugerir()` al final del flujo | Colaborador `Recomendador` inyectado en `Carrito` | Función pura añadida a la composición |
 
 ### Resultados y paridad
 
 `python -m carrito.demo` ejecuta cinco escenarios idénticos en las tres versiones:
 
-| Escenario | Items | Faltantes | 2x1 | Cupón | Envío | Total |
-|---|---:|---:|---:|---:|---:|---:|
-| cumpleanos, 10 pers., FIESTA10 | 5 | 0 | 13.980 | 15.892 | 0 | 143.028 |
-| trabajo_remoto, 12 pers., HOME10 | 5 | 0 | 89.940 | 258.552 | 0 | 2.326.968 |
-| vuelta_a_clases, 12 pers., ESCUELA10 | 5 | 0 | 77.940 | 136.777 | 0 | 1.230.993 |
-| cumpleanos, 200 pers., sin cupón | 5 | 1 | 279.600 | 0 | 0 | 3.438.600 |
-| accesorios_basicos, 1 persona, sin cupón | 5 | 0 | 0 | 0 | 3.990 | 40.940 |
+| Escenario | Items | Faltantes | 2x1 | Cupón | Envío | Total | Recs |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| cumpleanos, 10 pers., FIESTA10 | 5 | 0 | 13.980 | 15.892 | 0 | 143.028 | 2 (15 %) |
+| trabajo_remoto, 12 pers., HOME10 | 5 | 0 | 89.940 | 258.552 | 0 | 2.326.968 | 2 (sin dto.) |
+| vuelta_a_clases, 12 pers., ESCUELA10 | 5 | 0 | 77.940 | 136.777 | 0 | 1.230.993 | 2 (15 %) |
+| cumpleanos, 200 pers., sin cupón | 5 | 1 | 279.600 | 0 | 0 | 3.438.600 | 2 (15 %) |
+| accesorios_basicos, 1 persona, sin cupón | 5 | 0 | 0 | 0 | 3.990 | 40.940 | 1 (sin dto.) |
 
-Las tres implementaciones devuelven diccionarios **exactamente iguales** en todos los casos; `tests/test_paridad.py` verifica esto automáticamente junto con validaciones, cupón inválido y envío.
+Las tres implementaciones devuelven diccionarios **exactamente iguales** en todos los casos; `tests/test_paridad.py` verifica esto automáticamente junto con validaciones, cupón inválido, envío y recomendaciones.
+
+Detalle de la recomendación para el primer caso: `PARLANTE-PRO` ($54.990 → $46.742) y `SOPORTE` ($14.990 → $12.742), ambos de categorías presentes en el carrito (Audio y Accesorios). El hecho de que el evento tenga cupón no es condición del descuento: basta con que el evento esté marcado como festivo en el JSON.
 
 ### Errores y correcciones
 
-Ver [`errores_corregidos.md`](errores_corregidos.md). Incluye 24 incidencias reales, desde credenciales y scopes de Shopify hasta cambios de la API 2026, imágenes, precios, limpieza del checkout, validación del catálogo, límites de tasa y registro de errores.
+Ver [`errores_corregidos.md`](errores_corregidos.md). Incluye 25 incidencias reales, desde credenciales y scopes de Shopify hasta cambios de la API 2026, imágenes, precios, limpieza del checkout, validación del catálogo, límites de tasa, registro de errores y la recomendación personalizada omitida en la primera versión.
 
 ### Explicación del código
 

@@ -35,7 +35,8 @@ def formatear(resultado):
         f"faltantes={len(resultado['faltantes'])}, "
         f"2x1=${resultado['descuentos']['2x1']}, "
         f"cupon=${resultado['descuentos']['cupon']}, "
-        f"envio=${resultado['envio']}, total=${resultado['total']}"
+        f"envio=${resultado['envio']}, total=${resultado['total']}, "
+        f"recs={len(resultado['recomendaciones'])}"
     )
 
 
@@ -57,6 +58,14 @@ def main():
         iguales = resultados[0] == resultados[1] == resultados[2]
         todos_iguales = todos_iguales and iguales  # Actualiza la bandera.
         print(f"  >>> Paridad: {'OK' if iguales else 'FALLO'}")
+
+        # Detalle de las sugerencias personalizadas calculadas para el caso.
+        for recom in resultados[0]["recomendaciones"]:
+            print(
+                f"    Recomendado: {recom['nombre']} ({recom['categoria']}) "
+                f"${recom['precio']} -> ${recom['precio_final']} "
+                f"[{recom['motivo']}]"
+            )
 
         # Detalle del caso de stock agotado para hacer visible la sustitución.
         if personas == 200:

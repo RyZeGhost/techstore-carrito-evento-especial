@@ -28,11 +28,12 @@ Este registro describe los fallos reales que aparecieron durante la construcció
 | 22 | El catálogo podía contener datos incompletos o SKUs duplicados sin que nada lo detectara | `cargar_catalogo()` hacía únicamente `json.load()`. | Se añadió `validar_catalogo()` en `carrito/datos.py`: comprueba claves obligatorias, tipos, SKUs únicos, precios y stock válidos, URLs de imagen HTTPS, sustitutos existentes y reglas coherentes. `cargar_catalogo()` lo invoca antes de devolver los datos. |
 | 23 | Límites de tasa de Shopify podían interrumpir la carga del catálogo | El cliente no reintentaba ante HTTP 429 ni errores GraphQL `THROTTLED`. | Se agregó `peticion_con_reintento()` con backoff exponencial (`1, 2, 4, 8, 16 s`) y se detectan errores `THROTTLED` en `graphql_query()`. |
 | 24 | No se registraban las respuestas fallidas de la API | El enunciado del agente pide registrar logs de errores; el cliente solo lanzaba excepciones. | Se añadió un `logger` en `shopify_client.py` que escribe `logs/shopify_errores.log` (carpeta ignorada por Git) con fecha, nivel y mensaje para errores de red, HTTP 429, fallos de token y errores GraphQL. |
+| 25 | Faltaba la recomendación personalizada de productos similares con descuento por festividad | La primera versión del carrito solo resolvía stock, 2x1, cupón y envío; el usuario recordó este requisito adicional durante la revisión final. | Se agregó `carrito/recomendaciones.py` (función pura), la configuración `recomendaciones` en `datos/catalogo.json` y su integración en los tres paradigmas: imperativo (llamada al final del flujo), OOP (clase `Recomendador`) y funcional (función compuesta). El resultado incluye `recomendaciones` sin alterar el total; se añadieron 2 pruebas (7 en total). |
 
 ## Estado final verificado
 
 - `python -m carrito.demo` → los cinco casos producen resultados idénticos en los tres paradigmas.
-- `python -m unittest discover -s tests -v` → 5 pruebas, todas OK.
+- `python -m unittest discover -s tests -v` → 7 pruebas, todas OK (incluye recomendaciones en festividad y sin festividad).
 - `python shopify_client.py` → `Conectado a: TechStore (techstore-d8vn3rhk.myshopify.com)`.
 - `python -m scripts.poblar_catalogo --dry-run` → 25 SKUs existentes, 0 productos por crear.
 - `python -m scripts.poblar_catalogo` → 22 productos activos con precio CLP y una imagen cada uno; 8 colecciones completas; 17 productos de ejemplo archivados.

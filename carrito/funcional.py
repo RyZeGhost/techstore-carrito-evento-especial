@@ -11,6 +11,7 @@ import math  # ceil().
 from functools import reduce  # reduce() acumula una secuencia en un solo valor.
 
 from carrito.datos import indice_productos  # Índice de productos compartido.
+from carrito.recomendaciones import sugerir  # Función pura compartida.
 
 
 def validar(evento, personas, catalogo):
@@ -103,6 +104,11 @@ def costo_envio(catalogo, monto):
     return 0 if monto >= envio["gratis_desde"] else envio["costo"]
 
 
+def recomendaciones_para(items, catalogo, evento):
+    """Envuelve la regla compartida como una función pura más de la composición."""
+    return sugerir(items, catalogo, evento)
+
+
 def armar_carrito(evento, personas, catalogo, cupon=None):
     """Compone todas las funciones puras y devuelve el resultado final."""
     config = validar(evento, personas, catalogo)  # 1) Validar entradas.
@@ -117,8 +123,9 @@ def armar_carrito(evento, personas, catalogo, cupon=None):
     base = subtotal - desc_2x1 - desc_cupon  # 7) Base para envío.
     envio = costo_envio(catalogo, base)  # 8) Envío.
     total = base + envio  # 9) Total.
+    sugerencias = recomendaciones_para(list(items), catalogo, evento)  # 10)
 
-    return {  # 10) Diccionario nuevo; equivalente a los otros paradigmas.
+    return {  # 11) Diccionario nuevo; equivalente a los otros paradigmas.
         "evento": evento,
         "personas": personas,
         "items": list(items),
@@ -126,4 +133,5 @@ def armar_carrito(evento, personas, catalogo, cupon=None):
         "descuentos": {"2x1": desc_2x1, "cupon": desc_cupon},
         "envio": envio,
         "total": total,
+        "recomendaciones": sugerencias,
     }

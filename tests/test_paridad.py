@@ -8,6 +8,7 @@ from carrito import (
     armar_objetos,
     cargar_catalogo,
 )
+from carrito.datos import indice_productos
 
 FUNCIONES = (armar_imperativo, armar_objetos, armar_funcional)
 
@@ -52,6 +53,43 @@ class TestParidad(unittest.TestCase):
         for funcion in FUNCIONES:
             resultado = funcion("accesorios_basicos", 1, self.catalogo)
             self.assertEqual(resultado["envio"], 3990)
+
+    def test_recomendaciones_en_festividad(self):
+        """En eventos festivos se sugieren similares con descuento."""
+        config = self.catalogo["recomendaciones"]
+        for funcion in FUNCIONES:
+            resultado = funcion("cumpleanos", 10, self.catalogo, "FIESTA10")
+            recomendaciones = resultado["recomendaciones"]
+            self.assertTrue(recomendaciones)
+            self.assertLessEqual(len(recomendaciones), config["maximo"])
+
+            productos = indice_productos(self.catalogo)
+            categorias_carrito = {
+                productos[item["sku"]]["categoria"] for item in resultado["items"]
+            }
+            skus_carrito = {item["sku"] for item in resultado["items"]}
+
+            for recom in recomendaciones:
+                self.assertIn(recom["categoria"], categorias_carrito)
+                self.assertNotIn(recom["sku"], skus_carrito)
+                self.assertEqual(recom["motivo"], "festividad")
+                esperado = recom["precio"] * config["descuento_porcentaje"] // 100
+                self.assertEqual(recom["descuento"], esperado)
+                self.assertEqual(recom["precio_final"], recom["precio"] - esperado)
+
+            # Las sugerencias son ofertas: no modifican el total del carrito.
+            self.assertEqual(resultado["total"], 143028)
+
+    def test_recomendaciones_sin_festividad(self):
+        """Fuera de festividades se muestran similares sin descuento."""
+        for funcion in FUNCIONES:
+            resultado = funcion("trabajo_remoto", 12, self.catalogo, "HOME10")
+            recomendaciones = resultado["recomendaciones"]
+            self.assertTrue(recomendaciones)
+            for recom in recomendaciones:
+                self.assertEqual(recom["motivo"], "similar")
+                self.assertEqual(recom["descuento"], 0)
+                self.assertEqual(recom["precio_final"], recom["precio"])
 
     def test_validaciones(self):
         """Entradas inválidas lanzan ValueError en las tres versiones."""

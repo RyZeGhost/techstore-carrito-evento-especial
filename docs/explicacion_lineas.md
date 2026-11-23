@@ -227,7 +227,7 @@ comentario del bloque que le precede inmediatamente.
 | 20 | `if not isinstance(catalogo, dict):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 21 | `raise ValueError("El catálogo debe ser un objeto JSON")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 22 | `` | Línea en blanco: separa bloques lógicos. |
-| 23 | `for clave in ("moneda", "envio", "sustitutos", "productos", "eventos"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 23 | `for clave in ("moneda", "envio", "recomendaciones", "sustitutos", "productos", "eventos"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 24 | `if clave not in catalogo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 25 | `raise ValueError(f"Falta la clave obligatoria '{clave}' en el catálogo")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 26 | `` | Línea en blanco: separa bloques lógicos. |
@@ -236,58 +236,70 @@ comentario del bloque que le precede inmediatamente.
 | 29 | `if not isinstance(envio.get(clave), int) or envio[clave] < 0:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 30 | `raise ValueError(f"envio.{clave} debe ser un entero no negativo")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 31 | `` | Línea en blanco: separa bloques lógicos. |
-| 32 | `if not isinstance(catalogo["productos"], list) or not catalogo["productos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 33 | `raise ValueError("productos debe ser una lista no vacía")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 34 | `` | Línea en blanco: separa bloques lógicos. |
-| 35 | `skus = set()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 36 | `for producto in catalogo["productos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 37 | `for clave in ("sku", "nombre", "precio", "stock", "categoria",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 38 | `"descripcion", "imagen"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 39 | `if clave not in producto:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 40 | `raise ValueError(f"Falta '{clave}' en el producto {producto.get('sku')}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 41 | `if producto["sku"] in skus:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 42 | `raise ValueError(f"SKU duplicado: {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 43 | `skus.add(producto["sku"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 44 | `if not isinstance(producto["precio"], int) or producto["precio"] <= 0:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 45 | `raise ValueError(f"precio inválido en {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 46 | `if not isinstance(producto["stock"], int) or producto["stock"] < 0:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 47 | `raise ValueError(f"stock inválido en {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 48 | `if not str(producto["imagen"]).startswith("https://"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 49 | `raise ValueError(f"imagen inválida en {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 50 | `` | Línea en blanco: separa bloques lógicos. |
-| 51 | `for sku, sustituto in catalogo["sustitutos"].items():` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 52 | `if sku not in skus or sustituto not in skus:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 53 | `raise ValueError(f"Sustituto inválido: {sku} -> {sustituto}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 54 | `` | Línea en blanco: separa bloques lógicos. |
-| 55 | `if not isinstance(catalogo["eventos"], dict) or not catalogo["eventos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 56 | `raise ValueError("eventos debe ser un objeto no vacío")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 57 | `` | Línea en blanco: separa bloques lógicos. |
-| 58 | `for nombre, evento in catalogo["eventos"].items():` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 59 | `for clave in ("nombre", "cupon", "producto_2x1", "reglas"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 60 | `if clave not in evento:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 61 | `raise ValueError(f"Falta '{clave}' en el evento {nombre}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 62 | `if evento["producto_2x1"] not in skus:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 63 | `raise ValueError(f"producto_2x1 inexistente en el evento {nombre}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 64 | `for regla in evento["reglas"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 65 | `if regla["sku"] not in skus:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 66 | `raise ValueError(f"SKU de regla inexistente: {regla['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 67 | `if regla["por_persona"] < 0 or regla["minimo"] < 0:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 68 | `raise ValueError(f"Cantidades negativas en el evento {nombre}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 32 | `recomendaciones = catalogo["recomendaciones"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 33 | `for clave in ("por_categoria", "maximo", "descuento_porcentaje"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 34 | `valor = recomendaciones.get(clave)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 35 | `if not isinstance(valor, int) or valor < 0:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 36 | `raise ValueError(f"recomendaciones.{clave} debe ser un entero no negativo")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 37 | `if not isinstance(recomendaciones.get("eventos_festivos"), list):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 38 | `raise ValueError("recomendaciones.eventos_festivos debe ser una lista")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 39 | `` | Línea en blanco: separa bloques lógicos. |
+| 40 | `if not isinstance(catalogo["productos"], list) or not catalogo["productos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 41 | `raise ValueError("productos debe ser una lista no vacía")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 42 | `` | Línea en blanco: separa bloques lógicos. |
+| 43 | `skus = set()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 44 | `for producto in catalogo["productos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 45 | `for clave in ("sku", "nombre", "precio", "stock", "categoria",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 46 | `"descripcion", "imagen"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 47 | `if clave not in producto:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 48 | `raise ValueError(f"Falta '{clave}' en el producto {producto.get('sku')}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 49 | `if producto["sku"] in skus:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 50 | `raise ValueError(f"SKU duplicado: {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 51 | `skus.add(producto["sku"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 52 | `if not isinstance(producto["precio"], int) or producto["precio"] <= 0:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 53 | `raise ValueError(f"precio inválido en {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 54 | `if not isinstance(producto["stock"], int) or producto["stock"] < 0:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 55 | `raise ValueError(f"stock inválido en {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 56 | `if not str(producto["imagen"]).startswith("https://"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 57 | `raise ValueError(f"imagen inválida en {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 58 | `` | Línea en blanco: separa bloques lógicos. |
+| 59 | `for sku, sustituto in catalogo["sustitutos"].items():` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 60 | `if sku not in skus or sustituto not in skus:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 61 | `raise ValueError(f"Sustituto inválido: {sku} -> {sustituto}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 62 | `` | Línea en blanco: separa bloques lógicos. |
+| 63 | `if not isinstance(catalogo["eventos"], dict) or not catalogo["eventos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 64 | `raise ValueError("eventos debe ser un objeto no vacío")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 65 | `` | Línea en blanco: separa bloques lógicos. |
+| 66 | `for nombre in recomendaciones["eventos_festivos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 67 | `if nombre not in catalogo["eventos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 68 | `raise ValueError(f"Evento festivo inexistente: {nombre}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 69 | `` | Línea en blanco: separa bloques lógicos. |
-| 70 | `return True` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 71 | `` | Línea en blanco: separa bloques lógicos. |
-| 72 | `` | Línea en blanco: separa bloques lógicos. |
-| 73 | `def cargar_catalogo(ruta=RUTA_CATALOGO):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 74 | `"""Lee el JSON, valida su esquema y devuelve el diccionario del catálogo."""` | Docstring: describe el propósito del bloque. |
-| 75 | `with open(ruta, "r", encoding="utf-8") as archivo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 76 | `catalogo = json.load(archivo)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 77 | `validar_catalogo(catalogo)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 78 | `return catalogo` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 79 | `` | Línea en blanco: separa bloques lógicos. |
-| 80 | `` | Línea en blanco: separa bloques lógicos. |
-| 81 | `def indice_productos(catalogo):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 82 | `"""Construye un índice {sku: producto} para búsquedas O(1)."""` | Docstring: describe el propósito del bloque. |
-| 83 | `return {producto["sku"]: producto for producto in catalogo["productos"]}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 70 | `for nombre, evento in catalogo["eventos"].items():` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 71 | `for clave in ("nombre", "cupon", "producto_2x1", "reglas"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 72 | `if clave not in evento:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 73 | `raise ValueError(f"Falta '{clave}' en el evento {nombre}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 74 | `if evento["producto_2x1"] not in skus:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 75 | `raise ValueError(f"producto_2x1 inexistente en el evento {nombre}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 76 | `for regla in evento["reglas"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 77 | `if regla["sku"] not in skus:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 78 | `raise ValueError(f"SKU de regla inexistente: {regla['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 79 | `if regla["por_persona"] < 0 or regla["minimo"] < 0:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 80 | `raise ValueError(f"Cantidades negativas en el evento {nombre}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 81 | `` | Línea en blanco: separa bloques lógicos. |
+| 82 | `return True` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 83 | `` | Línea en blanco: separa bloques lógicos. |
+| 84 | `` | Línea en blanco: separa bloques lógicos. |
+| 85 | `def cargar_catalogo(ruta=RUTA_CATALOGO):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 86 | `"""Lee el JSON, valida su esquema y devuelve el diccionario del catálogo."""` | Docstring: describe el propósito del bloque. |
+| 87 | `with open(ruta, "r", encoding="utf-8") as archivo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 88 | `catalogo = json.load(archivo)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 89 | `validar_catalogo(catalogo)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 90 | `return catalogo` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 91 | `` | Línea en blanco: separa bloques lógicos. |
+| 92 | `` | Línea en blanco: separa bloques lógicos. |
+| 93 | `def indice_productos(catalogo):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 94 | `"""Construye un índice {sku: producto} para búsquedas O(1)."""` | Docstring: describe el propósito del bloque. |
+| 95 | `return {producto["sku"]: producto for producto in catalogo["productos"]}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 
 ## `carrito/imperativo.py`
 
@@ -304,108 +316,114 @@ comentario del bloque que le precede inmediatamente.
 | 9 | `import math` | ceil() redondea siempre hacia arriba. |
 | 10 | `` | Línea en blanco: separa bloques lógicos. |
 | 11 | `from carrito.datos import indice_productos` | Convierte la lista de productos en un dict. |
-| 12 | `` | Línea en blanco: separa bloques lógicos. |
+| 12 | `from carrito.recomendaciones import sugerir` | Regla transversal de sugerencias. |
 | 13 | `` | Línea en blanco: separa bloques lógicos. |
-| 14 | `def armar_carrito(evento, personas, catalogo, cupon=None):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 15 | `"""Devuelve el carrito armado como diccionario (misma forma en los 3 paradigmas)."""` | Docstring: describe el propósito del bloque. |
-| 16 | `` | Línea en blanco: separa bloques lógicos. |
-| 17 | `# Validación temprana: evita trabajar con entradas sin sentido.` | Validación temprana: evita trabajar con entradas sin sentido. |
-| 18 | `if personas <= 0:` | Una persona o menos no define un evento. |
-| 19 | `raise ValueError("personas debe ser mayor que cero")` | Error explícito. |
-| 20 | `` | Línea en blanco: separa bloques lógicos. |
-| 21 | `if evento not in catalogo["eventos"]:` | El evento debe existir en el JSON. |
-| 22 | `raise ValueError(f"Evento desconocido: {evento}")` | Mensaje útil. |
-| 23 | `` | Línea en blanco: separa bloques lógicos. |
-| 24 | `productos = indice_productos(catalogo)` | {sku: producto}, acceso O(1). |
-| 25 | `config = catalogo["eventos"][evento]` | Reglas propias del evento elegido. |
-| 26 | `items = []` | Acumulador mutable de líneas del carrito. |
-| 27 | `faltantes = []` | Acumulador mutable de productos sin stock suficiente. |
-| 28 | `` | Línea en blanco: separa bloques lógicos. |
-| 29 | `# --- Paso 1: calcular cantidades y resolver stock ---` | --- Paso 1: calcular cantidades y resolver stock --- |
-| 30 | `for regla in config["reglas"]:` | Recorre las reglas en orden estable. |
-| 31 | `sku = regla["sku"]` | SKU del producto sugerido por la regla. |
-| 32 | `producto = productos[sku]` | Datos del producto (precio, stock, nombre). |
-| 33 | `` | Línea en blanco: separa bloques lógicos. |
-| 34 | `# ceil() porque no se pueden vender fracciones; max() aplica el mínimo.` | ceil() porque no se pueden vender fracciones; max() aplica el mínimo. |
-| 35 | `cantidad = max(regla["minimo"], math.ceil(personas * regla["por_persona"]))` | ceil() porque no se pueden vender fracciones; max() aplica el mínimo. |
-| 36 | `` | Línea en blanco: separa bloques lógicos. |
-| 37 | `if cantidad > producto["stock"]:` | No hay stock suficiente. |
-| 38 | `sku_sustituto = catalogo["sustitutos"].get(sku)` | Busca alternativa. |
-| 39 | `sustituto = productos.get(sku_sustituto)` | Puede no existir. |
-| 40 | `` | Línea en blanco: separa bloques lógicos. |
-| 41 | `if sustituto and sustituto["stock"] >= cantidad:` | El sustituto alcanza. |
-| 42 | `# Se agrega el sustituto, dejando registro del producto original.` | Se agrega el sustituto, dejando registro del producto original. |
-| 43 | `items.append({` | Se agrega el sustituto, dejando registro del producto original. |
-| 44 | `"sku": sustituto["sku"],` | SKU que finalmente se vende. |
-| 45 | `"nombre": sustituto["nombre"],` | Nombre del sustituto. |
-| 46 | `"cantidad": cantidad,` | Cantidad calculada originalmente. |
-| 47 | `"precio_unitario": sustituto["precio"],` | Precio del sustituto. |
-| 48 | `"subtotal": cantidad * sustituto["precio"],` | Línea * precio. |
-| 49 | `"sustituto_de": sku,` | Trazabilidad del cambio. |
-| 50 | `})` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 51 | `continue` | Ya resolvimos esta regla; pasamos a la siguiente. |
-| 52 | `` | Línea en blanco: separa bloques lógicos. |
-| 53 | `disponible = producto["stock"]` | Stock real que sí se puede vender. |
-| 54 | `if disponible > 0:` | Solo agregamos la línea si hay algo disponible. |
-| 55 | `items.append({` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 56 | `"sku": sku,` | SKU original. |
-| 57 | `"nombre": producto["nombre"],` | Nombre original. |
-| 58 | `"cantidad": disponible,` | Se limita al stock disponible. |
-| 59 | `"precio_unitario": producto["precio"],` | Precio original. |
-| 60 | `"subtotal": disponible * producto["precio"],` | Subtotal de la línea. |
-| 61 | `"sustituto_de": None,` | No hubo sustitución. |
-| 62 | `})` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 63 | `` | Línea en blanco: separa bloques lógicos. |
-| 64 | `falta = cantidad - disponible` | Diferencia no cubierta. |
-| 65 | `if falta > 0:` | Solo se registra si realmente falta stock. |
-| 66 | `faltantes.append({"sku": sku, "cantidad": falta})` | Reporte. |
-| 67 | `else:` | Hay stock suficiente. |
-| 68 | `items.append({` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 69 | `"sku": sku,` | SKU original. |
-| 70 | `"nombre": producto["nombre"],` | Nombre original. |
-| 71 | `"cantidad": cantidad,` | Cantidad calculada. |
-| 72 | `"precio_unitario": producto["precio"],` | Precio original. |
-| 73 | `"subtotal": cantidad * producto["precio"],` | Subtotal de la línea. |
-| 74 | `"sustituto_de": None,` | Sin sustitución. |
-| 75 | `})` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 76 | `` | Línea en blanco: separa bloques lógicos. |
-| 77 | `# --- Paso 2: aplicar promoción 2x1 ---` | --- Paso 2: aplicar promoción 2x1 --- |
-| 78 | `descuento_2x1 = 0` | Acumulador del descuento. |
-| 79 | `sku_promo = config["producto_2x1"]` | Producto con 2x1 en este evento. |
-| 80 | `for item in items:` | Revisa cada línea ya construida. |
-| 81 | `# Se considera también el sustituto para no perder la promoción.` | Se considera también el sustituto para no perder la promoción. |
-| 82 | `if item["sku"] == sku_promo or item["sustituto_de"] == sku_promo:` | Se considera también el sustituto para no perder la promoción. |
-| 83 | `pares = item["cantidad"] // 2` | Cada par equivale a una unidad gratis. |
-| 84 | `descuento_2x1 += pares * item["precio_unitario"]` | Acumula el descuento. |
-| 85 | `` | Línea en blanco: separa bloques lógicos. |
-| 86 | `# --- Paso 3: subtotal, cupón y envío ---` | --- Paso 3: subtotal, cupón y envío --- |
-| 87 | `subtotal = 0` | Acumulador del subtotal sin descuentos. |
-| 88 | `for item in items:` | Recorre las líneas. |
-| 89 | `subtotal += item["subtotal"]` | Suma el subtotal de cada línea. |
-| 90 | `` | Línea en blanco: separa bloques lógicos. |
-| 91 | `base = subtotal - descuento_2x1` | Subtotal después del 2x1. |
-| 92 | `descuento_cupon = 0` | Valor por defecto: sin cupón. |
-| 93 | `if cupon == config["cupon"]:` | Solo si el cupón coincide con el del evento. |
-| 94 | `descuento_cupon = base * 10 // 100` | 10% redondeado hacia abajo (enteros). |
-| 95 | `` | Línea en blanco: separa bloques lógicos. |
-| 96 | `envio = catalogo["envio"]` | Configuración de envío del JSON. |
-| 97 | `if base - descuento_cupon >= envio["gratis_desde"]:` | Supera el umbral. |
-| 98 | `costo_envio = 0` | Envío gratis. |
-| 99 | `else:` | No supera el umbral. |
-| 100 | `costo_envio = envio["costo"]` | Se cobra el envío. |
-| 101 | `` | Línea en blanco: separa bloques lógicos. |
-| 102 | `total = base - descuento_cupon + costo_envio` | Resultado final. |
-| 103 | `` | Línea en blanco: separa bloques lógicos. |
-| 104 | `# --- Paso 4: devolver estructura común a los tres paradigmas ---` | --- Paso 4: devolver estructura común a los tres paradigmas --- |
-| 105 | `return {` | --- Paso 4: devolver estructura común a los tres paradigmas --- |
-| 106 | `"evento": evento,` | Evento solicitado. |
-| 107 | `"personas": personas,` | Cantidad de personas solicitada. |
-| 108 | `"items": items,` | Líneas del carrito. |
-| 109 | `"faltantes": faltantes,` | Productos sin stock. |
-| 110 | `"descuentos": {"2x1": descuento_2x1, "cupon": descuento_cupon},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 111 | `"envio": costo_envio,` | Costo de envío aplicado. |
-| 112 | `"total": total,` | Total a pagar. |
-| 113 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 14 | `` | Línea en blanco: separa bloques lógicos. |
+| 15 | `def armar_carrito(evento, personas, catalogo, cupon=None):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 16 | `"""Devuelve el carrito armado como diccionario (misma forma en los 3 paradigmas)."""` | Docstring: describe el propósito del bloque. |
+| 17 | `` | Línea en blanco: separa bloques lógicos. |
+| 18 | `# Validación temprana: evita trabajar con entradas sin sentido.` | Validación temprana: evita trabajar con entradas sin sentido. |
+| 19 | `if personas <= 0:` | Una persona o menos no define un evento. |
+| 20 | `raise ValueError("personas debe ser mayor que cero")` | Error explícito. |
+| 21 | `` | Línea en blanco: separa bloques lógicos. |
+| 22 | `if evento not in catalogo["eventos"]:` | El evento debe existir en el JSON. |
+| 23 | `raise ValueError(f"Evento desconocido: {evento}")` | Mensaje útil. |
+| 24 | `` | Línea en blanco: separa bloques lógicos. |
+| 25 | `productos = indice_productos(catalogo)` | {sku: producto}, acceso O(1). |
+| 26 | `config = catalogo["eventos"][evento]` | Reglas propias del evento elegido. |
+| 27 | `items = []` | Acumulador mutable de líneas del carrito. |
+| 28 | `faltantes = []` | Acumulador mutable de productos sin stock suficiente. |
+| 29 | `` | Línea en blanco: separa bloques lógicos. |
+| 30 | `# --- Paso 1: calcular cantidades y resolver stock ---` | --- Paso 1: calcular cantidades y resolver stock --- |
+| 31 | `for regla in config["reglas"]:` | Recorre las reglas en orden estable. |
+| 32 | `sku = regla["sku"]` | SKU del producto sugerido por la regla. |
+| 33 | `producto = productos[sku]` | Datos del producto (precio, stock, nombre). |
+| 34 | `` | Línea en blanco: separa bloques lógicos. |
+| 35 | `# ceil() porque no se pueden vender fracciones; max() aplica el mínimo.` | ceil() porque no se pueden vender fracciones; max() aplica el mínimo. |
+| 36 | `cantidad = max(regla["minimo"], math.ceil(personas * regla["por_persona"]))` | ceil() porque no se pueden vender fracciones; max() aplica el mínimo. |
+| 37 | `` | Línea en blanco: separa bloques lógicos. |
+| 38 | `if cantidad > producto["stock"]:` | No hay stock suficiente. |
+| 39 | `sku_sustituto = catalogo["sustitutos"].get(sku)` | Busca alternativa. |
+| 40 | `sustituto = productos.get(sku_sustituto)` | Puede no existir. |
+| 41 | `` | Línea en blanco: separa bloques lógicos. |
+| 42 | `if sustituto and sustituto["stock"] >= cantidad:` | El sustituto alcanza. |
+| 43 | `# Se agrega el sustituto, dejando registro del producto original.` | Se agrega el sustituto, dejando registro del producto original. |
+| 44 | `items.append({` | Se agrega el sustituto, dejando registro del producto original. |
+| 45 | `"sku": sustituto["sku"],` | SKU que finalmente se vende. |
+| 46 | `"nombre": sustituto["nombre"],` | Nombre del sustituto. |
+| 47 | `"cantidad": cantidad,` | Cantidad calculada originalmente. |
+| 48 | `"precio_unitario": sustituto["precio"],` | Precio del sustituto. |
+| 49 | `"subtotal": cantidad * sustituto["precio"],` | Línea * precio. |
+| 50 | `"sustituto_de": sku,` | Trazabilidad del cambio. |
+| 51 | `})` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 52 | `continue` | Ya resolvimos esta regla; pasamos a la siguiente. |
+| 53 | `` | Línea en blanco: separa bloques lógicos. |
+| 54 | `disponible = producto["stock"]` | Stock real que sí se puede vender. |
+| 55 | `if disponible > 0:` | Solo agregamos la línea si hay algo disponible. |
+| 56 | `items.append({` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 57 | `"sku": sku,` | SKU original. |
+| 58 | `"nombre": producto["nombre"],` | Nombre original. |
+| 59 | `"cantidad": disponible,` | Se limita al stock disponible. |
+| 60 | `"precio_unitario": producto["precio"],` | Precio original. |
+| 61 | `"subtotal": disponible * producto["precio"],` | Subtotal de la línea. |
+| 62 | `"sustituto_de": None,` | No hubo sustitución. |
+| 63 | `})` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 64 | `` | Línea en blanco: separa bloques lógicos. |
+| 65 | `falta = cantidad - disponible` | Diferencia no cubierta. |
+| 66 | `if falta > 0:` | Solo se registra si realmente falta stock. |
+| 67 | `faltantes.append({"sku": sku, "cantidad": falta})` | Reporte. |
+| 68 | `else:` | Hay stock suficiente. |
+| 69 | `items.append({` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 70 | `"sku": sku,` | SKU original. |
+| 71 | `"nombre": producto["nombre"],` | Nombre original. |
+| 72 | `"cantidad": cantidad,` | Cantidad calculada. |
+| 73 | `"precio_unitario": producto["precio"],` | Precio original. |
+| 74 | `"subtotal": cantidad * producto["precio"],` | Subtotal de la línea. |
+| 75 | `"sustituto_de": None,` | Sin sustitución. |
+| 76 | `})` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 77 | `` | Línea en blanco: separa bloques lógicos. |
+| 78 | `# --- Paso 2: aplicar promoción 2x1 ---` | --- Paso 2: aplicar promoción 2x1 --- |
+| 79 | `descuento_2x1 = 0` | Acumulador del descuento. |
+| 80 | `sku_promo = config["producto_2x1"]` | Producto con 2x1 en este evento. |
+| 81 | `for item in items:` | Revisa cada línea ya construida. |
+| 82 | `# Se considera también el sustituto para no perder la promoción.` | Se considera también el sustituto para no perder la promoción. |
+| 83 | `if item["sku"] == sku_promo or item["sustituto_de"] == sku_promo:` | Se considera también el sustituto para no perder la promoción. |
+| 84 | `pares = item["cantidad"] // 2` | Cada par equivale a una unidad gratis. |
+| 85 | `descuento_2x1 += pares * item["precio_unitario"]` | Acumula el descuento. |
+| 86 | `` | Línea en blanco: separa bloques lógicos. |
+| 87 | `# --- Paso 3: subtotal, cupón y envío ---` | --- Paso 3: subtotal, cupón y envío --- |
+| 88 | `subtotal = 0` | Acumulador del subtotal sin descuentos. |
+| 89 | `for item in items:` | Recorre las líneas. |
+| 90 | `subtotal += item["subtotal"]` | Suma el subtotal de cada línea. |
+| 91 | `` | Línea en blanco: separa bloques lógicos. |
+| 92 | `base = subtotal - descuento_2x1` | Subtotal después del 2x1. |
+| 93 | `descuento_cupon = 0` | Valor por defecto: sin cupón. |
+| 94 | `if cupon == config["cupon"]:` | Solo si el cupón coincide con el del evento. |
+| 95 | `descuento_cupon = base * 10 // 100` | 10% redondeado hacia abajo (enteros). |
+| 96 | `` | Línea en blanco: separa bloques lógicos. |
+| 97 | `envio = catalogo["envio"]` | Configuración de envío del JSON. |
+| 98 | `if base - descuento_cupon >= envio["gratis_desde"]:` | Supera el umbral. |
+| 99 | `costo_envio = 0` | Envío gratis. |
+| 100 | `else:` | No supera el umbral. |
+| 101 | `costo_envio = envio["costo"]` | Se cobra el envío. |
+| 102 | `` | Línea en blanco: separa bloques lógicos. |
+| 103 | `total = base - descuento_cupon + costo_envio` | Resultado final. |
+| 104 | `` | Línea en blanco: separa bloques lógicos. |
+| 105 | `# --- Paso 4: sugerencias personalizadas según el carrito y la festividad ---` | --- Paso 4: sugerencias personalizadas según el carrito y la festividad --- |
+| 106 | `# Se calculan al final porque dependen de las líneas ya resueltas.` | Se calculan al final porque dependen de las líneas ya resueltas. |
+| 107 | `recomendaciones = sugerir(items, catalogo, evento)` | Se calculan al final porque dependen de las líneas ya resueltas. |
+| 108 | `` | Línea en blanco: separa bloques lógicos. |
+| 109 | `# --- Paso 5: devolver estructura común a los tres paradigmas ---` | --- Paso 5: devolver estructura común a los tres paradigmas --- |
+| 110 | `return {` | --- Paso 5: devolver estructura común a los tres paradigmas --- |
+| 111 | `"evento": evento,` | Evento solicitado. |
+| 112 | `"personas": personas,` | Cantidad de personas solicitada. |
+| 113 | `"items": items,` | Líneas del carrito. |
+| 114 | `"faltantes": faltantes,` | Productos sin stock. |
+| 115 | `"descuentos": {"2x1": descuento_2x1, "cupon": descuento_cupon},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 116 | `"envio": costo_envio,` | Costo de envío aplicado. |
+| 117 | `"total": total,` | Total a pagar. |
+| 118 | `"recomendaciones": recomendaciones,` | Ofertas similares; no cambian el total. |
+| 119 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 
 ## `carrito/orientado_objetos.py`
 
@@ -425,221 +443,240 @@ comentario del bloque que le precede inmediatamente.
 | 12 | `from dataclasses import dataclass` | Reduce el código repetitivo de __init__. |
 | 13 | `` | Línea en blanco: separa bloques lógicos. |
 | 14 | `from carrito.datos import indice_productos` | Índice compartido de productos. |
-| 15 | `` | Línea en blanco: separa bloques lógicos. |
+| 15 | `from carrito.recomendaciones import sugerir` | Regla pura compartida. |
 | 16 | `` | Línea en blanco: separa bloques lógicos. |
-| 17 | `# --- Modelo de datos ---` | --- Modelo de datos --- |
-| 18 | `` | Línea en blanco: separa bloques lógicos. |
-| 19 | `@dataclass(frozen=True)` | frozen=True => objetos inmutables. |
-| 20 | `class Producto:` | --- Modelo de datos --- |
-| 21 | `"""Representa un producto del catálogo."""` | Docstring: describe el propósito del bloque. |
-| 22 | `` | Línea en blanco: separa bloques lógicos. |
-| 23 | `sku: str` | Identificador único. |
-| 24 | `nombre: str` | Nombre visible. |
-| 25 | `precio: int` | Precio en pesos enteros. |
-| 26 | `stock: int` | Unidades disponibles. |
-| 27 | `` | Línea en blanco: separa bloques lógicos. |
-| 28 | `def crear_item(self, cantidad, sustituto_de=None):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 29 | `"""Fábrica de líneas de carrito a partir del producto."""` | Docstring: describe el propósito del bloque. |
-| 30 | `return Item(` | Devuelve un objeto Item. |
-| 31 | `sku=self.sku,` | SKU del producto vendido. |
-| 32 | `nombre=self.nombre,` | Nombre del producto vendido. |
-| 33 | `cantidad=cantidad,` | Unidades calculadas. |
-| 34 | `precio_unitario=self.precio,` | Precio unitario. |
-| 35 | `subtotal=cantidad * self.precio,` | Precio total de la línea. |
-| 36 | `sustituto_de=sustituto_de,` | SKU original si hubo sustitución. |
-| 37 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 38 | `` | Línea en blanco: separa bloques lógicos. |
+| 17 | `` | Línea en blanco: separa bloques lógicos. |
+| 18 | `# --- Modelo de datos ---` | --- Modelo de datos --- |
+| 19 | `` | Línea en blanco: separa bloques lógicos. |
+| 20 | `@dataclass(frozen=True)` | frozen=True => objetos inmutables. |
+| 21 | `class Producto:` | --- Modelo de datos --- |
+| 22 | `"""Representa un producto del catálogo."""` | Docstring: describe el propósito del bloque. |
+| 23 | `` | Línea en blanco: separa bloques lógicos. |
+| 24 | `sku: str` | Identificador único. |
+| 25 | `nombre: str` | Nombre visible. |
+| 26 | `precio: int` | Precio en pesos enteros. |
+| 27 | `stock: int` | Unidades disponibles. |
+| 28 | `` | Línea en blanco: separa bloques lógicos. |
+| 29 | `def crear_item(self, cantidad, sustituto_de=None):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 30 | `"""Fábrica de líneas de carrito a partir del producto."""` | Docstring: describe el propósito del bloque. |
+| 31 | `return Item(` | Devuelve un objeto Item. |
+| 32 | `sku=self.sku,` | SKU del producto vendido. |
+| 33 | `nombre=self.nombre,` | Nombre del producto vendido. |
+| 34 | `cantidad=cantidad,` | Unidades calculadas. |
+| 35 | `precio_unitario=self.precio,` | Precio unitario. |
+| 36 | `subtotal=cantidad * self.precio,` | Precio total de la línea. |
+| 37 | `sustituto_de=sustituto_de,` | SKU original si hubo sustitución. |
+| 38 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 39 | `` | Línea en blanco: separa bloques lógicos. |
-| 40 | `@dataclass(frozen=True)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 41 | `class Item:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 42 | `"""Una línea del carrito; también inmutable."""` | Docstring: describe el propósito del bloque. |
-| 43 | `` | Línea en blanco: separa bloques lógicos. |
-| 44 | `sku: str` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 45 | `nombre: str` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 46 | `cantidad: int` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 47 | `precio_unitario: int` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 48 | `subtotal: int` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 49 | `sustituto_de: str \| None` | None cuando no hubo sustitución. |
-| 50 | `` | Línea en blanco: separa bloques lógicos. |
-| 51 | `def como_dict(self):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 52 | `"""Convierte el objeto en diccionario para igualar a los otros paradigmas."""` | Docstring: describe el propósito del bloque. |
-| 53 | `return {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 54 | `"sku": self.sku,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 55 | `"nombre": self.nombre,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 56 | `"cantidad": self.cantidad,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 57 | `"precio_unitario": self.precio_unitario,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 58 | `"subtotal": self.subtotal,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 59 | `"sustituto_de": self.sustituto_de,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 60 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 61 | `` | Línea en blanco: separa bloques lógicos. |
+| 40 | `` | Línea en blanco: separa bloques lógicos. |
+| 41 | `@dataclass(frozen=True)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 42 | `class Item:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 43 | `"""Una línea del carrito; también inmutable."""` | Docstring: describe el propósito del bloque. |
+| 44 | `` | Línea en blanco: separa bloques lógicos. |
+| 45 | `sku: str` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 46 | `nombre: str` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 47 | `cantidad: int` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 48 | `precio_unitario: int` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 49 | `subtotal: int` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 50 | `sustituto_de: str \| None` | None cuando no hubo sustitución. |
+| 51 | `` | Línea en blanco: separa bloques lógicos. |
+| 52 | `def como_dict(self):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 53 | `"""Convierte el objeto en diccionario para igualar a los otros paradigmas."""` | Docstring: describe el propósito del bloque. |
+| 54 | `return {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 55 | `"sku": self.sku,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 56 | `"nombre": self.nombre,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 57 | `"cantidad": self.cantidad,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 58 | `"precio_unitario": self.precio_unitario,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 59 | `"subtotal": self.subtotal,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 60 | `"sustituto_de": self.sustituto_de,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 61 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 62 | `` | Línea en blanco: separa bloques lógicos. |
-| 63 | `@dataclass(frozen=True)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 64 | `class Regla:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 65 | `"""Regla que define cuántas unidades se sugieren por persona."""` | Docstring: describe el propósito del bloque. |
-| 66 | `` | Línea en blanco: separa bloques lógicos. |
-| 67 | `sku: str` | Producto al que aplica. |
-| 68 | `por_persona: float` | Unidades (o fracción) por persona. |
-| 69 | `minimo: int` | Mínimo absoluto de unidades. |
-| 70 | `` | Línea en blanco: separa bloques lógicos. |
-| 71 | `def cantidad_para(self, personas):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 72 | `"""Calcula la cantidad redondeada hacia arriba, con mínimo."""` | Docstring: describe el propósito del bloque. |
-| 73 | `return max(self.minimo, math.ceil(personas * self.por_persona))` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 74 | `` | Línea en blanco: separa bloques lógicos. |
+| 63 | `` | Línea en blanco: separa bloques lógicos. |
+| 64 | `@dataclass(frozen=True)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 65 | `class Regla:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 66 | `"""Regla que define cuántas unidades se sugieren por persona."""` | Docstring: describe el propósito del bloque. |
+| 67 | `` | Línea en blanco: separa bloques lógicos. |
+| 68 | `sku: str` | Producto al que aplica. |
+| 69 | `por_persona: float` | Unidades (o fracción) por persona. |
+| 70 | `minimo: int` | Mínimo absoluto de unidades. |
+| 71 | `` | Línea en blanco: separa bloques lógicos. |
+| 72 | `def cantidad_para(self, personas):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 73 | `"""Calcula la cantidad redondeada hacia arriba, con mínimo."""` | Docstring: describe el propósito del bloque. |
+| 74 | `return max(self.minimo, math.ceil(personas * self.por_persona))` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 75 | `` | Línea en blanco: separa bloques lógicos. |
-| 76 | `@dataclass(frozen=True)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 77 | `class Evento:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 78 | `"""Configuración de un evento: reglas, cupón y producto en 2x1."""` | Docstring: describe el propósito del bloque. |
-| 79 | `` | Línea en blanco: separa bloques lógicos. |
-| 80 | `nombre: str` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 81 | `cupon: str` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 82 | `producto_2x1: str` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 83 | `reglas: tuple` | Tupla de Regla (inmutable). |
-| 84 | `` | Línea en blanco: separa bloques lógicos. |
-| 85 | `@classmethod` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 86 | `def desde_dict(cls, datos):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 87 | `"""Construye un Evento desde el diccionario del JSON."""` | Docstring: describe el propósito del bloque. |
-| 88 | `reglas = tuple(` | Comprensión que crea objetos Regla. |
-| 89 | `Regla(r["sku"], r["por_persona"], r["minimo"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 90 | `for r in datos["reglas"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 91 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 92 | `return cls(datos["nombre"], datos["cupon"], datos["producto_2x1"], reglas)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 93 | `` | Línea en blanco: separa bloques lógicos. |
+| 76 | `` | Línea en blanco: separa bloques lógicos. |
+| 77 | `@dataclass(frozen=True)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 78 | `class Evento:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 79 | `"""Configuración de un evento: reglas, cupón y producto en 2x1."""` | Docstring: describe el propósito del bloque. |
+| 80 | `` | Línea en blanco: separa bloques lógicos. |
+| 81 | `nombre: str` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 82 | `cupon: str` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 83 | `producto_2x1: str` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 84 | `reglas: tuple` | Tupla de Regla (inmutable). |
+| 85 | `` | Línea en blanco: separa bloques lógicos. |
+| 86 | `@classmethod` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 87 | `def desde_dict(cls, datos):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 88 | `"""Construye un Evento desde el diccionario del JSON."""` | Docstring: describe el propósito del bloque. |
+| 89 | `reglas = tuple(` | Comprensión que crea objetos Regla. |
+| 90 | `Regla(r["sku"], r["por_persona"], r["minimo"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 91 | `for r in datos["reglas"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 92 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 93 | `return cls(datos["nombre"], datos["cupon"], datos["producto_2x1"], reglas)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 94 | `` | Línea en blanco: separa bloques lógicos. |
-| 95 | `# --- Estrategias de descuento (herencia y polimorfismo) ---` | --- Estrategias de descuento (herencia y polimorfismo) --- |
-| 96 | `` | Línea en blanco: separa bloques lógicos. |
-| 97 | `class Descuento(ABC):` | --- Estrategias de descuento (herencia y polimorfismo) --- |
-| 98 | `"""Interfaz común: toda estrategia debe saber calcular un descuento."""` | Docstring: describe el propósito del bloque. |
-| 99 | `` | Línea en blanco: separa bloques lógicos. |
-| 100 | `@abstractmethod` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 101 | `def calcular(self, items, evento, cupon):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 102 | `"""Devuelve el monto de descuento (entero)."""` | Docstring: describe el propósito del bloque. |
-| 103 | `raise NotImplementedError` | Obliga a las subclases a implementarlo. |
-| 104 | `` | Línea en blanco: separa bloques lógicos. |
+| 95 | `` | Línea en blanco: separa bloques lógicos. |
+| 96 | `# --- Estrategias de descuento (herencia y polimorfismo) ---` | --- Estrategias de descuento (herencia y polimorfismo) --- |
+| 97 | `` | Línea en blanco: separa bloques lógicos. |
+| 98 | `class Descuento(ABC):` | --- Estrategias de descuento (herencia y polimorfismo) --- |
+| 99 | `"""Interfaz común: toda estrategia debe saber calcular un descuento."""` | Docstring: describe el propósito del bloque. |
+| 100 | `` | Línea en blanco: separa bloques lógicos. |
+| 101 | `@abstractmethod` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 102 | `def calcular(self, items, evento, cupon):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 103 | `"""Devuelve el monto de descuento (entero)."""` | Docstring: describe el propósito del bloque. |
+| 104 | `raise NotImplementedError` | Obliga a las subclases a implementarlo. |
 | 105 | `` | Línea en blanco: separa bloques lógicos. |
-| 106 | `class Descuento2x1(Descuento):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 107 | `"""Descuento 2x1 sobre el producto configurado en el evento."""` | Docstring: describe el propósito del bloque. |
-| 108 | `` | Línea en blanco: separa bloques lógicos. |
-| 109 | `def calcular(self, items, evento, cupon):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 110 | `total = 0` | Acumulador local. |
-| 111 | `for item in items:` | Polimorfismo: Item expone los mismos atributos. |
-| 112 | `es_promo = item.sku == evento.producto_2x1` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 113 | `es_sustituto = item.sustituto_de == evento.producto_2x1` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 114 | `if es_promo or es_sustituto:` | Aplica también al sustituto. |
-| 115 | `total += (item.cantidad // 2) * item.precio_unitario` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 116 | `return total` | Cumple el contrato de Descuento. |
-| 117 | `` | Línea en blanco: separa bloques lógicos. |
+| 106 | `` | Línea en blanco: separa bloques lógicos. |
+| 107 | `class Descuento2x1(Descuento):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 108 | `"""Descuento 2x1 sobre el producto configurado en el evento."""` | Docstring: describe el propósito del bloque. |
+| 109 | `` | Línea en blanco: separa bloques lógicos. |
+| 110 | `def calcular(self, items, evento, cupon):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 111 | `total = 0` | Acumulador local. |
+| 112 | `for item in items:` | Polimorfismo: Item expone los mismos atributos. |
+| 113 | `es_promo = item.sku == evento.producto_2x1` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 114 | `es_sustituto = item.sustituto_de == evento.producto_2x1` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 115 | `if es_promo or es_sustituto:` | Aplica también al sustituto. |
+| 116 | `total += (item.cantidad // 2) * item.precio_unitario` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 117 | `return total` | Cumple el contrato de Descuento. |
 | 118 | `` | Línea en blanco: separa bloques lógicos. |
-| 119 | `class DescuentoPorcentaje(Descuento):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 120 | `"""Descuento por cupón: porcentaje sobre la base ya descontada."""` | Docstring: describe el propósito del bloque. |
-| 121 | `` | Línea en blanco: separa bloques lógicos. |
-| 122 | `def __init__(self, porcentaje):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 123 | `self.porcentaje = porcentaje` | Estado interno encapsulado. |
-| 124 | `` | Línea en blanco: separa bloques lógicos. |
-| 125 | `def calcular(self, items, evento, cupon, base=0):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 126 | `# Firma extendida con `base`; se usa desde el carrito de forma explícita.` | Firma extendida con `base`; se usa desde el carrito de forma explícita. |
-| 127 | `if cupon != evento.cupon:` | Cupón incorrecto o ausente. |
-| 128 | `return 0` | Sin descuento. |
-| 129 | `return base * self.porcentaje // 100` | Entero, redondeo hacia abajo. |
-| 130 | `` | Línea en blanco: separa bloques lógicos. |
+| 119 | `` | Línea en blanco: separa bloques lógicos. |
+| 120 | `class DescuentoPorcentaje(Descuento):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 121 | `"""Descuento por cupón: porcentaje sobre la base ya descontada."""` | Docstring: describe el propósito del bloque. |
+| 122 | `` | Línea en blanco: separa bloques lógicos. |
+| 123 | `def __init__(self, porcentaje):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 124 | `self.porcentaje = porcentaje` | Estado interno encapsulado. |
+| 125 | `` | Línea en blanco: separa bloques lógicos. |
+| 126 | `def calcular(self, items, evento, cupon, base=0):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 127 | `# Firma extendida con `base`; se usa desde el carrito de forma explícita.` | Firma extendida con `base`; se usa desde el carrito de forma explícita. |
+| 128 | `if cupon != evento.cupon:` | Cupón incorrecto o ausente. |
+| 129 | `return 0` | Sin descuento. |
+| 130 | `return base * self.porcentaje // 100` | Entero, redondeo hacia abajo. |
 | 131 | `` | Línea en blanco: separa bloques lógicos. |
-| 132 | `class PoliticaEnvio:` | Firma extendida con `base`; se usa desde el carrito de forma explícita. |
-| 133 | `"""Define cuándo el envío es gratis."""` | Docstring: describe el propósito del bloque. |
-| 134 | `` | Línea en blanco: separa bloques lógicos. |
-| 135 | `def __init__(self, costo, gratis_desde):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 136 | `self.costo = costo` | Costo normal. |
-| 137 | `self.gratis_desde = gratis_desde` | Umbral para envío gratis. |
+| 132 | `` | Línea en blanco: separa bloques lógicos. |
+| 133 | `class Recomendador:` | Firma extendida con `base`; se usa desde el carrito de forma explícita. |
+| 134 | `"""Encapsula la regla de sugerencias por similitud y festividad."""` | Docstring: describe el propósito del bloque. |
+| 135 | `` | Línea en blanco: separa bloques lógicos. |
+| 136 | `def __init__(self, catalogo):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 137 | `self.catalogo = catalogo` | Configuración de recomendaciones y productos. |
 | 138 | `` | Línea en blanco: separa bloques lógicos. |
-| 139 | `def calcular(self, monto):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 140 | `"""Devuelve el costo de envío según el monto después de descuentos."""` | Docstring: describe el propósito del bloque. |
-| 141 | `return 0 if monto >= self.gratis_desde else self.costo` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 139 | `def sugerir_para(self, items, evento):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 140 | `"""Devuelve sugerencias para las líneas ya armadas del carrito."""` | Docstring: describe el propósito del bloque. |
+| 141 | `return sugerir(items, self.catalogo, evento)` | Delega en la función pura. |
 | 142 | `` | Línea en blanco: separa bloques lógicos. |
 | 143 | `` | Línea en blanco: separa bloques lógicos. |
-| 144 | `# --- Orquestación ---` | --- Orquestación --- |
-| 145 | `` | Línea en blanco: separa bloques lógicos. |
-| 146 | `class Carrito:` | --- Orquestación --- |
-| 147 | `"""Coordina productos, reglas y descuentos para armar el carrito."""` | Docstring: describe el propósito del bloque. |
-| 148 | `` | Línea en blanco: separa bloques lógicos. |
-| 149 | `def __init__(self, evento, personas, catalogo, cupon=None):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 150 | `if personas <= 0:` | Validación de entrada. |
-| 151 | `raise ValueError("personas debe ser mayor que cero")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 152 | `if evento not in catalogo["eventos"]:` | Validación de evento. |
-| 153 | `raise ValueError(f"Evento desconocido: {evento}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 144 | `class PoliticaEnvio:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 145 | `"""Define cuándo el envío es gratis."""` | Docstring: describe el propósito del bloque. |
+| 146 | `` | Línea en blanco: separa bloques lógicos. |
+| 147 | `def __init__(self, costo, gratis_desde):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 148 | `self.costo = costo` | Costo normal. |
+| 149 | `self.gratis_desde = gratis_desde` | Umbral para envío gratis. |
+| 150 | `` | Línea en blanco: separa bloques lógicos. |
+| 151 | `def calcular(self, monto):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 152 | `"""Devuelve el costo de envío según el monto después de descuentos."""` | Docstring: describe el propósito del bloque. |
+| 153 | `return 0 if monto >= self.gratis_desde else self.costo` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 154 | `` | Línea en blanco: separa bloques lógicos. |
-| 155 | `self.evento = Evento.desde_dict(catalogo["eventos"][evento])` | Config. |
-| 156 | `self.personas = personas` | Cantidad de personas. |
-| 157 | `self.productos = {` | Dict de objetos Producto. |
-| 158 | `sku: Producto(p["sku"], p["nombre"], p["precio"], p["stock"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 159 | `for sku, p in indice_productos(catalogo).items()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 160 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 161 | `self.sustitutos = catalogo["sustitutos"]` | Mapa de reemplazos. |
-| 162 | `self.cupon = cupon` | Cupón ingresado por el usuario. |
-| 163 | `self.envio = PoliticaEnvio(` | Política de envío del catálogo. |
-| 164 | `catalogo["envio"]["costo"], catalogo["envio"]["gratis_desde"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 165 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 166 | `self.descuentos = [Descuento2x1()]` | Estrategias polimórficas. |
-| 167 | `` | Línea en blanco: separa bloques lógicos. |
-| 168 | `def _resolver_regla(self, regla):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 169 | `"""Aplica una regla; devuelve (item o None, faltante o None)."""` | Docstring: describe el propósito del bloque. |
-| 170 | `producto = self.productos[regla.sku]` | Producto sugerido. |
-| 171 | `cantidad = regla.cantidad_para(self.personas)` | Cantidad calculada. |
-| 172 | `` | Línea en blanco: separa bloques lógicos. |
-| 173 | `if cantidad <= producto.stock:` | Caso simple: hay stock. |
-| 174 | `return producto.crear_item(cantidad), None` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 175 | `` | Línea en blanco: separa bloques lógicos. |
-| 176 | `# Sin stock suficiente: intenta sustituto.` | Sin stock suficiente: intenta sustituto. |
-| 177 | `sku_alt = self.sustitutos.get(regla.sku)` | SKU alternativo. |
-| 178 | `alternativo = self.productos.get(sku_alt)` | Objeto alternativo. |
-| 179 | `if alternativo and alternativo.stock >= cantidad:` | El sustituto alcanza. |
-| 180 | `return alternativo.crear_item(cantidad, regla.sku), None` | Sin stock suficiente: intenta sustituto. |
+| 155 | `` | Línea en blanco: separa bloques lógicos. |
+| 156 | `# --- Orquestación ---` | --- Orquestación --- |
+| 157 | `` | Línea en blanco: separa bloques lógicos. |
+| 158 | `class Carrito:` | --- Orquestación --- |
+| 159 | `"""Coordina productos, reglas y descuentos para armar el carrito."""` | Docstring: describe el propósito del bloque. |
+| 160 | `` | Línea en blanco: separa bloques lógicos. |
+| 161 | `def __init__(self, evento, personas, catalogo, cupon=None):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 162 | `if personas <= 0:` | Validación de entrada. |
+| 163 | `raise ValueError("personas debe ser mayor que cero")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 164 | `if evento not in catalogo["eventos"]:` | Validación de evento. |
+| 165 | `raise ValueError(f"Evento desconocido: {evento}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 166 | `` | Línea en blanco: separa bloques lógicos. |
+| 167 | `self.evento = Evento.desde_dict(catalogo["eventos"][evento])` | Config. |
+| 168 | `self.clave_evento = evento` | Clave exacta del JSON, para las sugerencias. |
+| 169 | `self.personas = personas` | Cantidad de personas. |
+| 170 | `self.productos = {` | Dict de objetos Producto. |
+| 171 | `sku: Producto(p["sku"], p["nombre"], p["precio"], p["stock"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 172 | `for sku, p in indice_productos(catalogo).items()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 173 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 174 | `self.sustitutos = catalogo["sustitutos"]` | Mapa de reemplazos. |
+| 175 | `self.cupon = cupon` | Cupón ingresado por el usuario. |
+| 176 | `self.envio = PoliticaEnvio(` | Política de envío del catálogo. |
+| 177 | `catalogo["envio"]["costo"], catalogo["envio"]["gratis_desde"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 178 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 179 | `self.descuentos = [Descuento2x1()]` | Estrategias polimórficas. |
+| 180 | `self.recomendador = Recomendador(catalogo)` | Sugerencias personalizadas. |
 | 181 | `` | Línea en blanco: separa bloques lógicos. |
-| 182 | `# No hay sustituto válido: se vende lo disponible y se reporta el falta.` | No hay sustituto válido: se vende lo disponible y se reporta el falta. |
-| 183 | `disponible = producto.stock` | No hay sustituto válido: se vende lo disponible y se reporta el falta. |
-| 184 | `item = producto.crear_item(disponible) if disponible > 0 else None` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 185 | `faltante = {"sku": regla.sku, "cantidad": cantidad - disponible}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 186 | `return item, faltante` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 187 | `` | Línea en blanco: separa bloques lógicos. |
-| 188 | `def armar(self):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 189 | `"""Ejecuta el algoritmo completo y devuelve el diccionario resultado."""` | Docstring: describe el propósito del bloque. |
-| 190 | `items = []` | Lista mutable de objetos Item. |
-| 191 | `faltantes = []` | Lista mutable de reportes de stock. |
-| 192 | `` | Línea en blanco: separa bloques lógicos. |
-| 193 | `for regla in self.evento.reglas:` | Iteración sobre reglas del evento. |
-| 194 | `item, faltante = self._resolver_regla(regla)` | Delegación. |
-| 195 | `if item is not None:` | Puede no haber item si stock = 0. |
-| 196 | `items.append(item)` | Acumula el objeto. |
-| 197 | `if faltante is not None:` | Puede no haber faltante. |
-| 198 | `faltantes.append(faltante)` | Acumula el reporte. |
-| 199 | `` | Línea en blanco: separa bloques lógicos. |
-| 200 | `subtotal = sum(item.subtotal for item in items)` | Suma de líneas. |
+| 182 | `def _resolver_regla(self, regla):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 183 | `"""Aplica una regla; devuelve (item o None, faltante o None)."""` | Docstring: describe el propósito del bloque. |
+| 184 | `producto = self.productos[regla.sku]` | Producto sugerido. |
+| 185 | `cantidad = regla.cantidad_para(self.personas)` | Cantidad calculada. |
+| 186 | `` | Línea en blanco: separa bloques lógicos. |
+| 187 | `if cantidad <= producto.stock:` | Caso simple: hay stock. |
+| 188 | `return producto.crear_item(cantidad), None` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 189 | `` | Línea en blanco: separa bloques lógicos. |
+| 190 | `# Sin stock suficiente: intenta sustituto.` | Sin stock suficiente: intenta sustituto. |
+| 191 | `sku_alt = self.sustitutos.get(regla.sku)` | SKU alternativo. |
+| 192 | `alternativo = self.productos.get(sku_alt)` | Objeto alternativo. |
+| 193 | `if alternativo and alternativo.stock >= cantidad:` | El sustituto alcanza. |
+| 194 | `return alternativo.crear_item(cantidad, regla.sku), None` | Sin stock suficiente: intenta sustituto. |
+| 195 | `` | Línea en blanco: separa bloques lógicos. |
+| 196 | `# No hay sustituto válido: se vende lo disponible y se reporta el falta.` | No hay sustituto válido: se vende lo disponible y se reporta el falta. |
+| 197 | `disponible = producto.stock` | No hay sustituto válido: se vende lo disponible y se reporta el falta. |
+| 198 | `item = producto.crear_item(disponible) if disponible > 0 else None` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 199 | `faltante = {"sku": regla.sku, "cantidad": cantidad - disponible}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 200 | `return item, faltante` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 201 | `` | Línea en blanco: separa bloques lógicos. |
-| 202 | `# Polimorfismo: ambas estrategias responden a `calcular`.` | Polimorfismo: ambas estrategias responden a `calcular`. |
-| 203 | `desc_2x1 = self.descuentos[0].calcular(items, self.evento, self.cupon)` | Polimorfismo: ambas estrategias responden a `calcular`. |
-| 204 | `desc_cupon = DescuentoPorcentaje(10).calcular(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 205 | `items, self.evento, self.cupon, base=subtotal - desc_2x1` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 206 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 207 | `` | Línea en blanco: separa bloques lógicos. |
-| 208 | `base = subtotal - desc_2x1 - desc_cupon` | Monto para evaluar envío. |
-| 209 | `costo_envio = self.envio.calcular(base)` | Política de envío. |
-| 210 | `total = base + costo_envio` | Total final. |
-| 211 | `` | Línea en blanco: separa bloques lógicos. |
-| 212 | `return {` | Misma estructura que en el paradigma imperativo. |
-| 213 | `"evento": self.evento.nombre.lower().replace(" ", "_"),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 214 | `"personas": self.personas,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 215 | `"items": [item.como_dict() for item in items],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 216 | `"faltantes": faltantes,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 217 | `"descuentos": {"2x1": desc_2x1, "cupon": desc_cupon},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 218 | `"envio": costo_envio,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 219 | `"total": total,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 220 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 202 | `def armar(self):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 203 | `"""Ejecuta el algoritmo completo y devuelve el diccionario resultado."""` | Docstring: describe el propósito del bloque. |
+| 204 | `items = []` | Lista mutable de objetos Item. |
+| 205 | `faltantes = []` | Lista mutable de reportes de stock. |
+| 206 | `` | Línea en blanco: separa bloques lógicos. |
+| 207 | `for regla in self.evento.reglas:` | Iteración sobre reglas del evento. |
+| 208 | `item, faltante = self._resolver_regla(regla)` | Delegación. |
+| 209 | `if item is not None:` | Puede no haber item si stock = 0. |
+| 210 | `items.append(item)` | Acumula el objeto. |
+| 211 | `if faltante is not None:` | Puede no haber faltante. |
+| 212 | `faltantes.append(faltante)` | Acumula el reporte. |
+| 213 | `` | Línea en blanco: separa bloques lógicos. |
+| 214 | `subtotal = sum(item.subtotal for item in items)` | Suma de líneas. |
+| 215 | `` | Línea en blanco: separa bloques lógicos. |
+| 216 | `# Polimorfismo: ambas estrategias responden a `calcular`.` | Polimorfismo: ambas estrategias responden a `calcular`. |
+| 217 | `desc_2x1 = self.descuentos[0].calcular(items, self.evento, self.cupon)` | Polimorfismo: ambas estrategias responden a `calcular`. |
+| 218 | `desc_cupon = DescuentoPorcentaje(10).calcular(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 219 | `items, self.evento, self.cupon, base=subtotal - desc_2x1` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 220 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 221 | `` | Línea en blanco: separa bloques lógicos. |
-| 222 | `` | Línea en blanco: separa bloques lógicos. |
-| 223 | `def armar_carrito(evento, personas, catalogo, cupon=None):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 224 | `"""API pública equivalente a la de los otros dos módulos."""` | Docstring: describe el propósito del bloque. |
-| 225 | `# El evento devuelto por la clase se normaliza al nombre de la clave JSON.` | El evento devuelto por la clase se normaliza al nombre de la clave JSON. |
-| 226 | `carrito = Carrito(evento, personas, catalogo, cupon)` | El evento devuelto por la clase se normaliza al nombre de la clave JSON. |
-| 227 | `resultado = carrito.armar()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 228 | `resultado["evento"] = evento` | Garantiza igualdad exacta entre versiones. |
-| 229 | `return resultado` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 222 | `base = subtotal - desc_2x1 - desc_cupon` | Monto para evaluar envío. |
+| 223 | `costo_envio = self.envio.calcular(base)` | Política de envío. |
+| 224 | `total = base + costo_envio` | Total final. |
+| 225 | `` | Línea en blanco: separa bloques lógicos. |
+| 226 | `# El recomendador es un colaborador más del carrito, como la política de envío.` | El recomendador es un colaborador más del carrito, como la política de envío. |
+| 227 | `items_dict = [item.como_dict() for item in items]` | El recomendador es un colaborador más del carrito, como la política de envío. |
+| 228 | `recomendaciones = self.recomendador.sugerir_para(items_dict, self.clave_evento)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 229 | `` | Línea en blanco: separa bloques lógicos. |
+| 230 | `return {` | Misma estructura que en el paradigma imperativo. |
+| 231 | `"evento": self.evento.nombre.lower().replace(" ", "_"),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 232 | `"personas": self.personas,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 233 | `"items": items_dict,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 234 | `"faltantes": faltantes,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 235 | `"descuentos": {"2x1": desc_2x1, "cupon": desc_cupon},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 236 | `"envio": costo_envio,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 237 | `"total": total,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 238 | `"recomendaciones": recomendaciones,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 239 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 240 | `` | Línea en blanco: separa bloques lógicos. |
+| 241 | `` | Línea en blanco: separa bloques lógicos. |
+| 242 | `def armar_carrito(evento, personas, catalogo, cupon=None):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 243 | `"""API pública equivalente a la de los otros dos módulos."""` | Docstring: describe el propósito del bloque. |
+| 244 | `# El evento devuelto por la clase se normaliza al nombre de la clave JSON.` | El evento devuelto por la clase se normaliza al nombre de la clave JSON. |
+| 245 | `carrito = Carrito(evento, personas, catalogo, cupon)` | El evento devuelto por la clase se normaliza al nombre de la clave JSON. |
+| 246 | `resultado = carrito.armar()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 247 | `resultado["evento"] = evento` | Garantiza igualdad exacta entre versiones. |
+| 248 | `return resultado` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 
 ## `carrito/funcional.py`
 
@@ -658,122 +695,130 @@ comentario del bloque que le precede inmediatamente.
 | 11 | `from functools import reduce` | reduce() acumula una secuencia en un solo valor. |
 | 12 | `` | Línea en blanco: separa bloques lógicos. |
 | 13 | `from carrito.datos import indice_productos` | Índice de productos compartido. |
-| 14 | `` | Línea en blanco: separa bloques lógicos. |
+| 14 | `from carrito.recomendaciones import sugerir` | Función pura compartida. |
 | 15 | `` | Línea en blanco: separa bloques lógicos. |
-| 16 | `def validar(evento, personas, catalogo):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 17 | `"""Función pura de validación: devuelve la configuración del evento."""` | Docstring: describe el propósito del bloque. |
-| 18 | `if personas <= 0:` | Condición de error. |
-| 19 | `raise ValueError("personas debe ser mayor que cero")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 20 | `if evento not in catalogo["eventos"]:` | El evento debe existir. |
-| 21 | `raise ValueError(f"Evento desconocido: {evento}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 22 | `return catalogo["eventos"][evento]` | Devuelve un dict existente (no lo muta). |
-| 23 | `` | Línea en blanco: separa bloques lógicos. |
+| 16 | `` | Línea en blanco: separa bloques lógicos. |
+| 17 | `def validar(evento, personas, catalogo):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 18 | `"""Función pura de validación: devuelve la configuración del evento."""` | Docstring: describe el propósito del bloque. |
+| 19 | `if personas <= 0:` | Condición de error. |
+| 20 | `raise ValueError("personas debe ser mayor que cero")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 21 | `if evento not in catalogo["eventos"]:` | El evento debe existir. |
+| 22 | `raise ValueError(f"Evento desconocido: {evento}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 23 | `return catalogo["eventos"][evento]` | Devuelve un dict existente (no lo muta). |
 | 24 | `` | Línea en blanco: separa bloques lógicos. |
-| 25 | `def cantidad_para(personas, regla):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 26 | `"""Calcula unidades de una regla: techo y mínimo."""` | Docstring: describe el propósito del bloque. |
-| 27 | `return max(regla["minimo"], math.ceil(personas * regla["por_persona"]))` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 28 | `` | Línea en blanco: separa bloques lógicos. |
+| 25 | `` | Línea en blanco: separa bloques lógicos. |
+| 26 | `def cantidad_para(personas, regla):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 27 | `"""Calcula unidades de una regla: techo y mínimo."""` | Docstring: describe el propósito del bloque. |
+| 28 | `return max(regla["minimo"], math.ceil(personas * regla["por_persona"]))` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 29 | `` | Línea en blanco: separa bloques lógicos. |
-| 30 | `def crear_item(producto, cantidad, sustituto_de=None):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 31 | `"""Construye un diccionario nuevo para una línea del carrito."""` | Docstring: describe el propósito del bloque. |
-| 32 | `return {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 33 | `"sku": producto["sku"],` | SKU vendido. |
-| 34 | `"nombre": producto["nombre"],` | Nombre del producto. |
-| 35 | `"cantidad": cantidad,` | Unidades. |
-| 36 | `"precio_unitario": producto["precio"],` | Precio unitario. |
-| 37 | `"subtotal": cantidad * producto["precio"],` | Total de la línea. |
-| 38 | `"sustituto_de": sustituto_de,` | SKU original si se sustituyó. |
-| 39 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 40 | `` | Línea en blanco: separa bloques lógicos. |
+| 30 | `` | Línea en blanco: separa bloques lógicos. |
+| 31 | `def crear_item(producto, cantidad, sustituto_de=None):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 32 | `"""Construye un diccionario nuevo para una línea del carrito."""` | Docstring: describe el propósito del bloque. |
+| 33 | `return {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 34 | `"sku": producto["sku"],` | SKU vendido. |
+| 35 | `"nombre": producto["nombre"],` | Nombre del producto. |
+| 36 | `"cantidad": cantidad,` | Unidades. |
+| 37 | `"precio_unitario": producto["precio"],` | Precio unitario. |
+| 38 | `"subtotal": cantidad * producto["precio"],` | Total de la línea. |
+| 39 | `"sustituto_de": sustituto_de,` | SKU original si se sustituyó. |
+| 40 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 41 | `` | Línea en blanco: separa bloques lógicos. |
-| 42 | `def resolver(regla, personas, catalogo, productos):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 43 | `"""Devuelve el par (item, faltante); uno de los dos puede ser None."""` | Docstring: describe el propósito del bloque. |
-| 44 | `producto = productos[regla["sku"]]` | Producto de la regla. |
-| 45 | `cantidad = cantidad_para(personas, regla)` | Cantidad calculada. |
-| 46 | `` | Línea en blanco: separa bloques lógicos. |
-| 47 | `if cantidad <= producto["stock"]:` | Hay stock. |
-| 48 | `return crear_item(producto, cantidad), None` | Par sin faltante. |
-| 49 | `` | Línea en blanco: separa bloques lógicos. |
-| 50 | `# Sin stock: buscar sustituto con stock suficiente.` | Sin stock: buscar sustituto con stock suficiente. |
-| 51 | `sku_alternativo = catalogo["sustitutos"].get(regla["sku"])` | Puede no existir. |
-| 52 | `alternativo = productos.get(sku_alternativo)` | Puede no existir. |
-| 53 | `` | Línea en blanco: separa bloques lógicos. |
-| 54 | `if alternativo and alternativo["stock"] >= cantidad:` | Sustituto válido. |
-| 55 | `return crear_item(alternativo, cantidad, regla["sku"]), None` | Sin stock: buscar sustituto con stock suficiente. |
-| 56 | `` | Línea en blanco: separa bloques lógicos. |
-| 57 | `# Sin sustituto válido: vender lo disponible y reportar la diferencia.` | Sin sustituto válido: vender lo disponible y reportar la diferencia. |
-| 58 | `disponible = producto["stock"]` | Stock disponible. |
-| 59 | `item = crear_item(producto, disponible) if disponible > 0 else None` | Item opcional. |
-| 60 | `faltante = {"sku": regla["sku"], "cantidad": cantidad - disponible}` | Reporte. |
-| 61 | `return item, faltante` | Sin sustituto válido: vender lo disponible y reportar la diferencia. |
-| 62 | `` | Línea en blanco: separa bloques lógicos. |
+| 42 | `` | Línea en blanco: separa bloques lógicos. |
+| 43 | `def resolver(regla, personas, catalogo, productos):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 44 | `"""Devuelve el par (item, faltante); uno de los dos puede ser None."""` | Docstring: describe el propósito del bloque. |
+| 45 | `producto = productos[regla["sku"]]` | Producto de la regla. |
+| 46 | `cantidad = cantidad_para(personas, regla)` | Cantidad calculada. |
+| 47 | `` | Línea en blanco: separa bloques lógicos. |
+| 48 | `if cantidad <= producto["stock"]:` | Hay stock. |
+| 49 | `return crear_item(producto, cantidad), None` | Par sin faltante. |
+| 50 | `` | Línea en blanco: separa bloques lógicos. |
+| 51 | `# Sin stock: buscar sustituto con stock suficiente.` | Sin stock: buscar sustituto con stock suficiente. |
+| 52 | `sku_alternativo = catalogo["sustitutos"].get(regla["sku"])` | Puede no existir. |
+| 53 | `alternativo = productos.get(sku_alternativo)` | Puede no existir. |
+| 54 | `` | Línea en blanco: separa bloques lógicos. |
+| 55 | `if alternativo and alternativo["stock"] >= cantidad:` | Sustituto válido. |
+| 56 | `return crear_item(alternativo, cantidad, regla["sku"]), None` | Sin stock: buscar sustituto con stock suficiente. |
+| 57 | `` | Línea en blanco: separa bloques lógicos. |
+| 58 | `# Sin sustituto válido: vender lo disponible y reportar la diferencia.` | Sin sustituto válido: vender lo disponible y reportar la diferencia. |
+| 59 | `disponible = producto["stock"]` | Stock disponible. |
+| 60 | `item = crear_item(producto, disponible) if disponible > 0 else None` | Item opcional. |
+| 61 | `faltante = {"sku": regla["sku"], "cantidad": cantidad - disponible}` | Reporte. |
+| 62 | `return item, faltante` | Sin sustituto válido: vender lo disponible y reportar la diferencia. |
 | 63 | `` | Línea en blanco: separa bloques lógicos. |
-| 64 | `def construir_lineas(config, personas, catalogo, productos):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 65 | `"""Aplica `resolver` a todas las reglas con map y separa resultados."""` | Docstring: describe el propósito del bloque. |
-| 66 | `pares = tuple(` | Tupla inmutable de resultados. |
-| 67 | `map(` | map aplica resolver a cada regla. |
-| 68 | `lambda regla: resolver(regla, personas, catalogo, productos),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 69 | `config["reglas"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 70 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 64 | `` | Línea en blanco: separa bloques lógicos. |
+| 65 | `def construir_lineas(config, personas, catalogo, productos):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 66 | `"""Aplica `resolver` a todas las reglas con map y separa resultados."""` | Docstring: describe el propósito del bloque. |
+| 67 | `pares = tuple(` | Tupla inmutable de resultados. |
+| 68 | `map(` | map aplica resolver a cada regla. |
+| 69 | `lambda regla: resolver(regla, personas, catalogo, productos),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 70 | `config["reglas"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 71 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 72 | `items = tuple(filter(None, map(lambda par: par[0], pares)))` | Solo items. |
-| 73 | `faltantes = tuple(filter(None, map(lambda par: par[1], pares)))` | Solo faltantes. |
-| 74 | `return items, faltantes` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 75 | `` | Línea en blanco: separa bloques lógicos. |
+| 72 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 73 | `items = tuple(filter(None, map(lambda par: par[0], pares)))` | Solo items. |
+| 74 | `faltantes = tuple(filter(None, map(lambda par: par[1], pares)))` | Solo faltantes. |
+| 75 | `return items, faltantes` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 76 | `` | Línea en blanco: separa bloques lógicos. |
-| 77 | `def sumar_subtotal(items):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 78 | `"""Reduce los subtotales de las líneas en un entero."""` | Docstring: describe el propósito del bloque. |
-| 79 | `return reduce(lambda total, item: total + item["subtotal"], items, 0)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 80 | `` | Línea en blanco: separa bloques lógicos. |
+| 77 | `` | Línea en blanco: separa bloques lógicos. |
+| 78 | `def sumar_subtotal(items):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 79 | `"""Reduce los subtotales de las líneas en un entero."""` | Docstring: describe el propósito del bloque. |
+| 80 | `return reduce(lambda total, item: total + item["subtotal"], items, 0)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 81 | `` | Línea en blanco: separa bloques lógicos. |
-| 82 | `def descuento_2x1(items, sku_promo):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 83 | `"""Descuento 2x1 usando reduce sobre las líneas promocionadas."""` | Docstring: describe el propósito del bloque. |
-| 84 | `promocionados = filter(` | filter conserva solo las líneas que cumplen. |
-| 85 | `lambda item: item["sku"] == sku_promo or item["sustituto_de"] == sku_promo,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 86 | `items,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 87 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 88 | `return reduce(` | Acumula pares * precio. |
-| 89 | `lambda total, item: total + (item["cantidad"] // 2) * item["precio_unitario"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 90 | `promocionados,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 91 | `0,` | Valor inicial del acumulador. |
-| 92 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 93 | `` | Línea en blanco: separa bloques lógicos. |
+| 82 | `` | Línea en blanco: separa bloques lógicos. |
+| 83 | `def descuento_2x1(items, sku_promo):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 84 | `"""Descuento 2x1 usando reduce sobre las líneas promocionadas."""` | Docstring: describe el propósito del bloque. |
+| 85 | `promocionados = filter(` | filter conserva solo las líneas que cumplen. |
+| 86 | `lambda item: item["sku"] == sku_promo or item["sustituto_de"] == sku_promo,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 87 | `items,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 88 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 89 | `return reduce(` | Acumula pares * precio. |
+| 90 | `lambda total, item: total + (item["cantidad"] // 2) * item["precio_unitario"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 91 | `promocionados,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 92 | `0,` | Valor inicial del acumulador. |
+| 93 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 94 | `` | Línea en blanco: separa bloques lógicos. |
-| 95 | `def descuento_cupon(cupon, config, base):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 96 | `"""Descuento de 10% solo si el cupón coincide con el del evento."""` | Docstring: describe el propósito del bloque. |
-| 97 | `return base * 10 // 100 if cupon == config["cupon"] else 0` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 98 | `` | Línea en blanco: separa bloques lógicos. |
+| 95 | `` | Línea en blanco: separa bloques lógicos. |
+| 96 | `def descuento_cupon(cupon, config, base):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 97 | `"""Descuento de 10% solo si el cupón coincide con el del evento."""` | Docstring: describe el propósito del bloque. |
+| 98 | `return base * 10 // 100 if cupon == config["cupon"] else 0` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 99 | `` | Línea en blanco: separa bloques lógicos. |
-| 100 | `def costo_envio(catalogo, monto):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 101 | `"""Costo de envío según el umbral configurado."""` | Docstring: describe el propósito del bloque. |
-| 102 | `envio = catalogo["envio"]` | Configuración de envío. |
-| 103 | `return 0 if monto >= envio["gratis_desde"] else envio["costo"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 104 | `` | Línea en blanco: separa bloques lógicos. |
+| 100 | `` | Línea en blanco: separa bloques lógicos. |
+| 101 | `def costo_envio(catalogo, monto):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 102 | `"""Costo de envío según el umbral configurado."""` | Docstring: describe el propósito del bloque. |
+| 103 | `envio = catalogo["envio"]` | Configuración de envío. |
+| 104 | `return 0 if monto >= envio["gratis_desde"] else envio["costo"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 105 | `` | Línea en blanco: separa bloques lógicos. |
-| 106 | `def armar_carrito(evento, personas, catalogo, cupon=None):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 107 | `"""Compone todas las funciones puras y devuelve el resultado final."""` | Docstring: describe el propósito del bloque. |
-| 108 | `config = validar(evento, personas, catalogo)` | 1) Validar entradas. |
-| 109 | `productos = indice_productos(catalogo)` | 2) Indexar productos. |
+| 106 | `` | Línea en blanco: separa bloques lógicos. |
+| 107 | `def recomendaciones_para(items, catalogo, evento):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 108 | `"""Envuelve la regla compartida como una función pura más de la composición."""` | Docstring: describe el propósito del bloque. |
+| 109 | `return sugerir(items, catalogo, evento)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 110 | `` | Línea en blanco: separa bloques lógicos. |
-| 111 | `items, faltantes = construir_lineas(config, personas, catalogo, productos)` | 3) |
-| 112 | `` | Línea en blanco: separa bloques lógicos. |
-| 113 | `subtotal = sumar_subtotal(items)` | 4) Suma funcional de líneas. |
-| 114 | `desc_2x1 = descuento_2x1(items, config["producto_2x1"])` | 5) Promoción. |
-| 115 | `desc_cupon = descuento_cupon(cupon, config, subtotal - desc_2x1)` | 6) Cupón. |
+| 111 | `` | Línea en blanco: separa bloques lógicos. |
+| 112 | `def armar_carrito(evento, personas, catalogo, cupon=None):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 113 | `"""Compone todas las funciones puras y devuelve el resultado final."""` | Docstring: describe el propósito del bloque. |
+| 114 | `config = validar(evento, personas, catalogo)` | 1) Validar entradas. |
+| 115 | `productos = indice_productos(catalogo)` | 2) Indexar productos. |
 | 116 | `` | Línea en blanco: separa bloques lógicos. |
-| 117 | `base = subtotal - desc_2x1 - desc_cupon` | 7) Base para envío. |
-| 118 | `envio = costo_envio(catalogo, base)` | 8) Envío. |
-| 119 | `total = base + envio` | 9) Total. |
-| 120 | `` | Línea en blanco: separa bloques lógicos. |
-| 121 | `return {` | 10) Diccionario nuevo; equivalente a los otros paradigmas. |
-| 122 | `"evento": evento,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 123 | `"personas": personas,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 124 | `"items": list(items),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 125 | `"faltantes": list(faltantes),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 126 | `"descuentos": {"2x1": desc_2x1, "cupon": desc_cupon},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 127 | `"envio": envio,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 128 | `"total": total,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 129 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 117 | `items, faltantes = construir_lineas(config, personas, catalogo, productos)` | 3) |
+| 118 | `` | Línea en blanco: separa bloques lógicos. |
+| 119 | `subtotal = sumar_subtotal(items)` | 4) Suma funcional de líneas. |
+| 120 | `desc_2x1 = descuento_2x1(items, config["producto_2x1"])` | 5) Promoción. |
+| 121 | `desc_cupon = descuento_cupon(cupon, config, subtotal - desc_2x1)` | 6) Cupón. |
+| 122 | `` | Línea en blanco: separa bloques lógicos. |
+| 123 | `base = subtotal - desc_2x1 - desc_cupon` | 7) Base para envío. |
+| 124 | `envio = costo_envio(catalogo, base)` | 8) Envío. |
+| 125 | `total = base + envio` | 9) Total. |
+| 126 | `sugerencias = recomendaciones_para(list(items), catalogo, evento)` | 10) |
+| 127 | `` | Línea en blanco: separa bloques lógicos. |
+| 128 | `return {` | 11) Diccionario nuevo; equivalente a los otros paradigmas. |
+| 129 | `"evento": evento,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 130 | `"personas": personas,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 131 | `"items": list(items),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 132 | `"faltantes": list(faltantes),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 133 | `"descuentos": {"2x1": desc_2x1, "cupon": desc_cupon},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 134 | `"envio": envio,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 135 | `"total": total,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 136 | `"recomendaciones": sugerencias,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 137 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 
 ## `carrito/demo.py`
 
@@ -816,46 +861,55 @@ comentario del bloque que le precede inmediatamente.
 | 35 | `f"faltantes={len(resultado['faltantes'])}, "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 36 | `f"2x1=${resultado['descuentos']['2x1']}, "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 37 | `f"cupon=${resultado['descuentos']['cupon']}, "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 38 | `f"envio=${resultado['envio']}, total=${resultado['total']}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 39 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 40 | `` | Línea en blanco: separa bloques lógicos. |
+| 38 | `f"envio=${resultado['envio']}, total=${resultado['total']}, "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 39 | `f"recs={len(resultado['recomendaciones'])}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 40 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 41 | `` | Línea en blanco: separa bloques lógicos. |
-| 42 | `def main():` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 43 | `"""Ejecuta todos los casos y verifica que los tres resultados sean iguales."""` | Docstring: describe el propósito del bloque. |
-| 44 | `catalogo = cargar_catalogo()` | Misma fuente de datos para todos. |
-| 45 | `todos_iguales = True` | Bandera global del resultado de la comparación. |
-| 46 | `` | Línea en blanco: separa bloques lógicos. |
-| 47 | `for evento, personas, cupon in CASOS:` | Recorre los escenarios. |
-| 48 | `print(f"\n=== {evento} \| {personas} personas \| cupón={cupon} ===")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 49 | `resultados = []` | Resultados de las tres implementaciones. |
-| 50 | `` | Línea en blanco: separa bloques lógicos. |
-| 51 | `for nombre, funcion in IMPLEMENTACIONES:` | Recorre los paradigmas. |
-| 52 | `resultado = funcion(evento, personas, catalogo, cupon)` | Ejecuta. |
-| 53 | `resultados.append(resultado)` | Guarda para comparar. |
-| 54 | `print(f"  {nombre:<20} {formatear(resultado)}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 55 | `` | Línea en blanco: separa bloques lógicos. |
-| 56 | `# Comparación estricta: los tres dict deben ser exactamente iguales.` | Comparación estricta: los tres dict deben ser exactamente iguales. |
-| 57 | `iguales = resultados[0] == resultados[1] == resultados[2]` | Comparación estricta: los tres dict deben ser exactamente iguales. |
-| 58 | `todos_iguales = todos_iguales and iguales` | Actualiza la bandera. |
-| 59 | `print(f"  >>> Paridad: {'OK' if iguales else 'FALLO'}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 60 | `` | Línea en blanco: separa bloques lógicos. |
-| 61 | `# Detalle del caso de stock agotado para hacer visible la sustitución.` | Detalle del caso de stock agotado para hacer visible la sustitución. |
-| 62 | `if personas == 200:` | Detalle del caso de stock agotado para hacer visible la sustitución. |
-| 63 | `for item in resultados[0]["items"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 64 | `if item["sustituto_de"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 65 | `print(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 66 | `f"    Sustituto: {item['sustituto_de']} -> "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 67 | `f"{item['sku']} x{item['cantidad']}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 42 | `` | Línea en blanco: separa bloques lógicos. |
+| 43 | `def main():` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 44 | `"""Ejecuta todos los casos y verifica que los tres resultados sean iguales."""` | Docstring: describe el propósito del bloque. |
+| 45 | `catalogo = cargar_catalogo()` | Misma fuente de datos para todos. |
+| 46 | `todos_iguales = True` | Bandera global del resultado de la comparación. |
+| 47 | `` | Línea en blanco: separa bloques lógicos. |
+| 48 | `for evento, personas, cupon in CASOS:` | Recorre los escenarios. |
+| 49 | `print(f"\n=== {evento} \| {personas} personas \| cupón={cupon} ===")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 50 | `resultados = []` | Resultados de las tres implementaciones. |
+| 51 | `` | Línea en blanco: separa bloques lógicos. |
+| 52 | `for nombre, funcion in IMPLEMENTACIONES:` | Recorre los paradigmas. |
+| 53 | `resultado = funcion(evento, personas, catalogo, cupon)` | Ejecuta. |
+| 54 | `resultados.append(resultado)` | Guarda para comparar. |
+| 55 | `print(f"  {nombre:<20} {formatear(resultado)}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 56 | `` | Línea en blanco: separa bloques lógicos. |
+| 57 | `# Comparación estricta: los tres dict deben ser exactamente iguales.` | Comparación estricta: los tres dict deben ser exactamente iguales. |
+| 58 | `iguales = resultados[0] == resultados[1] == resultados[2]` | Comparación estricta: los tres dict deben ser exactamente iguales. |
+| 59 | `todos_iguales = todos_iguales and iguales` | Actualiza la bandera. |
+| 60 | `print(f"  >>> Paridad: {'OK' if iguales else 'FALLO'}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 61 | `` | Línea en blanco: separa bloques lógicos. |
+| 62 | `# Detalle de las sugerencias personalizadas calculadas para el caso.` | Detalle de las sugerencias personalizadas calculadas para el caso. |
+| 63 | `for recom in resultados[0]["recomendaciones"]:` | Detalle de las sugerencias personalizadas calculadas para el caso. |
+| 64 | `print(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 65 | `f"    Recomendado: {recom['nombre']} ({recom['categoria']}) "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 66 | `f"${recom['precio']} -> ${recom['precio_final']} "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 67 | `f"[{recom['motivo']}]"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 68 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 69 | `for falta in resultados[0]["faltantes"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 70 | `print(f"    Faltante: {falta['sku']} x{falta['cantidad']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 71 | `` | Línea en blanco: separa bloques lógicos. |
-| 72 | `print(f"\nResultado global: {'TODOS LOS CASOS COINCIDEN' if todos_iguales else 'HAY DIFERENCIAS'}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 73 | `return 0 if todos_iguales else 1` | Código de salida para CI. |
-| 74 | `` | Línea en blanco: separa bloques lógicos. |
-| 75 | `` | Línea en blanco: separa bloques lógicos. |
-| 76 | `if __name__ == "__main__":` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 77 | `raise SystemExit(main())` | Permite usar el demo en scripts y tests. |
+| 69 | `` | Línea en blanco: separa bloques lógicos. |
+| 70 | `# Detalle del caso de stock agotado para hacer visible la sustitución.` | Detalle del caso de stock agotado para hacer visible la sustitución. |
+| 71 | `if personas == 200:` | Detalle del caso de stock agotado para hacer visible la sustitución. |
+| 72 | `for item in resultados[0]["items"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 73 | `if item["sustituto_de"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 74 | `print(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 75 | `f"    Sustituto: {item['sustituto_de']} -> "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 76 | `f"{item['sku']} x{item['cantidad']}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 77 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 78 | `for falta in resultados[0]["faltantes"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 79 | `print(f"    Faltante: {falta['sku']} x{falta['cantidad']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 80 | `` | Línea en blanco: separa bloques lógicos. |
+| 81 | `print(f"\nResultado global: {'TODOS LOS CASOS COINCIDEN' if todos_iguales else 'HAY DIFERENCIAS'}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 82 | `return 0 if todos_iguales else 1` | Código de salida para CI. |
+| 83 | `` | Línea en blanco: separa bloques lógicos. |
+| 84 | `` | Línea en blanco: separa bloques lógicos. |
+| 85 | `if __name__ == "__main__":` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 86 | `raise SystemExit(main())` | Permite usar el demo en scripts y tests. |
 
 ## `scripts/poblar_catalogo.py`
 

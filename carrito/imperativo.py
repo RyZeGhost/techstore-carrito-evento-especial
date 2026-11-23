@@ -9,6 +9,7 @@ Características del paradigma usadas aquí:
 import math  # ceil() redondea siempre hacia arriba.
 
 from carrito.datos import indice_productos  # Convierte la lista de productos en un dict.
+from carrito.recomendaciones import sugerir  # Regla transversal de sugerencias.
 
 
 def armar_carrito(evento, personas, catalogo, cupon=None):
@@ -101,7 +102,11 @@ def armar_carrito(evento, personas, catalogo, cupon=None):
 
     total = base - descuento_cupon + costo_envio  # Resultado final.
 
-    # --- Paso 4: devolver estructura común a los tres paradigmas ---
+    # --- Paso 4: sugerencias personalizadas según el carrito y la festividad ---
+    # Se calculan al final porque dependen de las líneas ya resueltas.
+    recomendaciones = sugerir(items, catalogo, evento)
+
+    # --- Paso 5: devolver estructura común a los tres paradigmas ---
     return {
         "evento": evento,  # Evento solicitado.
         "personas": personas,  # Cantidad de personas solicitada.
@@ -110,4 +115,5 @@ def armar_carrito(evento, personas, catalogo, cupon=None):
         "descuentos": {"2x1": descuento_2x1, "cupon": descuento_cupon},
         "envio": costo_envio,  # Costo de envío aplicado.
         "total": total,  # Total a pagar.
+        "recomendaciones": recomendaciones,  # Ofertas similares; no cambian el total.
     }

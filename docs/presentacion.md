@@ -32,7 +32,8 @@ Debe resolver:
 - stock insuficiente con sustitutos;
 - promoción 2x1;
 - cupón del 10 %;
-- envío pagado o gratis según monto.
+- envío pagado o gratis según monto;
+- **recomendaciones de objetos similares con descuento en festividades**.
 
 **Restricción clave:** las tres implementaciones deben dar el mismo resultado.
 
@@ -65,6 +66,7 @@ Debe resolver:
 - 2x1 sobre pares del producto promocionado (aunque sea sustituido).
 - Cupón 10 % sobre la base ya descontada.
 - Envío $3.990, gratis desde $50.000.
+- Recomendaciones: hasta 2 similares por categoría; 15 % de descuento en `cumpleanos` y `vuelta_a_clases`.
 - Aritmética entera en CLP con `// 100`.
 
 ---
@@ -77,8 +79,9 @@ Debe resolver:
 - `eventos`: reglas (`sku`, `por_persona`, `mínimo`), cupón y producto 2x1.
 - `sustitutos`: mapeo de SKU alternativo.
 - `envio`: costo y umbral de envío gratis.
+- `recomendaciones`: máximo por categoría, tope global, porcentaje y eventos festivos.
 
-`carrito/datos.py` valida el esquema antes de usar o enviar los datos a Shopify.
+`carrito/recomendaciones.py` aplica la regla de similitud; `carrito/datos.py` valida el esquema antes de usar o enviar los datos a Shopify.
 
 ---
 
@@ -119,16 +122,18 @@ Debe resolver:
 
 ## 9. Resultados — paridad
 
-| Escenario | Ítems | 2x1 | Cupón | Envío | Total |
-|---|---:|---:|---:|---:|---:|
-| Cumpleaños, 10 pers., FIESTA10 | 5 | 13.980 | 15.892 | 0 | 143.028 |
-| Trabajo remoto, 12 pers., HOME10 | 5 | 89.940 | 258.552 | 0 | 2.326.968 |
-| Vuelta a clases, 12 pers., ESCUELA10 | 5 | 77.940 | 136.777 | 0 | 1.230.993 |
-| Cumpleaños, 200 pers., sin cupón | 5 | 279.600 | 0 | 0 | 3.438.600 |
-| Accesorios básicos, 1 pers. | 5 | 0 | 0 | 3.990 | 40.940 |
+| Escenario | Ítems | 2x1 | Cupón | Envío | Total | Recs |
+|---|---:|---:|---:|---:|---:|---:|
+| Cumpleaños, 10 pers., FIESTA10 | 5 | 13.980 | 15.892 | 0 | 143.028 | 2 (15 %) |
+| Trabajo remoto, 12 pers., HOME10 | 5 | 89.940 | 258.552 | 0 | 2.326.968 | 2 (sin dto.) |
+| Vuelta a clases, 12 pers., ESCUELA10 | 5 | 77.940 | 136.777 | 0 | 1.230.993 | 2 (15 %) |
+| Cumpleaños, 200 pers., sin cupón | 5 | 279.600 | 0 | 0 | 3.438.600 | 2 (15 %) |
+| Accesorios básicos, 1 pers. | 5 | 0 | 0 | 3.990 | 40.940 | 1 (sin dto.) |
+
+Ejemplo: en cumpleaños se sugieren `PARLANTE-PRO` ($54.990 → $46.742) y `SOPORTE` ($14.990 → $12.742).
 
 - `python -m carrito.demo` → **TODOS LOS CASOS COINCIDEN**.
-- `python -m unittest discover -s tests -v` → **5/5 OK**.
+- `python -m unittest discover -s tests -v` → **7/7 OK**.
 
 ---
 
@@ -152,13 +157,14 @@ Debe resolver:
 
 ## 11. Errores y supervisión de IA
 
-Se registraron **24 incidencias reales** en `errores_corregidos.md`, entre ellas:
+Se registraron **25 incidencias reales** en `errores_corregidos.md`, entre ellas:
 
 - confundir Client Secret (`shpss_`) con access token (`shpat_`);
 - scopes insuficientes en la app;
 - cambios de la API 2026 (`variants`, `collectionAddProducts`);
 - productos de ejemplo en el checkout;
-- imágenes y precios.
+- imágenes y precios;
+- recomendación personalizada omitida y luego integrada.
 
 Cada respuesta generada con IA se **ejecutó, comparó y corrigió**. Los 27 prompts (9 por paradigma) están en `prompts.md`.
 
