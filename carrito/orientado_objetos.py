@@ -13,6 +13,12 @@ from dataclasses import dataclass  # Reduce el código repetitivo de __init__.
 
 from carrito.datos import indice_productos  # Índice compartido de productos.
 from carrito.recomendaciones import sugerir  # Regla pura compartida.
+from carrito.segmentos import (  # Reglas compartidas de segmentación.
+    beneficios_para,
+    config_para,
+    descuento_para,
+    envio_para,
+)
 
 
 # --- Modelo de datos ---
@@ -130,15 +136,36 @@ class DescuentoPorcentaje(Descuento):
         return base * self.porcentaje // 100  # Entero, redondeo hacia abajo.
 
 
+class Segmento:
+    """Representa al cliente (nuevo, frecuente, mayorista o invitado)."""
+
+    def __init__(self, tipo_usuario, catalogo):
+        self.catalogo = catalogo  # Configuración de segmentos.
+        self.clave, self.config = config_para(tipo_usuario, catalogo)  # Valida.
+
+    def descuento_para(self, base):
+        """Descuento del segmento sobre la base ya descontada."""
+        return descuento_para(base, self.clave, self.catalogo)  # Delega.
+
+    def envio_para(self, costo_envio):
+        """Aplica el beneficio de envío gratis si corresponde."""
+        return envio_para(costo_envio, self.clave, self.catalogo)  # Delega.
+
+    def beneficios(self):
+        """Devuelve el resumen de beneficios del segmento."""
+        return beneficios_para(self.clave, self.catalogo)  # Delega.
+
+
 class Recomendador:
     """Encapsula la regla de sugerencias por similitud y festividad."""
 
     def __init__(self, catalogo):
         self.catalogo = catalogo  # Configuración de recomendaciones y productos.
 
-    def sugerir_para(self, items, evento):
+    def sugerir_para(self, items, evento, tipo_usuario=None):
         """Devuelve sugerencias para las líneas ya armadas del carrito."""
-        return sugerir(items, self.catalogo, evento)  # Delega en la función pura.
+        # Delega en la función pura, incluido el perfil del cliente.
+        return sugerir(items, self.catalogo, evento, tipo_usuario)
 
 
 class PoliticaEnvio:
@@ -158,7 +185,7 @@ class PoliticaEnvio:
 class Carrito:
     """Coordina productos, reglas y descuentos para armar el carrito."""
 
-    def __init__(self, evento, personas, catalogo, cupon=None):
+    def __init__(self, evento, personas, catalogo, cupon=None, tipo_usuario=None):
         if personas <= 0:  # Validación de entrada.
             raise ValueError("personas debe ser mayor que cero")
         if evento not in catalogo["eventos"]:  # Validación de evento.
@@ -178,6 +205,7 @@ class Carrito:
         )
         self.descuentos = [Descuento2x1()]  # Estrategias polimórficas.
         self.recomendador = Recomendador(catalogo)  # Sugerencias personalizadas.
+        self.segmento = Segmento(tipo_usuario, catalogo)  # Perfil del cliente.
 
     def _resolver_regla(self, regla):
         """Aplica una regla; devuelve (item o None, faltante o None)."""
@@ -219,30 +247,41 @@ class Carrito:
             items, self.evento, self.cupon, base=subtotal - desc_2x1
         )
 
-        base = subtotal - desc_2x1 - desc_cupon  # Monto para evaluar envío.
-        costo_envio = self.envio.calcular(base)  # Política de envío.
-        total = base + costo_envio  # Total final.
+        base = subtotal - desc_2x1 - desc_cupon  # Base antes del segmento.
+        desc_segmento = self.segmento.descuento_para(base)  # Beneficio por perfil.
+        monto = base - desc_segmento  # Monto para evaluar envío.
+        costo_envio = self.envio.calcular(monto)  # Política de envío.
+        costo_envio = self.segmento.envio_para(costo_envio)  # Beneficio de envío.
+        total = monto + costo_envio  # Total final.
 
-        # El recomendador es un colaborador más del carrito, como la política de envío.
+        # Recomendador y segmento son colaboradores del carrito.
         items_dict = [item.como_dict() for item in items]
-        recomendaciones = self.recomendador.sugerir_para(items_dict, self.clave_evento)
+        recomendaciones = self.recomendador.sugerir_para(
+            items_dict, self.clave_evento, self.segmento.clave
+        )
 
         return {  # Misma estructura que en el paradigma imperativo.
             "evento": self.evento.nombre.lower().replace(" ", "_"),
             "personas": self.personas,
+            "tipo_usuario": self.segmento.clave or "invitado",
             "items": items_dict,
             "faltantes": faltantes,
-            "descuentos": {"2x1": desc_2x1, "cupon": desc_cupon},
+            "descuentos": {
+                "2x1": desc_2x1,
+                "cupon": desc_cupon,
+                "segmento": desc_segmento,
+            },
             "envio": costo_envio,
+            "beneficios": self.segmento.beneficios(),
             "total": total,
             "recomendaciones": recomendaciones,
         }
 
 
-def armar_carrito(evento, personas, catalogo, cupon=None):
+def armar_carrito(evento, personas, catalogo, cupon=None, tipo_usuario=None):
     """API pública equivalente a la de los otros dos módulos."""
     # El evento devuelto por la clase se normaliza al nombre de la clave JSON.
-    carrito = Carrito(evento, personas, catalogo, cupon)
+    carrito = Carrito(evento, personas, catalogo, cupon, tipo_usuario)
     resultado = carrito.armar()
     resultado["evento"] = evento  # Garantiza igualdad exacta entre versiones.
     return resultado

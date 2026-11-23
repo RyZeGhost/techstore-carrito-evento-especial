@@ -3,9 +3,10 @@
 Usa solo la librería estándar de Python, por lo que no añade dependencias.
 
 Endpoints:
-    GET  /health    -> estado del servicio
-    GET  /eventos   -> eventos disponibles y sus reglas
-    POST /carrito   -> calcula el carrito en uno o los tres paradigmas
+    GET  /health     -> estado del servicio
+    GET  /eventos    -> eventos disponibles y sus reglas
+    GET  /segmentos  -> tipos de usuario y sus beneficios
+    POST /carrito    -> calcula el carrito en uno o los tres paradigmas
 
 Uso:
     python -m scripts.api_carrito
@@ -58,6 +59,8 @@ class ManejadorCarrito(BaseHTTPRequestHandler):
             self.responder(200, {"estado": "ok", "productos": len(CATALOGO["productos"])})
         elif self.path == "/eventos":
             self.responder(200, CATALOGO["eventos"])
+        elif self.path == "/segmentos":
+            self.responder(200, CATALOGO["segmentos"])
         else:
             self.responder(404, {"error": "Ruta no encontrada"})
 
@@ -74,6 +77,7 @@ class ManejadorCarrito(BaseHTTPRequestHandler):
             evento = datos.get("evento")
             personas = datos.get("personas")
             cupon = datos.get("cupon")
+            tipo_usuario = datos.get("tipo_usuario")
 
             if paradigma != "todos" and paradigma not in FUNCIONES:
                 self.responder(400, {"error": f"Paradigma desconocido: {paradigma}"})
@@ -81,7 +85,7 @@ class ManejadorCarrito(BaseHTTPRequestHandler):
 
             nombres = FUNCIONES if paradigma == "todos" else {paradigma: FUNCIONES[paradigma]}
             resultados = {
-                nombre: funcion(evento, personas, CATALOGO, cupon)
+                nombre: funcion(evento, personas, CATALOGO, cupon, tipo_usuario)
                 for nombre, funcion in nombres.items()
             }
             self.responder(200, resultados)
@@ -100,7 +104,7 @@ def main():
     puerto = int(os.getenv("PUERTO_API", "8000"))
     servidor = HTTPServer(("127.0.0.1", puerto), ManejadorCarrito)
     print(f"API del carrito escuchando en http://127.0.0.1:{puerto}")
-    print("  GET /health | GET /eventos | POST /carrito")
+    print("  GET /health | GET /eventos | GET /segmentos | POST /carrito")
     try:
         servidor.serve_forever()
     except KeyboardInterrupt:

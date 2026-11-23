@@ -20,7 +20,7 @@ def validar_catalogo(catalogo):
     if not isinstance(catalogo, dict):
         raise ValueError("El catálogo debe ser un objeto JSON")
 
-    for clave in ("moneda", "envio", "recomendaciones", "sustitutos", "productos", "eventos"):
+    for clave in ("moneda", "envio", "recomendaciones", "segmentos", "sustitutos", "productos", "eventos"):
         if clave not in catalogo:
             raise ValueError(f"Falta la clave obligatoria '{clave}' en el catálogo")
 
@@ -36,6 +36,18 @@ def validar_catalogo(catalogo):
             raise ValueError(f"recomendaciones.{clave} debe ser un entero no negativo")
     if not isinstance(recomendaciones.get("eventos_festivos"), list):
         raise ValueError("recomendaciones.eventos_festivos debe ser una lista")
+
+    segmentos = catalogo["segmentos"]
+    if not isinstance(segmentos, dict) or not segmentos:
+        raise ValueError("segmentos debe ser un objeto no vacío")
+    for nombre, segmento in segmentos.items():
+        porcentaje = segmento.get("descuento_porcentaje")
+        if not isinstance(porcentaje, int) or not 0 <= porcentaje <= 100:
+            raise ValueError(f"segmentos.{nombre}.descuento_porcentaje debe estar entre 0 y 100")
+        if not isinstance(segmento.get("envio_gratis"), bool):
+            raise ValueError(f"segmentos.{nombre}.envio_gratis debe ser booleano")
+        if segmento.get("recomendacion") not in ("economica", "premium", "alto_ticket"):
+            raise ValueError(f"segmentos.{nombre}.recomendacion no válida")
 
     if not isinstance(catalogo["productos"], list) or not catalogo["productos"]:
         raise ValueError("productos debe ser una lista no vacía")

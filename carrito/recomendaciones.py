@@ -6,6 +6,7 @@ no modifica el catálogo ni el carrito y solo devuelve diccionarios nuevos.
 """
 
 from carrito.datos import indice_productos
+from carrito.segmentos import config_para
 
 
 def categorias_en_carrito(items, productos):
@@ -28,9 +29,24 @@ def precio_promedio(categoria, items, productos):
     return sum(precios) / len(precios) if precios else 0
 
 
-def sugerir(items, catalogo, evento):
-    """Sugiere hasta `maximo` productos similares con descuento en festividades."""
+def clave_orden(estilo, producto, promedio):
+    """Clave de ordenación según el perfil del cliente."""
+    if estilo == "economica":  # Nuevo: accesorios de entrada, los más baratos.
+        return (producto["precio"], producto["sku"])
+    if estilo == "premium":  # Frecuente: gama alta de la categoría.
+        return (-producto["precio"], producto["sku"])
+    if estilo == "alto_ticket":  # Mayorista: mayor valor disponible para volumen.
+        return (-producto["precio"] * producto["stock"], producto["sku"])
+    # Invitado: el similar clásico, más cercano al promedio del carrito.
+    return (abs(producto["precio"] - promedio), producto["sku"])
+
+
+def sugerir(items, catalogo, evento, tipo_usuario=None):
+    """Sugiere hasta `maximo` productos según festividad y segmento."""
     config = catalogo["recomendaciones"]  # Regla configurable desde el JSON.
+    clave, segmento = config_para(tipo_usuario, catalogo)  # Valida el tipo.
+    estilo = segmento["recomendacion"] if segmento else "similar"
+    perfil = clave or "invitado"
     productos = indice_productos(catalogo)  # {sku: producto}, acceso O(1).
     festivo = evento in config["eventos_festivos"]  # Solo ciertos eventos.
     porcentaje = config["descuento_porcentaje"] if festivo else 0
@@ -50,8 +66,8 @@ def sugerir(items, catalogo, evento):
             and producto["sku"] not in usados
             and producto["stock"] > 0
         ]
-        # "Similar" = precio más cercano al promedio de esa categoría en el carrito.
-        opciones.sort(key=lambda p: (abs(p["precio"] - promedio), p["sku"]))
+        # El perfil cambia el criterio; invitado usa el precio más cercano al promedio.
+        opciones.sort(key=lambda p: clave_orden(estilo, p, promedio))
 
         for producto in opciones[: config["por_categoria"]]:
             if len(seleccionados) >= config["maximo"]:
@@ -65,6 +81,7 @@ def sugerir(items, catalogo, evento):
                 "descuento": descuento,
                 "precio_final": producto["precio"] - descuento,
                 "motivo": "festividad" if festivo else "similar",
+                "perfil": perfil,  # Segmento que originó la sugerencia.
             })
             usados.add(producto["sku"])  # No repetir sugerencias.
 

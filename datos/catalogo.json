@@ -13,6 +13,26 @@
       "vuelta_a_clases"
     ]
   },
+  "segmentos": {
+    "nuevo": {
+      "descripcion": "Primer pedido",
+      "descuento_porcentaje": 10,
+      "envio_gratis": true,
+      "recomendacion": "economica"
+    },
+    "frecuente": {
+      "descripcion": "Cliente recurrente",
+      "descuento_porcentaje": 5,
+      "envio_gratis": false,
+      "recomendacion": "premium"
+    },
+    "mayorista": {
+      "descripcion": "Compra por volumen",
+      "descuento_porcentaje": 15,
+      "envio_gratis": true,
+      "recomendacion": "alto_ticket"
+    }
+  },
   "sustitutos": {
     "PARLANTE": "PARLANTE-PRO",
     "AURICULARES": "AURICULARES-PRO",

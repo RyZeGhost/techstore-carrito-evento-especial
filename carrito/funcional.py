@@ -12,6 +12,12 @@ from functools import reduce  # reduce() acumula una secuencia en un solo valor.
 
 from carrito.datos import indice_productos  # Índice de productos compartido.
 from carrito.recomendaciones import sugerir  # Función pura compartida.
+from carrito.segmentos import (  # Funciones puras de segmentación.
+    beneficios_para,
+    config_para,
+    descuento_para,
+    envio_para,
+)
 
 
 def validar(evento, personas, catalogo):
@@ -98,20 +104,22 @@ def descuento_cupon(cupon, config, base):
     return base * 10 // 100 if cupon == config["cupon"] else 0
 
 
-def costo_envio(catalogo, monto):
-    """Costo de envío según el umbral configurado."""
+def costo_envio(catalogo, monto, tipo_usuario=None):
+    """Costo de envío según el umbral y el beneficio del segmento."""
     envio = catalogo["envio"]  # Configuración de envío.
-    return 0 if monto >= envio["gratis_desde"] else envio["costo"]
+    costo = 0 if monto >= envio["gratis_desde"] else envio["costo"]
+    return envio_para(costo, tipo_usuario, catalogo)  # Función pura compartida.
 
 
-def recomendaciones_para(items, catalogo, evento):
+def recomendaciones_para(items, catalogo, evento, tipo_usuario=None):
     """Envuelve la regla compartida como una función pura más de la composición."""
-    return sugerir(items, catalogo, evento)
+    return sugerir(items, catalogo, evento, tipo_usuario)
 
 
-def armar_carrito(evento, personas, catalogo, cupon=None):
+def armar_carrito(evento, personas, catalogo, cupon=None, tipo_usuario=None):
     """Compone todas las funciones puras y devuelve el resultado final."""
     config = validar(evento, personas, catalogo)  # 1) Validar entradas.
+    config_para(tipo_usuario, catalogo)  # 1b) Valida el segmento.
     productos = indice_productos(catalogo)  # 2) Indexar productos.
 
     items, faltantes = construir_lineas(config, personas, catalogo, productos)  # 3)
@@ -120,18 +128,28 @@ def armar_carrito(evento, personas, catalogo, cupon=None):
     desc_2x1 = descuento_2x1(items, config["producto_2x1"])  # 5) Promoción.
     desc_cupon = descuento_cupon(cupon, config, subtotal - desc_2x1)  # 6) Cupón.
 
-    base = subtotal - desc_2x1 - desc_cupon  # 7) Base para envío.
-    envio = costo_envio(catalogo, base)  # 8) Envío.
-    total = base + envio  # 9) Total.
-    sugerencias = recomendaciones_para(list(items), catalogo, evento)  # 10)
+    base = subtotal - desc_2x1 - desc_cupon  # 7) Base para el segmento.
+    desc_segmento = descuento_para(base, tipo_usuario, catalogo)  # 8) Perfil.
+    monto = base - desc_segmento  # 9) Base para envío.
+    envio = costo_envio(catalogo, monto, tipo_usuario)  # 10) Envío.
+    total = monto + envio  # 11) Total.
+    sugerencias = recomendaciones_para(  # 12) Perfil + festividad.
+        list(items), catalogo, evento, tipo_usuario
+    )
 
-    return {  # 11) Diccionario nuevo; equivalente a los otros paradigmas.
+    return {  # 13) Diccionario nuevo; equivalente a los otros paradigmas.
         "evento": evento,
         "personas": personas,
+        "tipo_usuario": tipo_usuario or "invitado",
         "items": list(items),
         "faltantes": list(faltantes),
-        "descuentos": {"2x1": desc_2x1, "cupon": desc_cupon},
+        "descuentos": {
+            "2x1": desc_2x1,
+            "cupon": desc_cupon,
+            "segmento": desc_segmento,
+        },
         "envio": envio,
+        "beneficios": beneficios_para(tipo_usuario, catalogo),
         "total": total,
         "recomendaciones": sugerencias,
     }

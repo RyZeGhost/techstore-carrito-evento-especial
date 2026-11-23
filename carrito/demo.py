@@ -35,6 +35,7 @@ def formatear(resultado):
         f"faltantes={len(resultado['faltantes'])}, "
         f"2x1=${resultado['descuentos']['2x1']}, "
         f"cupon=${resultado['descuentos']['cupon']}, "
+        f"dto.seg=${resultado['descuentos']['segmento']}, "
         f"envio=${resultado['envio']}, total=${resultado['total']}, "
         f"recs={len(resultado['recomendaciones'])}"
     )
@@ -77,6 +78,25 @@ def main():
                     )
             for falta in resultados[0]["faltantes"]:
                 print(f"    Faltante: {falta['sku']} x{falta['cantidad']}")
+
+    # Bloque adicional: el mismo evento atendido a cada tipo de usuario.
+    print("\n=== Segmentación de clientes (cumpleanos, 10 personas) ===")
+    for tipo in ("invitado", "nuevo", "frecuente", "mayorista"):
+        resultados = [
+            funcion("cumpleanos", 10, catalogo, "FIESTA10", None if tipo == "invitado" else tipo)
+            for _, funcion in IMPLEMENTACIONES
+        ]
+        iguales = resultados[0] == resultados[1] == resultados[2]
+        todos_iguales = todos_iguales and iguales  # También entra en el resultado global.
+        resultado = resultados[0]
+        print(f"  {tipo:<10} {formatear(resultado)} | paridad={'OK' if iguales else 'FALLO'}")
+        print(
+            f"    Beneficios: {resultado['beneficios']['descripcion']}, "
+            f"envío gratis={resultado['beneficios']['envio_gratis']}, "
+            f"estilo={resultado['beneficios']['estilo_recomendacion']}"
+        )
+        for recom in resultado["recomendaciones"]:
+            print(f"    Recomendado: {recom['nombre']} (perfil={recom['perfil']})")
 
     print(f"\nResultado global: {'TODOS LOS CASOS COINCIDEN' if todos_iguales else 'HAY DIFERENCIAS'}")
     return 0 if todos_iguales else 1  # Código de salida para CI.

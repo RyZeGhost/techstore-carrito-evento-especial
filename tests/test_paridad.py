@@ -91,6 +91,55 @@ class TestParidad(unittest.TestCase):
                 self.assertEqual(recom["descuento"], 0)
                 self.assertEqual(recom["precio_final"], recom["precio"])
 
+    def test_segmentos_paridad_y_descuento(self):
+        """Los tres segmentos descuentan según su porcentaje configurado."""
+        invitado = FUNCIONES[0]("cumpleanos", 10, self.catalogo, "FIESTA10")
+        base = invitado["total"] - invitado["envio"]  # Base sin segmento.
+        for tipo, porcentaje in (("nuevo", 10), ("frecuente", 5), ("mayorista", 15)):
+            resultados = [
+                funcion("cumpleanos", 10, self.catalogo, "FIESTA10", tipo)
+                for funcion in FUNCIONES
+            ]
+            self.assertEqual(resultados[0], resultados[1])  # Paridad.
+            self.assertEqual(resultados[1], resultados[2])
+            resultado = resultados[0]
+            self.assertEqual(resultado["tipo_usuario"], tipo)
+            esperado = base * porcentaje // 100
+            self.assertEqual(resultado["descuentos"]["segmento"], esperado)
+            self.assertEqual(resultado["total"], base - esperado + resultado["envio"])
+
+    def test_segmento_envio_gratis(self):
+        """Nuevo y mayorista no pagan envío; frecuente conserva la tarifa."""
+        for tipo in ("nuevo", "mayorista"):
+            resultado = FUNCIONES[0]("accesorios_basicos", 1, self.catalogo, None, tipo)
+            self.assertEqual(resultado["envio"], 0)
+            self.assertTrue(resultado["beneficios"]["envio_gratis"])
+        frecuente = FUNCIONES[0]("accesorios_basicos", 1, self.catalogo, None, "frecuente")
+        self.assertEqual(frecuente["envio"], 3990)
+        self.assertFalse(frecuente["beneficios"]["envio_gratis"])
+
+    def test_recomendaciones_por_segmento(self):
+        """El perfil cambia el estilo de las recomendaciones."""
+        por_tipo = {
+            tipo: FUNCIONES[0]("cumpleanos", 10, self.catalogo, "FIESTA10", tipo)
+            for tipo in (None, "nuevo", "frecuente", "mayorista")
+        }
+        self.assertEqual(por_tipo[None]["recomendaciones"][0]["perfil"], "invitado")
+        for tipo in ("nuevo", "frecuente", "mayorista"):
+            for recom in por_tipo[tipo]["recomendaciones"]:
+                self.assertEqual(recom["perfil"], tipo)
+        # 'economica' prioriza precio bajo; 'premium', precio alto.
+        self.assertLessEqual(
+            por_tipo["nuevo"]["recomendaciones"][0]["precio"],
+            por_tipo["frecuente"]["recomendaciones"][0]["precio"],
+        )
+
+    def test_tipo_usuario_invalido(self):
+        """Un tipo de usuario no configurado lanza ValueError."""
+        for funcion in FUNCIONES:
+            with self.assertRaises(ValueError):
+                funcion("cumpleanos", 10, self.catalogo, None, "vip")
+
     def test_validaciones(self):
         """Entradas inválidas lanzan ValueError en las tres versiones."""
         for funcion in FUNCIONES:

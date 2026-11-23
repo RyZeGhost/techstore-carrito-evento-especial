@@ -10,9 +10,15 @@ import math  # ceil() redondea siempre hacia arriba.
 
 from carrito.datos import indice_productos  # Convierte la lista de productos en un dict.
 from carrito.recomendaciones import sugerir  # Regla transversal de sugerencias.
+from carrito.segmentos import (  # Reglas compartidas de segmentación.
+    beneficios_para,
+    config_para,
+    descuento_para,
+    envio_para,
+)
 
 
-def armar_carrito(evento, personas, catalogo, cupon=None):
+def armar_carrito(evento, personas, catalogo, cupon=None, tipo_usuario=None):
     """Devuelve el carrito armado como diccionario (misma forma en los 3 paradigmas)."""
 
     # Validación temprana: evita trabajar con entradas sin sentido.
@@ -21,6 +27,8 @@ def armar_carrito(evento, personas, catalogo, cupon=None):
 
     if evento not in catalogo["eventos"]:  # El evento debe existir en el JSON.
         raise ValueError(f"Evento desconocido: {evento}")  # Mensaje útil.
+
+    config_para(tipo_usuario, catalogo)  # Valida 'nuevo', 'frecuente', 'mayorista'.
 
     productos = indice_productos(catalogo)  # {sku: producto}, acceso O(1).
     config = catalogo["eventos"][evento]  # Reglas propias del evento elegido.
@@ -94,26 +102,38 @@ def armar_carrito(evento, personas, catalogo, cupon=None):
     if cupon == config["cupon"]:  # Solo si el cupón coincide con el del evento.
         descuento_cupon = base * 10 // 100  # 10% redondeado hacia abajo (enteros).
 
+    # --- Paso 4: beneficios del segmento (después del 2x1 y del cupón) ---
+    base_final = base - descuento_cupon  # Monto sobre el que aplica el segmento.
+    descuento_segmento = descuento_para(base_final, tipo_usuario, catalogo)
+    monto = base_final - descuento_segmento  # Base para evaluar el envío.
+
     envio = catalogo["envio"]  # Configuración de envío del JSON.
-    if base - descuento_cupon >= envio["gratis_desde"]:  # Supera el umbral.
+    if monto >= envio["gratis_desde"]:  # Supera el umbral.
         costo_envio = 0  # Envío gratis.
     else:  # No supera el umbral.
         costo_envio = envio["costo"]  # Se cobra el envío.
+    costo_envio = envio_para(costo_envio, tipo_usuario, catalogo)  # Beneficio.
 
-    total = base - descuento_cupon + costo_envio  # Resultado final.
+    total = monto + costo_envio  # Resultado final.
 
-    # --- Paso 4: sugerencias personalizadas según el carrito y la festividad ---
+    # --- Paso 5: sugerencias según carrito, festividad y segmento ---
     # Se calculan al final porque dependen de las líneas ya resueltas.
-    recomendaciones = sugerir(items, catalogo, evento)
+    recomendaciones = sugerir(items, catalogo, evento, tipo_usuario)
 
-    # --- Paso 5: devolver estructura común a los tres paradigmas ---
+    # --- Paso 6: devolver estructura común a los tres paradigmas ---
     return {
         "evento": evento,  # Evento solicitado.
         "personas": personas,  # Cantidad de personas solicitada.
+        "tipo_usuario": tipo_usuario or "invitado",  # Segmento atendido.
         "items": items,  # Líneas del carrito.
         "faltantes": faltantes,  # Productos sin stock.
-        "descuentos": {"2x1": descuento_2x1, "cupon": descuento_cupon},
+        "descuentos": {
+            "2x1": descuento_2x1,
+            "cupon": descuento_cupon,
+            "segmento": descuento_segmento,
+        },
         "envio": costo_envio,  # Costo de envío aplicado.
+        "beneficios": beneficios_para(tipo_usuario, catalogo),
         "total": total,  # Total a pagar.
-        "recomendaciones": recomendaciones,  # Ofertas similares; no cambian el total.
+        "recomendaciones": recomendaciones,  # Ofertas; no cambian el total.
     }
