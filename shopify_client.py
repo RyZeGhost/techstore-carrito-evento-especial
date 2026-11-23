@@ -103,6 +103,31 @@ def peticion_con_reintento(constructor, descripcion: str) -> requests.Response:
     raise RuntimeError(f"No se pudo completar: {descripcion}")
 
 
+def rest_request(metodo: str, ruta: str, datos: dict | None = None) -> dict:
+    """Llama a la REST Admin API (necesaria para assets de tema)."""
+    url = f"https://{normalizar_shop(SHOP)}/admin/api/{API_VERSION}/{ruta.lstrip('/')}"
+    respuesta = peticion_con_reintento(
+        lambda: requests.request(
+            metodo,
+            url,
+            json=datos,
+            headers={
+                "X-Shopify-Access-Token": get_shopify_token(),
+                "Content-Type": "application/json",
+            },
+            timeout=30,
+        ),
+        f"REST {metodo} {ruta}",
+    )
+    if respuesta.status_code >= 400:
+        mensaje = (
+            f"Error {respuesta.status_code} en REST {ruta}: {resumen_error(respuesta)}"
+        )
+        LOGGER.error(mensaje)
+        raise RuntimeError(mensaje)
+    return respuesta.json() if respuesta.content else {}
+
+
 def get_shopify_token() -> str:
     """Obtiene (y reutiliza) un access token mediante client_credentials."""
     global _TOKEN

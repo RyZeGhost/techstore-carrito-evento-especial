@@ -42,11 +42,12 @@ Debe resolver:
 ## 3. Etapa 1 — La tienda
 
 - Plataforma: **Shopify** (plan de desarrollo).
-- **22 SKU** tecnológicos, **8 categorías**: Audio, Accesorios, Energía, Periféricos, Almacenamiento, Pantallas, Computadores y Redes.
+- **34 SKU** tecnológicos, **8 categorías**: Audio, Accesorios, Energía, Periféricos, Almacenamiento, Pantallas, Computadores y Redes.
 - Productos con **precio en CLP**, stock, SKU, descripción e **imagen real sin marca de agua**.
 - **8 colecciones** por categoría.
 - Carrito y checkout provistos por Shopify; pasarela en modo prueba y tema configurados.
-- Los 17 productos de ejemplo de Shopify se archivaron para que no aparezcan artículos ajenos en el checkout.
+- **Paginación: 12 productos por página** en las colecciones, con control de navegación y estilos propios.
+- Los **16 productos ajenos** (snowboards y cera) se eliminaron; la **Gift Card de crédito** se conservó y reactivó.
 
 ---
 
@@ -130,7 +131,7 @@ Debe resolver:
 | Cumpleaños, 200 pers., sin cupón | 5 | 279.600 | 0 | 0 | 3.438.600 | 2 (15 %) |
 | Accesorios básicos, 1 pers. | 5 | 0 | 0 | 3.990 | 40.940 | 1 (sin dto.) |
 
-Ejemplo: en cumpleaños se sugieren `PARLANTE-PRO` ($54.990 → $46.742) y `SOPORTE` ($14.990 → $12.742).
+Ejemplo: en cumpleaños se sugieren `AURICULARES-DEPORTIVOS` ($19.990 → $16.992) y `FUNDANOTEBOOK` ($14.990 → $12.742).
 
 - `python -m carrito.demo` → **TODOS LOS CASOS COINCIDEN**.
 - `python -m unittest discover -s tests -v` → **7/7 OK**.
@@ -157,11 +158,11 @@ Ejemplo: en cumpleaños se sugieren `PARLANTE-PRO` ($54.990 → $46.742) y `SOPO
 
 ## 11. Errores y supervisión de IA
 
-Se registraron **25 incidencias reales** en `errores_corregidos.md`, entre ellas:
+Se registraron **26 incidencias reales** en `errores_corregidos.md`, entre ellas:
 
 - confundir Client Secret (`shpss_`) con access token (`shpat_`);
-- scopes insuficientes en la app;
-- cambios de la API 2026 (`variants`, `collectionAddProducts`);
+- scopes insuficientes en la app (incluidos `read_themes`/`write_themes` para la paginación);
+- cambios de la API 2026 (`variants`, `collectionAddProducts`, `media` fuera de `ProductInput`);
 - productos de ejemplo en el checkout;
 - imágenes y precios;
 - recomendación personalizada omitida y luego integrada.

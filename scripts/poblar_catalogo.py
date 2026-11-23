@@ -137,12 +137,9 @@ def crear_producto(producto, location_id):
         "vendor": "TechStore",
         "status": "ACTIVE",
         "tags": [producto["categoria"], "carrito-evento"],
-        "media": [{
-            "alt": producto["nombre"],
-            "mediaContentType": "IMAGE",
-            "originalSource": producto["imagen"],
-        }],
     }
+    # La API 2026-01 no acepta `media` dentro de ProductInput: el producto se
+    # crea primero y la imagen se asocia después con productCreateMedia.
     respuesta = graphql_query(PRODUCT_CREATE, {"input": entrada})["productCreate"]
     if respuesta["userErrors"]:
         raise RuntimeError(f"Error creando {producto['sku']}: {respuesta['userErrors']}")
@@ -173,6 +170,23 @@ def crear_producto(producto, location_id):
             f"Error creando variante de {producto['sku']}: "
             f"{respuesta_variante['userErrors']}"
         )
+
+    # La imagen se sube en una mutación independiente (igual que en
+    # `sincronizar_producto`) porque no forma parte de `ProductInput`.
+    respuesta_media = graphql_query(MEDIA_CREATE, {
+        "productId": producto_id,
+        "media": [{
+            "alt": producto["nombre"],
+            "mediaContentType": "IMAGE",
+            "originalSource": producto["imagen"],
+        }],
+    })["productCreateMedia"]
+    if respuesta_media["userErrors"]:
+        raise RuntimeError(
+            f"Error agregando imagen a {producto['sku']}: "
+            f"{respuesta_media['userErrors']}"
+        )
+
     return respuesta["product"]
 
 

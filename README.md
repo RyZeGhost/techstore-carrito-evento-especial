@@ -2,7 +2,7 @@
 
 Proyecto de la **Tarea 1: Desarrollo Multiparadigma en Python de un Componente de E-commerce con Asistencia de IA Generativa**.
 
-TechStore es una tienda **de productos tecnológicos** (audio, periféricos, almacenamiento, pantallas, computadores, redes y accesorios). El catálogo completo está en `datos/catalogo.json`.
+TechStore es una tienda **de productos tecnológicos** con **34 SKU en 8 categorías** (audio, accesorios, energía, periféricos, almacenamiento, pantallas, computadores y redes). El catálogo completo está en `datos/catalogo.json`. El catálogo se muestra **paginado a 12 productos por página** y solo conserva la Gift Card de crédito como artículo no tecnológico.
 
 Contiene:
 
@@ -48,7 +48,7 @@ PUERTO_API=8000
 
 > `.env` está excluido por `.gitignore`. Nunca subas credenciales a GitHub.
 
-La app de Shopify debe estar **instalada en la tienda** y tener los scopes de productos e inventario (`write_products` y `write_inventory`, que implican lectura). `read_locations` no es obligatorio: el script solo consulta el ID de la ubicación, no su nombre.
+La app de Shopify debe estar **instalada en la tienda** y tener los scopes de productos e inventario (`write_products` y `write_inventory`, que implican lectura). Para modificar el tema hace falta además `read_themes` y `write_themes`; sin ellos la API responde `ACCESS_DENIED`. `read_locations` no es obligatorio: el script solo consulta el ID de la ubicación, no su nombre.
 
 ---
 
@@ -91,8 +91,8 @@ Ejemplo de salida:
   Orientado a objetos  items=5, faltantes=0, 2x1=$13980, cupon=$15892, envio=$0, total=$143028, recs=2
   Funcional            items=5, faltantes=0, 2x1=$13980, cupon=$15892, envio=$0, total=$143028, recs=2
   >>> Paridad: OK
-    Recomendado: Parlante portátil resistente al agua (Audio) $54990 -> $46742 [festividad]
-    Recomendado: Soporte para notebook (Accesorios) $14990 -> $12742 [festividad]
+    Recomendado: Auriculares deportivos in-ear (Audio) $19990 -> $16992 [festividad]
+    Recomendado: Funda para notebook 14 pulgadas (Accesorios) $14990 -> $12742 [festividad]
 ```
 
 Uso programático:
@@ -138,6 +138,15 @@ El script:
 - Sincroniza precio e imagen de los productos que ya existen.
 - Crea colecciones por categoría y agrega los productos.
 - Reintenta con backoff exponencial y registra los fallos en `logs/shopify_errores.log` (excluido de Git).
+
+Ajustar la interfaz y la paginación del tema activo (requiere scopes de tema):
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.actualizar_tema --dry-run
+.\.venv\Scripts\python.exe -m scripts.actualizar_tema
+```
+
+El script fuerza **12 productos por página**, asegura el control de navegación entre páginas, vincula `assets/techstore-paginas.css` en `layout/theme.liquid` y guarda respaldos de los archivos originales en `backups/` (excluido de Git).
 
 Regenerar la documentación línea por línea:
 

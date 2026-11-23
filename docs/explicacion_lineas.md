@@ -113,93 +113,118 @@ comentario del bloque que le precede inmediatamente.
 | 103 | `raise RuntimeError(f"No se pudo completar: {descripcion}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 104 | `` | Línea en blanco: separa bloques lógicos. |
 | 105 | `` | Línea en blanco: separa bloques lógicos. |
-| 106 | `def get_shopify_token() -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 107 | `"""Obtiene (y reutiliza) un access token mediante client_credentials."""` | Docstring: describe el propósito del bloque. |
-| 108 | `global _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 109 | `if _TOKEN:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 110 | `return _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 111 | `` | Línea en blanco: separa bloques lógicos. |
-| 112 | `validar_configuracion()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 113 | `url = f"https://{normalizar_shop(SHOP)}/admin/oauth/access_token"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 114 | `respuesta = peticion_con_reintento(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 115 | `lambda: requests.post(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 116 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 117 | `data={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 118 | `"grant_type": "client_credentials",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 119 | `"client_id": CLIENT_ID,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 120 | `"client_secret": CLIENT_SECRET,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 121 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 122 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 123 | `),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 124 | `"solicitud de token",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 106 | `def rest_request(metodo: str, ruta: str, datos: dict \| None = None) -> dict:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 107 | `"""Llama a la REST Admin API (necesaria para assets de tema)."""` | Docstring: describe el propósito del bloque. |
+| 108 | `url = f"https://{normalizar_shop(SHOP)}/admin/api/{API_VERSION}/{ruta.lstrip('/')}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 109 | `respuesta = peticion_con_reintento(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 110 | `lambda: requests.request(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 111 | `metodo,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 112 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 113 | `json=datos,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 114 | `headers={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 115 | `"X-Shopify-Access-Token": get_shopify_token(),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 116 | `"Content-Type": "application/json",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 117 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 118 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 119 | `),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 120 | `f"REST {metodo} {ruta}",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 121 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 122 | `if respuesta.status_code >= 400:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 123 | `mensaje = (` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 124 | `f"Error {respuesta.status_code} en REST {ruta}: {resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 125 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 126 | `if respuesta.status_code != 200:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 127 | `mensaje = (` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 128 | `f"Error {respuesta.status_code} al pedir el token: "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 129 | `f"{resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 130 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 131 | `LOGGER.error(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 132 | `raise RuntimeError(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 133 | `datos = respuesta.json()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 134 | `if "access_token" not in datos:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 135 | `mensaje = f"Shopify no devolvió access_token: {datos}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 136 | `LOGGER.error(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 137 | `raise RuntimeError(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 138 | `` | Línea en blanco: separa bloques lógicos. |
-| 139 | `_TOKEN = datos["access_token"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 140 | `return _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 141 | `` | Línea en blanco: separa bloques lógicos. |
-| 142 | `` | Línea en blanco: separa bloques lógicos. |
-| 143 | `def graphql_query(query: str, variables: dict \| None = None) -> dict:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 144 | `"""Ejecuta una consulta GraphQL y devuelve el bloque 'data'."""` | Docstring: describe el propósito del bloque. |
-| 145 | `url = f"https://{normalizar_shop(SHOP)}/admin/api/{API_VERSION}/graphql.json"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 146 | `` | Línea en blanco: separa bloques lógicos. |
-| 147 | `for intento in range(1, INTENTOS + 1):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 148 | `respuesta = peticion_con_reintento(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 149 | `lambda: requests.post(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 150 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 151 | `json={"query": query, "variables": variables or {}},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 152 | `headers={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 153 | `"X-Shopify-Access-Token": get_shopify_token(),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 154 | `"Content-Type": "application/json",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 155 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 156 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 157 | `),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 158 | `"consulta GraphQL",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 159 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 160 | `if respuesta.status_code != 200:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 161 | `mensaje = (` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 162 | `f"Error {respuesta.status_code} en GraphQL: {resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 163 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 164 | `LOGGER.error(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 165 | `raise RuntimeError(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 166 | `resultado = respuesta.json()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 167 | `errores = resultado.get("errors") or []` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 168 | `` | Línea en blanco: separa bloques lógicos. |
-| 169 | `es_throttled = any(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 170 | `error.get("extensions", {}).get("code") == "THROTTLED"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 171 | `for error in errores` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 172 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 173 | `if es_throttled and intento < INTENTOS:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 174 | `espera = 2 ** (intento - 1)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 175 | `print(f"  GraphQL limitó la tasa; reintentando en {espera}s...")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 176 | `time.sleep(espera)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 177 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 178 | `if errores:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 179 | `LOGGER.error("Errores de GraphQL: %s", errores)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 180 | `raise RuntimeError(f"Errores de GraphQL: {errores}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 181 | `return resultado.get("data", {})` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 182 | `` | Línea en blanco: separa bloques lógicos. |
-| 183 | `raise RuntimeError("La consulta GraphQL agotó los reintentos por límite de tasa")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 184 | `` | Línea en blanco: separa bloques lógicos. |
-| 185 | `` | Línea en blanco: separa bloques lógicos. |
-| 186 | `if __name__ == "__main__":` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 187 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 188 | `datos = graphql_query("{ shop { name myshopifyDomain } }")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 189 | `tienda = datos["shop"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 190 | `print(f"Conectado a: {tienda['name']} ({tienda['myshopifyDomain']})")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 191 | `except (RuntimeError, requests.RequestException, KeyError) as error:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 192 | `print(f"Error de conexión: {error}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 126 | `LOGGER.error(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 127 | `raise RuntimeError(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 128 | `return respuesta.json() if respuesta.content else {}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 129 | `` | Línea en blanco: separa bloques lógicos. |
+| 130 | `` | Línea en blanco: separa bloques lógicos. |
+| 131 | `def get_shopify_token() -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 132 | `"""Obtiene (y reutiliza) un access token mediante client_credentials."""` | Docstring: describe el propósito del bloque. |
+| 133 | `global _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 134 | `if _TOKEN:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 135 | `return _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 136 | `` | Línea en blanco: separa bloques lógicos. |
+| 137 | `validar_configuracion()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 138 | `url = f"https://{normalizar_shop(SHOP)}/admin/oauth/access_token"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 139 | `respuesta = peticion_con_reintento(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 140 | `lambda: requests.post(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 141 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 142 | `data={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 143 | `"grant_type": "client_credentials",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 144 | `"client_id": CLIENT_ID,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 145 | `"client_secret": CLIENT_SECRET,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 146 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 147 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 148 | `),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 149 | `"solicitud de token",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 150 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 151 | `if respuesta.status_code != 200:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 152 | `mensaje = (` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 153 | `f"Error {respuesta.status_code} al pedir el token: "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 154 | `f"{resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 155 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 156 | `LOGGER.error(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 157 | `raise RuntimeError(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 158 | `datos = respuesta.json()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 159 | `if "access_token" not in datos:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 160 | `mensaje = f"Shopify no devolvió access_token: {datos}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 161 | `LOGGER.error(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 162 | `raise RuntimeError(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 163 | `` | Línea en blanco: separa bloques lógicos. |
+| 164 | `_TOKEN = datos["access_token"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 165 | `return _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 166 | `` | Línea en blanco: separa bloques lógicos. |
+| 167 | `` | Línea en blanco: separa bloques lógicos. |
+| 168 | `def graphql_query(query: str, variables: dict \| None = None) -> dict:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 169 | `"""Ejecuta una consulta GraphQL y devuelve el bloque 'data'."""` | Docstring: describe el propósito del bloque. |
+| 170 | `url = f"https://{normalizar_shop(SHOP)}/admin/api/{API_VERSION}/graphql.json"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 171 | `` | Línea en blanco: separa bloques lógicos. |
+| 172 | `for intento in range(1, INTENTOS + 1):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 173 | `respuesta = peticion_con_reintento(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 174 | `lambda: requests.post(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 175 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 176 | `json={"query": query, "variables": variables or {}},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 177 | `headers={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 178 | `"X-Shopify-Access-Token": get_shopify_token(),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 179 | `"Content-Type": "application/json",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 180 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 181 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 182 | `),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 183 | `"consulta GraphQL",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 184 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 185 | `if respuesta.status_code != 200:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 186 | `mensaje = (` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 187 | `f"Error {respuesta.status_code} en GraphQL: {resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 188 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 189 | `LOGGER.error(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 190 | `raise RuntimeError(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 191 | `resultado = respuesta.json()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 192 | `errores = resultado.get("errors") or []` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 193 | `` | Línea en blanco: separa bloques lógicos. |
+| 194 | `es_throttled = any(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 195 | `error.get("extensions", {}).get("code") == "THROTTLED"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 196 | `for error in errores` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 197 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 198 | `if es_throttled and intento < INTENTOS:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 199 | `espera = 2 ** (intento - 1)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 200 | `print(f"  GraphQL limitó la tasa; reintentando en {espera}s...")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 201 | `time.sleep(espera)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 202 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 203 | `if errores:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 204 | `LOGGER.error("Errores de GraphQL: %s", errores)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 205 | `raise RuntimeError(f"Errores de GraphQL: {errores}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 206 | `return resultado.get("data", {})` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 207 | `` | Línea en blanco: separa bloques lógicos. |
+| 208 | `raise RuntimeError("La consulta GraphQL agotó los reintentos por límite de tasa")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 209 | `` | Línea en blanco: separa bloques lógicos. |
+| 210 | `` | Línea en blanco: separa bloques lógicos. |
+| 211 | `if __name__ == "__main__":` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 212 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 213 | `datos = graphql_query("{ shop { name myshopifyDomain } }")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 214 | `tienda = datos["shop"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 215 | `print(f"Conectado a: {tienda['name']} ({tienda['myshopifyDomain']})")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 216 | `except (RuntimeError, requests.RequestException, KeyError) as error:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 217 | `print(f"Error de conexión: {error}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 
 ## `carrito/datos.py`
 
@@ -1054,180 +1079,194 @@ comentario del bloque que le precede inmediatamente.
 | 137 | `"vendor": "TechStore",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 138 | `"status": "ACTIVE",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 139 | `"tags": [producto["categoria"], "carrito-evento"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 140 | `"media": [{` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 141 | `"alt": producto["nombre"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 142 | `"mediaContentType": "IMAGE",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 143 | `"originalSource": producto["imagen"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 144 | `}],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 145 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 146 | `respuesta = graphql_query(PRODUCT_CREATE, {"input": entrada})["productCreate"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 147 | `if respuesta["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 148 | `raise RuntimeError(f"Error creando {producto['sku']}: {respuesta['userErrors']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 149 | `` | Línea en blanco: separa bloques lógicos. |
-| 150 | `producto_id = respuesta["product"]["id"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 151 | `variante = {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 152 | `"price": str(producto["precio"]),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 153 | `"inventoryItem": {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 154 | `"sku": producto["sku"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 155 | `"tracked": True,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 156 | `"requiresShipping": True,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 157 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 158 | `"inventoryPolicy": "CONTINUE",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 159 | `"inventoryQuantities": [{` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 160 | `"availableQuantity": producto["stock"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 161 | `"locationId": location_id,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 162 | `}],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 163 | `"optionValues": [{` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 164 | `"optionName": "Title",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 165 | `"name": producto["nombre"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 166 | `}],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 167 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 168 | `respuesta_variante = graphql_query(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 169 | `VARIANT_CREATE, {"productId": producto_id, "variants": [variante]}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 170 | `)["productVariantsBulkCreate"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 171 | `if respuesta_variante["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 172 | `raise RuntimeError(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 173 | `f"Error creando variante de {producto['sku']}: "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 174 | `f"{respuesta_variante['userErrors']}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 175 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 176 | `return respuesta["product"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 177 | `` | Línea en blanco: separa bloques lógicos. |
-| 178 | `` | Línea en blanco: separa bloques lógicos. |
-| 179 | `def sincronizar_producto(producto, nodo):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 180 | `"""Ajusta precio e imagen de un producto que ya existe en Shopify."""` | Docstring: describe el propósito del bloque. |
-| 181 | `cambios = []` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 182 | `variante = next(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 183 | `(v for v in nodo["variants"]["nodes"] if v["sku"] == producto["sku"]), None` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 184 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 185 | `if variante and variante["price"] != str(producto["precio"]):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 186 | `respuesta = graphql_query(VARIANT_UPDATE, {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 187 | `"productId": nodo["id"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 188 | `"variants": [{"id": variante["id"], "price": str(producto["precio"])}],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 189 | `})["productVariantsBulkUpdate"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 190 | `if respuesta["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 191 | `raise RuntimeError(f"Error actualizando precio: {respuesta['userErrors']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 192 | `cambios.append("precio")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 193 | `` | Línea en blanco: separa bloques lógicos. |
-| 194 | `if not nodo["media"]["nodes"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 195 | `respuesta = graphql_query(MEDIA_CREATE, {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 196 | `"productId": nodo["id"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 197 | `"media": [{` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 198 | `"alt": producto["nombre"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 199 | `"mediaContentType": "IMAGE",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 200 | `"originalSource": producto["imagen"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 201 | `}],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 202 | `})["productCreateMedia"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 203 | `if respuesta["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 204 | `raise RuntimeError(f"Error agregando imagen: {respuesta['userErrors']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 205 | `cambios.append("imagen")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 206 | `` | Línea en blanco: separa bloques lógicos. |
-| 207 | `return cambios` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 208 | `` | Línea en blanco: separa bloques lógicos. |
-| 209 | `` | Línea en blanco: separa bloques lógicos. |
-| 210 | `def handle_de(texto):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 211 | `"""Convierte un texto a handle Shopify (minúsculas, sin tildes)."""` | Docstring: describe el propósito del bloque. |
-| 212 | `sin_tildes = unicodedata.normalize("NFKD", texto)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 213 | `return "".join(c for c in sin_tildes if not unicodedata.combining(c)).lower()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 214 | `` | Línea en blanco: separa bloques lógicos. |
-| 215 | `` | Línea en blanco: separa bloques lógicos. |
-| 216 | `def crear_colecciones(catalogo, productos_por_sku):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 217 | `"""Crea una colección por cada categoría y agrega sus productos."""` | Docstring: describe el propósito del bloque. |
-| 218 | `categorias = {}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 219 | `for producto in catalogo["productos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 220 | `categoria = producto["categoria"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 221 | `categorias.setdefault(categoria, []).append(productos_por_sku[producto["sku"]])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 140 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 141 | `# La API 2026-01 no acepta `media` dentro de ProductInput: el producto se` | La API 2026-01 no acepta `media` dentro de ProductInput: el producto se |
+| 142 | `# crea primero y la imagen se asocia después con productCreateMedia.` | crea primero y la imagen se asocia después con productCreateMedia. |
+| 143 | `respuesta = graphql_query(PRODUCT_CREATE, {"input": entrada})["productCreate"]` | crea primero y la imagen se asocia después con productCreateMedia. |
+| 144 | `if respuesta["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 145 | `raise RuntimeError(f"Error creando {producto['sku']}: {respuesta['userErrors']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 146 | `` | Línea en blanco: separa bloques lógicos. |
+| 147 | `producto_id = respuesta["product"]["id"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 148 | `variante = {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 149 | `"price": str(producto["precio"]),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 150 | `"inventoryItem": {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 151 | `"sku": producto["sku"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 152 | `"tracked": True,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 153 | `"requiresShipping": True,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 154 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 155 | `"inventoryPolicy": "CONTINUE",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 156 | `"inventoryQuantities": [{` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 157 | `"availableQuantity": producto["stock"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 158 | `"locationId": location_id,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 159 | `}],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 160 | `"optionValues": [{` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 161 | `"optionName": "Title",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 162 | `"name": producto["nombre"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 163 | `}],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 164 | `}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 165 | `respuesta_variante = graphql_query(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 166 | `VARIANT_CREATE, {"productId": producto_id, "variants": [variante]}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 167 | `)["productVariantsBulkCreate"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 168 | `if respuesta_variante["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 169 | `raise RuntimeError(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 170 | `f"Error creando variante de {producto['sku']}: "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 171 | `f"{respuesta_variante['userErrors']}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 172 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 173 | `` | Línea en blanco: separa bloques lógicos. |
+| 174 | `# La imagen se sube en una mutación independiente (igual que en` | La imagen se sube en una mutación independiente (igual que en |
+| 175 | `# `sincronizar_producto`) porque no forma parte de `ProductInput`.` | `sincronizar_producto`) porque no forma parte de `ProductInput`. |
+| 176 | `respuesta_media = graphql_query(MEDIA_CREATE, {` | `sincronizar_producto`) porque no forma parte de `ProductInput`. |
+| 177 | `"productId": producto_id,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 178 | `"media": [{` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 179 | `"alt": producto["nombre"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 180 | `"mediaContentType": "IMAGE",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 181 | `"originalSource": producto["imagen"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 182 | `}],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 183 | `})["productCreateMedia"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 184 | `if respuesta_media["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 185 | `raise RuntimeError(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 186 | `f"Error agregando imagen a {producto['sku']}: "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 187 | `f"{respuesta_media['userErrors']}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 188 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 189 | `` | Línea en blanco: separa bloques lógicos. |
+| 190 | `return respuesta["product"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 191 | `` | Línea en blanco: separa bloques lógicos. |
+| 192 | `` | Línea en blanco: separa bloques lógicos. |
+| 193 | `def sincronizar_producto(producto, nodo):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 194 | `"""Ajusta precio e imagen de un producto que ya existe en Shopify."""` | Docstring: describe el propósito del bloque. |
+| 195 | `cambios = []` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 196 | `variante = next(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 197 | `(v for v in nodo["variants"]["nodes"] if v["sku"] == producto["sku"]), None` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 198 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 199 | `if variante and variante["price"] != str(producto["precio"]):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 200 | `respuesta = graphql_query(VARIANT_UPDATE, {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 201 | `"productId": nodo["id"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 202 | `"variants": [{"id": variante["id"], "price": str(producto["precio"])}],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 203 | `})["productVariantsBulkUpdate"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 204 | `if respuesta["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 205 | `raise RuntimeError(f"Error actualizando precio: {respuesta['userErrors']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 206 | `cambios.append("precio")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 207 | `` | Línea en blanco: separa bloques lógicos. |
+| 208 | `if not nodo["media"]["nodes"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 209 | `respuesta = graphql_query(MEDIA_CREATE, {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 210 | `"productId": nodo["id"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 211 | `"media": [{` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 212 | `"alt": producto["nombre"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 213 | `"mediaContentType": "IMAGE",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 214 | `"originalSource": producto["imagen"],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 215 | `}],` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 216 | `})["productCreateMedia"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 217 | `if respuesta["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 218 | `raise RuntimeError(f"Error agregando imagen: {respuesta['userErrors']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 219 | `cambios.append("imagen")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 220 | `` | Línea en blanco: separa bloques lógicos. |
+| 221 | `return cambios` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 222 | `` | Línea en blanco: separa bloques lógicos. |
-| 223 | `existentes = graphql_query(COLECCIONES_QUERY)["collections"]["nodes"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 224 | `por_handle = {nodo["handle"]: nodo for nodo in existentes}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 225 | `` | Línea en blanco: separa bloques lógicos. |
-| 226 | `for categoria, ids in categorias.items():` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 227 | `handle = handle_de(categoria)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 228 | `nodo = por_handle.get(handle)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 229 | `if nodo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 230 | `coleccion_id = nodo["id"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 231 | `ya_agregados = {p["id"] for p in nodo["products"]["nodes"]}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 232 | `por_agregar = [i for i in ids if i not in ya_agregados]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 233 | `if not por_agregar:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 234 | `print(f"  Colección '{categoria}' ya estaba completa")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 235 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 236 | `else:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 237 | `respuesta = graphql_query(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 238 | `COLLECTION_CREATE,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 239 | `{"input": {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 240 | `"title": categoria,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 241 | `"handle": handle,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 242 | `"descriptionHtml": f"<p>Productos de la categoría {categoria}.</p>",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 243 | `}},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 244 | `)["collectionCreate"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 245 | `if respuesta["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 246 | `print(f"  Colección {categoria}: {respuesta['userErrors']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 247 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 248 | `coleccion_id = respuesta["collection"]["id"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 249 | `por_agregar = ids` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 250 | `` | Línea en blanco: separa bloques lógicos. |
-| 251 | `resultado = graphql_query(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 252 | `COLLECTION_ADD, {"id": coleccion_id, "productIds": por_agregar}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 253 | `)["collectionAddProducts"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 254 | `if resultado["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 255 | `print(f"  Error agregando productos a {categoria}: {resultado['userErrors']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 256 | `else:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 257 | `print(f"  Colección '{categoria}' con {len(por_agregar)} productos agregados")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 258 | `` | Línea en blanco: separa bloques lógicos. |
-| 259 | `` | Línea en blanco: separa bloques lógicos. |
-| 260 | `def main():` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 261 | `"""Punto de entrada con modo dry-run."""` | Docstring: describe el propósito del bloque. |
-| 262 | `parser = argparse.ArgumentParser(description=__doc__)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 263 | `parser.add_argument("--dry-run", action="store_true", help="no escribe en Shopify")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 264 | `args = parser.parse_args()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 265 | `` | Línea en blanco: separa bloques lógicos. |
-| 266 | `catalogo = cargar_catalogo()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 267 | `existentes, nodos = skus_existentes()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 268 | `print(f"SKUs existentes en la tienda: {len(existentes)}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 269 | `` | Línea en blanco: separa bloques lógicos. |
-| 270 | `nodos_por_sku = {}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 271 | `for nodo in nodos:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 272 | `for variante in nodo["variants"]["nodes"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 273 | `if variante["sku"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 274 | `nodos_por_sku[variante["sku"]] = nodo` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 275 | `` | Línea en blanco: separa bloques lógicos. |
-| 276 | `pendientes = [` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 277 | `p for p in catalogo["productos"] if p["sku"] not in existentes` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 278 | `]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 279 | `print(f"Productos a crear: {len(pendientes)}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 280 | `` | Línea en blanco: separa bloques lógicos. |
-| 281 | `if args.dry_run:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 282 | `for producto in pendientes:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 283 | `print(f"  [DRY RUN] Crear {producto['sku']} - {producto['nombre']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 284 | `for producto in catalogo["productos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 285 | `nodo = nodos_por_sku.get(producto["sku"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 286 | `if nodo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 287 | `sin_precio = any(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 288 | `v["sku"] == producto["sku"] and v["price"] != str(producto["precio"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 289 | `for v in nodo["variants"]["nodes"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 290 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 291 | `if sin_precio or not nodo["media"]["nodes"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 292 | `print(f"  [DRY RUN] Sincronizar {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 293 | `return 0` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 223 | `` | Línea en blanco: separa bloques lógicos. |
+| 224 | `def handle_de(texto):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 225 | `"""Convierte un texto a handle Shopify (minúsculas, sin tildes)."""` | Docstring: describe el propósito del bloque. |
+| 226 | `sin_tildes = unicodedata.normalize("NFKD", texto)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 227 | `return "".join(c for c in sin_tildes if not unicodedata.combining(c)).lower()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 228 | `` | Línea en blanco: separa bloques lógicos. |
+| 229 | `` | Línea en blanco: separa bloques lógicos. |
+| 230 | `def crear_colecciones(catalogo, productos_por_sku):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 231 | `"""Crea una colección por cada categoría y agrega sus productos."""` | Docstring: describe el propósito del bloque. |
+| 232 | `categorias = {}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 233 | `for producto in catalogo["productos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 234 | `categoria = producto["categoria"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 235 | `categorias.setdefault(categoria, []).append(productos_por_sku[producto["sku"]])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 236 | `` | Línea en blanco: separa bloques lógicos. |
+| 237 | `existentes = graphql_query(COLECCIONES_QUERY)["collections"]["nodes"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 238 | `por_handle = {nodo["handle"]: nodo for nodo in existentes}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 239 | `` | Línea en blanco: separa bloques lógicos. |
+| 240 | `for categoria, ids in categorias.items():` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 241 | `handle = handle_de(categoria)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 242 | `nodo = por_handle.get(handle)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 243 | `if nodo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 244 | `coleccion_id = nodo["id"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 245 | `ya_agregados = {p["id"] for p in nodo["products"]["nodes"]}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 246 | `por_agregar = [i for i in ids if i not in ya_agregados]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 247 | `if not por_agregar:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 248 | `print(f"  Colección '{categoria}' ya estaba completa")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 249 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 250 | `else:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 251 | `respuesta = graphql_query(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 252 | `COLLECTION_CREATE,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 253 | `{"input": {` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 254 | `"title": categoria,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 255 | `"handle": handle,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 256 | `"descriptionHtml": f"<p>Productos de la categoría {categoria}.</p>",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 257 | `}},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 258 | `)["collectionCreate"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 259 | `if respuesta["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 260 | `print(f"  Colección {categoria}: {respuesta['userErrors']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 261 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 262 | `coleccion_id = respuesta["collection"]["id"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 263 | `por_agregar = ids` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 264 | `` | Línea en blanco: separa bloques lógicos. |
+| 265 | `resultado = graphql_query(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 266 | `COLLECTION_ADD, {"id": coleccion_id, "productIds": por_agregar}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 267 | `)["collectionAddProducts"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 268 | `if resultado["userErrors"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 269 | `print(f"  Error agregando productos a {categoria}: {resultado['userErrors']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 270 | `else:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 271 | `print(f"  Colección '{categoria}' con {len(por_agregar)} productos agregados")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 272 | `` | Línea en blanco: separa bloques lógicos. |
+| 273 | `` | Línea en blanco: separa bloques lógicos. |
+| 274 | `def main():` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 275 | `"""Punto de entrada con modo dry-run."""` | Docstring: describe el propósito del bloque. |
+| 276 | `parser = argparse.ArgumentParser(description=__doc__)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 277 | `parser.add_argument("--dry-run", action="store_true", help="no escribe en Shopify")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 278 | `args = parser.parse_args()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 279 | `` | Línea en blanco: separa bloques lógicos. |
+| 280 | `catalogo = cargar_catalogo()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 281 | `existentes, nodos = skus_existentes()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 282 | `print(f"SKUs existentes en la tienda: {len(existentes)}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 283 | `` | Línea en blanco: separa bloques lógicos. |
+| 284 | `nodos_por_sku = {}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 285 | `for nodo in nodos:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 286 | `for variante in nodo["variants"]["nodes"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 287 | `if variante["sku"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 288 | `nodos_por_sku[variante["sku"]] = nodo` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 289 | `` | Línea en blanco: separa bloques lógicos. |
+| 290 | `pendientes = [` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 291 | `p for p in catalogo["productos"] if p["sku"] not in existentes` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 292 | `]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 293 | `print(f"Productos a crear: {len(pendientes)}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 294 | `` | Línea en blanco: separa bloques lógicos. |
-| 295 | `location_id = location_principal() if pendientes else None` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 296 | `ids_por_sku = {sku: nodo["id"] for sku, nodo in nodos_por_sku.items()}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 297 | `` | Línea en blanco: separa bloques lógicos. |
-| 298 | `for producto in pendientes:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 299 | `creado = crear_producto(producto, location_id)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 300 | `ids_por_sku[producto["sku"]] = creado["id"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 301 | `print(f"  Creado {producto['sku']} -> {creado['handle']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 302 | `` | Línea en blanco: separa bloques lógicos. |
-| 303 | `for producto in catalogo["productos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 304 | `nodo = nodos_por_sku.get(producto["sku"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 305 | `if nodo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 306 | `cambios = sincronizar_producto(producto, nodo)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 307 | `if cambios:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 308 | `print(f"  Actualizado {producto['sku']}: {', '.join(cambios)}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 309 | `` | Línea en blanco: separa bloques lógicos. |
-| 310 | `crear_colecciones(catalogo, ids_por_sku)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 311 | `return 0` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 312 | `` | Línea en blanco: separa bloques lógicos. |
-| 313 | `` | Línea en blanco: separa bloques lógicos. |
-| 314 | `if __name__ == "__main__":` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 315 | `raise SystemExit(main())` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 295 | `if args.dry_run:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 296 | `for producto in pendientes:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 297 | `print(f"  [DRY RUN] Crear {producto['sku']} - {producto['nombre']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 298 | `for producto in catalogo["productos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 299 | `nodo = nodos_por_sku.get(producto["sku"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 300 | `if nodo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 301 | `sin_precio = any(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 302 | `v["sku"] == producto["sku"] and v["price"] != str(producto["precio"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 303 | `for v in nodo["variants"]["nodes"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 304 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 305 | `if sin_precio or not nodo["media"]["nodes"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 306 | `print(f"  [DRY RUN] Sincronizar {producto['sku']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 307 | `return 0` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 308 | `` | Línea en blanco: separa bloques lógicos. |
+| 309 | `location_id = location_principal() if pendientes else None` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 310 | `ids_por_sku = {sku: nodo["id"] for sku, nodo in nodos_por_sku.items()}` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 311 | `` | Línea en blanco: separa bloques lógicos. |
+| 312 | `for producto in pendientes:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 313 | `creado = crear_producto(producto, location_id)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 314 | `ids_por_sku[producto["sku"]] = creado["id"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 315 | `print(f"  Creado {producto['sku']} -> {creado['handle']}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 316 | `` | Línea en blanco: separa bloques lógicos. |
+| 317 | `for producto in catalogo["productos"]:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 318 | `nodo = nodos_por_sku.get(producto["sku"])` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 319 | `if nodo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 320 | `cambios = sincronizar_producto(producto, nodo)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 321 | `if cambios:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 322 | `print(f"  Actualizado {producto['sku']}: {', '.join(cambios)}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 323 | `` | Línea en blanco: separa bloques lógicos. |
+| 324 | `crear_colecciones(catalogo, ids_por_sku)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 325 | `return 0` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 326 | `` | Línea en blanco: separa bloques lógicos. |
+| 327 | `` | Línea en blanco: separa bloques lógicos. |
+| 328 | `if __name__ == "__main__":` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 329 | `raise SystemExit(main())` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 

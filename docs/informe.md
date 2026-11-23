@@ -14,14 +14,14 @@ La tienda se montó sobre **Shopify**, plataforma validada por el enunciado.
 
 | Elemento | Exigencia | Estado |
 |---|---|---|
-| Catálogo y navegación | Mínimo | Catálogo de **productos tecnológicos** definido en `datos/catalogo.json` (22 SKU, 8 categorías: Audio, Accesorios, Energía, Periféricos, Almacenamiento, Pantallas, Computadores y Redes). Cada SKU incluye precio en **CLP** y una imagen real libre de marca de agua. Carga a Shopify mediante `scripts/poblar_catalogo.py`. |
+| Catálogo y navegación | Mínimo | Catálogo de **productos tecnológicos** definido en `datos/catalogo.json` (**34 SKU**, 8 categorías: Audio, Accesorios, Energía, Periféricos, Almacenamiento, Pantallas, Computadores y Redes). Cada SKU incluye precio en **CLP** y una imagen real libre de marca de agua. Carga a Shopify mediante `scripts/poblar_catalogo.py`. El catálogo se **divide en páginas de 12 productos** para no mostrar todo de una vez. |
 | Carrito y checkout | Mínimo | Provisto por Shopify en modo de prueba. |
 | Pasarela de pagos | Mínimo | Configurada en **Configuración → Pagos → Proveedores de pago de prueba** (Shopify Payments test mode / Bogus Gateway). |
 | Identidad visual (tema) | Mínimo | Tema coherente con TechStore configurado en **Online Store → Themes**. |
 | Gestión de usuarios | Recomendado | Habilitar cuentas de cliente en **Configuración → Clientes**. |
 | Reseñas y prueba social | Recomendado | Instalar una app de reseñas; no exigible. |
 | Catálogo e inventario (backend) | Recomendado | Los productos se crean con `inventoryManagement: SHOPIFY` y stock inicial desde el JSON. |
-| Pedidos y envíos | Recomendado | Tarifa plana de $3.990 y envío gratis sobre $50.000, coherentes con `datos/catalogo.json`. Los 17 productos de ejemplo de Shopify se archivaron para que no aparezcan artículos ajenos en el checkout. |
+| Pedidos y envíos | Recomendado | Tarifa plana de $3.990 y envío gratis sobre $50.000, coherentes con `datos/catalogo.json`. Los **16 productos ajenos** (snowboards y cera) se eliminaron para que no aparezcan artículos ajenos en el checkout; se conservó y reactivó la **Gift Card de crédito de la tienda** por pedido explícito. |
 | Marketing y promociones | Recomendado | Reglas 2x1 y cupones modeladas en el carrito; pueden replicarse como descuentos de Shopify. |
 | Analítica, roles, integraciones | Referencial | No exigidas. |
 
@@ -34,7 +34,9 @@ Se creó `shopify_client.py`, que usa el flujo **client credentials**:
 1. `get_shopify_token()` intercambia `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET` por un token de 24 h mediante `POST /admin/oauth/access_token`.
 2. `graphql_query(query, variables)` envía el token en `X-Shopify-Access-Token` a la Admin GraphQL API `2026-01`.
 
-Se usa GraphQL directo (sin Bulk Operations ni REST) porque el catálogo tiene solo 22 SKU: una carga idempotente con backoff exponencial es suficiente y evita gestionar operaciones asíncronas. Los errores de red, HTTP 429, fallos de token y errores GraphQL se registran en `logs/shopify_errores.log`, carpeta excluida del repositorio. `peticion_con_reintento()` aplica espera exponencial y `carrito/datos.py` valida el esquema JSON antes de cualquier petición.
+Se usa GraphQL directo (sin Bulk Operations) porque el catálogo tiene 34 SKU: una carga idempotente con backoff exponencial es suficiente y evita gestionar operaciones asíncronas. La **Admin REST API** se usa solo para los assets del tema, ya que GraphQL no permite leer/escribir archivos de Liquid; para eso se añadió `rest_request()` en `shopify_client.py`, que envía el mismo token en `X-Shopify-Access-Token`. Los errores de red, HTTP 429, fallos de token y errores GraphQL/REST se registran en `logs/shopify_errores.log`, carpeta excluida del repositorio. `peticion_con_reintento()` aplica espera exponencial y `carrito/datos.py` valida el esquema JSON antes de cualquier petición.
+
+La interfaz se ajustó sobre el tema activo `test-data` con `scripts/actualizar_tema.py`: la sección `sections/main-collection-product-grid.liquid` pagina `collection.products` a **12 por página**, mantiene el control `{% render 'pagination', paginate: paginate, anchor: '' %}` y carga `assets/techstore-paginas.css` desde `layout/theme.liquid`. Los originales quedaron en `backups/` (ignorado por Git). La verificación se hizo por API: no se pudo comprobar visualmente porque la tienda está protegida con contraseña y no se compartió ese acceso.
 
 Prueba ejecutada:
 
@@ -101,11 +103,11 @@ Reglas transversales:
 
 Las tres implementaciones devuelven diccionarios **exactamente iguales** en todos los casos; `tests/test_paridad.py` verifica esto automáticamente junto con validaciones, cupón inválido, envío y recomendaciones.
 
-Detalle de la recomendación para el primer caso: `PARLANTE-PRO` ($54.990 → $46.742) y `SOPORTE` ($14.990 → $12.742), ambos de categorías presentes en el carrito (Audio y Accesorios). El hecho de que el evento tenga cupón no es condición del descuento: basta con que el evento esté marcado como festivo en el JSON.
+Detalle de la recomendación para el primer caso, ya con el catálogo ampliado: `AURICULARES-DEPORTIVOS` ($19.990 → $16.992) y `FUNDANOTEBOOK` ($14.990 → $12.742), ambos de categorías presentes en el carrito (Audio y Accesorios). Antes de ampliar el catálogo se sugerían `PARLANTE-PRO` y `SOPORTE`; la regla es la misma, pero al incorporar 12 SKU nuevos el precio más cercano al promedio cambió. El hecho de que el evento tenga cupón no es condición del descuento: basta con que el evento esté marcado como festivo en el JSON.
 
 ### Errores y correcciones
 
-Ver [`errores_corregidos.md`](errores_corregidos.md). Incluye 25 incidencias reales, desde credenciales y scopes de Shopify hasta cambios de la API 2026, imágenes, precios, limpieza del checkout, validación del catálogo, límites de tasa, registro de errores y la recomendación personalizada omitida en la primera versión.
+Ver [`errores_corregidos.md`](errores_corregidos.md). Incluye 26 incidencias reales, desde credenciales y scopes de Shopify hasta cambios de la API 2026, imágenes, precios, limpieza del checkout, validación del catálogo, límites de tasa, registro de errores, la recomendación personalizada omitida en la primera versión, la paginación del tema y el campo `media` rechazado por `productCreate`.
 
 ### Explicación del código
 

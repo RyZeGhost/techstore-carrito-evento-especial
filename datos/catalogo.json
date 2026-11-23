@@ -8,7 +8,10 @@
     "por_categoria": 1,
     "maximo": 2,
     "descuento_porcentaje": 15,
-    "eventos_festivos": ["cumpleanos", "vuelta_a_clases"]
+    "eventos_festivos": [
+      "cumpleanos",
+      "vuelta_a_clases"
+    ]
   },
   "sustitutos": {
     "PARLANTE": "PARLANTE-PRO",
@@ -214,6 +217,114 @@
       "categoria": "Accesorios",
       "descripcion": "Lápiz táctil capacitivo para tabletas.",
       "imagen": "https://live.staticflickr.com/1419/4610205168_56693dec9b_b.jpg"
+    },
+    {
+      "sku": "MICROFONO-USB",
+      "nombre": "Micrófono USB de escritorio",
+      "precio": 49990,
+      "stock": 18,
+      "categoria": "Audio",
+      "descripcion": "Micrófono USB condensador para streaming y videollamadas.",
+      "imagen": "https://live.staticflickr.com/630/21412075452_2de3b9e9da_b.jpg"
+    },
+    {
+      "sku": "AURICULARES-DEPORTIVOS",
+      "nombre": "Auriculares deportivos in-ear",
+      "precio": 19990,
+      "stock": 50,
+      "categoria": "Audio",
+      "descripcion": "Auriculares in-ear resistentes al sudor para deporte.",
+      "imagen": "https://live.staticflickr.com/65535/49058501246_a0e6517237_b.jpg"
+    },
+    {
+      "sku": "FUNDANOTEBOOK",
+      "nombre": "Funda para notebook 14 pulgadas",
+      "precio": 14990,
+      "stock": 60,
+      "categoria": "Accesorios",
+      "descripcion": "Funda acolchada impermeable para notebooks de 14 pulgadas.",
+      "imagen": "https://live.staticflickr.com/2258/2213062612_3b08155cd1.jpg"
+    },
+    {
+      "sku": "MOCHILA-TECH",
+      "nombre": "Mochila técnica para notebook",
+      "precio": 34990,
+      "stock": 30,
+      "categoria": "Accesorios",
+      "descripcion": "Mochila con compartimento acolchado y puertos USB.",
+      "imagen": "https://live.staticflickr.com/3819/9650666216_85ea0392ca_b.jpg"
+    },
+    {
+      "sku": "HUB-USB",
+      "nombre": "Hub USB-C 9 en 1",
+      "precio": 29990,
+      "stock": 35,
+      "categoria": "Accesorios",
+      "descripcion": "Concentrador USB-C con HDMI, lector de tarjetas y carga.",
+      "imagen": "https://live.staticflickr.com/65535/49059915768_3c414fd90b.jpg"
+    },
+    {
+      "sku": "CARGADOR-WIRELESS",
+      "nombre": "Cargador inalámbrico 15 W",
+      "precio": 24990,
+      "stock": 40,
+      "categoria": "Energía",
+      "descripcion": "Base de carga inalámbrica rápida con indicador LED.",
+      "imagen": "https://live.staticflickr.com/704/22063888805_f404d3c592_b.jpg"
+    },
+    {
+      "sku": "TRACKPAD",
+      "nombre": "Trackpad inalámbrico",
+      "precio": 59990,
+      "stock": 15,
+      "categoria": "Periféricos",
+      "descripcion": "Panel táctil inalámbrico con gestos multitouch.",
+      "imagen": "https://live.staticflickr.com/3039/2581373471_594b69e5c2_b.jpg"
+    },
+    {
+      "sku": "DISCO-EXTERNO",
+      "nombre": "Disco duro externo 1 TB",
+      "precio": 69990,
+      "stock": 20,
+      "categoria": "Almacenamiento",
+      "descripcion": "Disco externo USB 3.0 de 1 TB para respaldo.",
+      "imagen": "https://live.staticflickr.com/3060/2885262347_b68eef6e48_b.jpg"
+    },
+    {
+      "sku": "TARJETA-MEMORIA",
+      "nombre": "Tarjeta microSD 128 GB",
+      "precio": 12990,
+      "stock": 80,
+      "categoria": "Almacenamiento",
+      "descripcion": "Tarjeta microSD de 128 GB con adaptador SD.",
+      "imagen": "https://live.staticflickr.com/5061/5562207733_a5b2c0c02c_b.jpg"
+    },
+    {
+      "sku": "PROYECTOR",
+      "nombre": "Proyector portátil HD",
+      "precio": 129990,
+      "stock": 10,
+      "categoria": "Pantallas",
+      "descripcion": "Proyector portátil HD con conexión HDMI y USB.",
+      "imagen": "https://live.staticflickr.com/65535/49769327016_f564ac2ea1_b.jpg"
+    },
+    {
+      "sku": "MINIPC",
+      "nombre": "Mini PC compacto",
+      "precio": 299990,
+      "stock": 8,
+      "categoria": "Computadores",
+      "descripcion": "Mini PC con procesador Intel, 8 GB RAM y SSD.",
+      "imagen": "https://live.staticflickr.com/8505/8526390650_ce8633f5fe_b.jpg"
+    },
+    {
+      "sku": "REPETIDOR-WIFI",
+      "nombre": "Repetidor WiFi 6",
+      "precio": 39990,
+      "stock": 25,
+      "categoria": "Redes",
+      "descripcion": "Extensor de cobertura WiFi 6 con puerto Ethernet.",
+      "imagen": "https://live.staticflickr.com/7331/16475914451_87e5e35f12_b.jpg"
     }
   ],
   "eventos": {
