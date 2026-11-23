@@ -9,14 +9,29 @@ Incluye backoff exponencial ante límites de tasa (HTTP 429 y errores
 THROTTLED de GraphQL), según las buenas prácticas del enunciado.
 """
 
+import logging
 import os
 import re
 import time
+from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Registro de respuestas fallidas, exigido por el enunciado del agente.
+# Se guarda fuera del repo (carpeta ignorada por .gitignore) para no subir datos.
+LOG_DIR = Path(__file__).resolve().parent / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+LOGGER = logging.getLogger("shopify")
+LOGGER.setLevel(logging.ERROR)
+if not LOGGER.handlers:
+    _handler = logging.FileHandler(LOG_DIR / "shopify_errores.log", encoding="utf-8")
+    _handler.setFormatter(
+        logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
+    )
+    LOGGER.addHandler(_handler)
 
 SHOP = os.getenv("SHOPIFY_SHOP", "").strip()
 CLIENT_ID = os.getenv("SHOPIFY_CLIENT_ID", "").strip()
@@ -69,6 +84,7 @@ def peticion_con_reintento(constructor, descripcion: str) -> requests.Response:
         try:
             respuesta = constructor()
         except requests.RequestException as error:
+            LOGGER.error("Error de red en %s (intento %s): %s", descripcion, intento, error)
             if intento == INTENTOS:
                 raise RuntimeError(f"{descripcion}: {error}") from error
             espera = 2 ** (intento - 1)
@@ -76,6 +92,8 @@ def peticion_con_reintento(constructor, descripcion: str) -> requests.Response:
             time.sleep(espera)
             continue
 
+        if respuesta.status_code == 429:
+            LOGGER.error("HTTP 429 en %s (intento %s)", descripcion, intento)
         if respuesta.status_code == 429 and intento < INTENTOS:
             espera = 2 ** (intento - 1)
             print(f"  Límite de tasa alcanzado ({descripcion}); reintentando en {espera}s...")
@@ -106,13 +124,17 @@ def get_shopify_token() -> str:
         "solicitud de token",
     )
     if respuesta.status_code != 200:
-        raise RuntimeError(
+        mensaje = (
             f"Error {respuesta.status_code} al pedir el token: "
             f"{resumen_error(respuesta)}"
         )
+        LOGGER.error(mensaje)
+        raise RuntimeError(mensaje)
     datos = respuesta.json()
     if "access_token" not in datos:
-        raise RuntimeError(f"Shopify no devolvió access_token: {datos}")
+        mensaje = f"Shopify no devolvió access_token: {datos}"
+        LOGGER.error(mensaje)
+        raise RuntimeError(mensaje)
 
     _TOKEN = datos["access_token"]
     return _TOKEN
@@ -136,9 +158,11 @@ def graphql_query(query: str, variables: dict | None = None) -> dict:
             "consulta GraphQL",
         )
         if respuesta.status_code != 200:
-            raise RuntimeError(
+            mensaje = (
                 f"Error {respuesta.status_code} en GraphQL: {resumen_error(respuesta)}"
             )
+            LOGGER.error(mensaje)
+            raise RuntimeError(mensaje)
         resultado = respuesta.json()
         errores = resultado.get("errors") or []
 
@@ -152,6 +176,7 @@ def graphql_query(query: str, variables: dict | None = None) -> dict:
             time.sleep(espera)
             continue
         if errores:
+            LOGGER.error("Errores de GraphQL: %s", errores)
             raise RuntimeError(f"Errores de GraphQL: {errores}")
         return resultado.get("data", {})
 

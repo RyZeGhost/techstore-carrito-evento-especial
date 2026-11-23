@@ -27,6 +27,7 @@ Este registro describe los fallos reales que aparecieron durante la construcció
 | 21 | `main.py` volvía a fallar con `SHOPIFY_ACCESS_TOKEN contiene el secreto de la app (shpss_...)` | El archivo seguía usando el primer enfoque (REST con `ShopifyAPI` y token `shpat_`), incompatible con las credenciales reales del proyecto. | Se reescribió `main.py` para delegar en `shopify_client.graphql_query()`, dejando `--info` como opción y marcando `--crear-ejemplo`/`--dry-run` como obsoletos. Ahora imprime `Conectado exitosamente a: TechStore (...)` y la API version `2026-01`. |
 | 22 | El catálogo podía contener datos incompletos o SKUs duplicados sin que nada lo detectara | `cargar_catalogo()` hacía únicamente `json.load()`. | Se añadió `validar_catalogo()` en `carrito/datos.py`: comprueba claves obligatorias, tipos, SKUs únicos, precios y stock válidos, URLs de imagen HTTPS, sustitutos existentes y reglas coherentes. `cargar_catalogo()` lo invoca antes de devolver los datos. |
 | 23 | Límites de tasa de Shopify podían interrumpir la carga del catálogo | El cliente no reintentaba ante HTTP 429 ni errores GraphQL `THROTTLED`. | Se agregó `peticion_con_reintento()` con backoff exponencial (`1, 2, 4, 8, 16 s`) y se detectan errores `THROTTLED` en `graphql_query()`. |
+| 24 | No se registraban las respuestas fallidas de la API | El enunciado del agente pide registrar logs de errores; el cliente solo lanzaba excepciones. | Se añadió un `logger` en `shopify_client.py` que escribe `logs/shopify_errores.log` (carpeta ignorada por Git) con fecha, nivel y mensaje para errores de red, HTTP 429, fallos de token y errores GraphQL. |
 
 ## Estado final verificado
 
@@ -37,4 +38,5 @@ Este registro describe los fallos reales que aparecieron durante la construcció
 - `python -m scripts.poblar_catalogo` → 22 productos activos con precio CLP y una imagen cada uno; 8 colecciones completas; 17 productos de ejemplo archivados.
 - `python main.py --info` → conexión correcta con API version `2026-01`.
 - `python -m scripts.generar_documentacion` → explicación línea por línea regenerada.
+- `shopify_client.py` escribe los fallos en `logs/shopify_errores.log` (no versionado).
 - `python -m scripts.api_carrito` → `GET /health` devuelve `{"estado":"ok","productos":22}`, `GET /eventos` lista los cuatro eventos y `POST /carrito` devuelve los tres paradigmas con total `143028` para el caso cumpleaños/10 personas/FIESTA10; una entrada inválida responde HTTP 400 con mensaje descriptivo.

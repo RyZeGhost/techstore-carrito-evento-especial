@@ -13,7 +13,7 @@ Tienda de productos tecnológicos + Carrito Evento Especial en tres paradigmas
 
 - Shopify: `techstore-d8vn3rhk.myshopify.com`
 - Repositorio: https://github.com/RyZeGhost/techstore-carrito-evento-especial
-- Fecha: 22 de noviembre de 2026
+- Fecha: 22–23 de noviembre de 2026
 
 > Nota: presentar en 8–10 minutos.
 
@@ -140,6 +140,7 @@ Debe resolver:
 - Header `X-Shopify-Access-Token`.
 - `python -m scripts.poblar_catalogo`: idempotente; crea y sincroniza precios, imágenes y colecciones.
 - Backoff exponencial ante HTTP 429 / `THROTTLED`.
+- Esquema JSON validado antes de enviar datos; fallos registrados en `logs/shopify_errores.log`.
 
 **API HTTP del carrito**
 
@@ -151,7 +152,7 @@ Debe resolver:
 
 ## 11. Errores y supervisión de IA
 
-Se registraron **23 incidencias reales** en `errores_corregidos.md`, entre ellas:
+Se registraron **24 incidencias reales** en `errores_corregidos.md`, entre ellas:
 
 - confundir Client Secret (`shpss_`) con access token (`shpat_`);
 - scopes insuficientes en la app;
@@ -184,3 +185,14 @@ Cada respuesta generada con IA se **ejecutó, comparó y corrigió**. Los 27 pro
 .\.venv\Scripts\python.exe -m scripts.poblar_catalogo --dry-run
 .\.venv\Scripts\python.exe -m scripts.api_carrito
 ```
+
+---
+
+## Anexo — Evidencia visual (insertar capturas)
+
+Espacios reservados para la entrega presencial:
+
+1. **Catálogo TechStore:** `[captura: colecciones y productos con imagen y precio CLP]`
+2. **Carrito y checkout en modo prueba:** `[captura: carrito armado y pasarela de prueba]`
+3. **Repositorio GitHub:** `[captura: commits y rama main sincronizada]`
+4. **Validación con el docente:** `[captura o firma: resultado de la validación del evento]`

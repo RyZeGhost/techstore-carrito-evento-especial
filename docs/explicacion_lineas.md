@@ -19,162 +19,187 @@ comentario del bloque que le precede inmediatamente.
 | 9 | `THROTTLED de GraphQL), según las buenas prácticas del enunciado.` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 10 | `"""` | Docstring: describe el propósito del bloque. |
 | 11 | `` | Línea en blanco: separa bloques lógicos. |
-| 12 | `import os` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 13 | `import re` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 14 | `import time` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 15 | `` | Línea en blanco: separa bloques lógicos. |
-| 16 | `import requests` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 17 | `from dotenv import load_dotenv` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 18 | `` | Línea en blanco: separa bloques lógicos. |
-| 19 | `load_dotenv()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 12 | `import logging` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 13 | `import os` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 14 | `import re` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 15 | `import time` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 16 | `from pathlib import Path` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 17 | `` | Línea en blanco: separa bloques lógicos. |
+| 18 | `import requests` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 19 | `from dotenv import load_dotenv` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 20 | `` | Línea en blanco: separa bloques lógicos. |
-| 21 | `SHOP = os.getenv("SHOPIFY_SHOP", "").strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 22 | `CLIENT_ID = os.getenv("SHOPIFY_CLIENT_ID", "").strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 23 | `CLIENT_SECRET = os.getenv("SHOPIFY_CLIENT_SECRET", "").strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 24 | `API_VERSION = "2026-01"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 25 | `INTENTOS = 5` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 26 | `` | Línea en blanco: separa bloques lógicos. |
-| 27 | `_TOKEN = None` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 28 | `` | Línea en blanco: separa bloques lógicos. |
-| 29 | `` | Línea en blanco: separa bloques lógicos. |
-| 30 | `def normalizar_shop(shop: str) -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 31 | `"""Acepta 'techstore', 'techstore.myshopify.com' o la URL completa con /admin."""` | Docstring: describe el propósito del bloque. |
-| 32 | `shop = shop.strip().replace("https://", "").replace("http://", "").rstrip("/")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 33 | `if shop.endswith("/admin"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 34 | `shop = shop[: -len("/admin")]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 35 | `if "." not in shop:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 36 | `shop += ".myshopify.com"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 37 | `return shop` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 38 | `` | Línea en blanco: separa bloques lógicos. |
-| 39 | `` | Línea en blanco: separa bloques lógicos. |
-| 40 | `def resumen_error(respuesta: requests.Response) -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 41 | `"""Extrae el mensaje útil de una respuesta de error (JSON o HTML)."""` | Docstring: describe el propósito del bloque. |
-| 42 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 43 | `return str(respuesta.json())[:300]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 44 | `except ValueError:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 45 | `titulo = re.search(r"<title>(.*?)</title>", respuesta.text, re.DOTALL)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 46 | `if titulo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 47 | `return titulo.group(1).strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 48 | `return respuesta.text[:300]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 49 | `` | Línea en blanco: separa bloques lógicos. |
-| 50 | `` | Línea en blanco: separa bloques lógicos. |
-| 51 | `def validar_configuracion() -> None:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 52 | `"""Verifica que existan las tres credenciales antes de llamar a la API."""` | Docstring: describe el propósito del bloque. |
-| 53 | `faltantes = [` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 54 | `nombre` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 55 | `for nombre, valor in (` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 56 | `("SHOPIFY_SHOP", SHOP),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 57 | `("SHOPIFY_CLIENT_ID", CLIENT_ID),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 58 | `("SHOPIFY_CLIENT_SECRET", CLIENT_SECRET),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 59 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 60 | `if not valor` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 61 | `]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 62 | `if faltantes:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 63 | `raise RuntimeError("Faltan variables en .env: " + ", ".join(faltantes))` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 21 | `load_dotenv()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 22 | `` | Línea en blanco: separa bloques lógicos. |
+| 23 | `# Registro de respuestas fallidas, exigido por el enunciado del agente.` | Registro de respuestas fallidas, exigido por el enunciado del agente. |
+| 24 | `# Se guarda fuera del repo (carpeta ignorada por .gitignore) para no subir datos.` | Se guarda fuera del repo (carpeta ignorada por .gitignore) para no subir datos. |
+| 25 | `LOG_DIR = Path(__file__).resolve().parent / "logs"` | Se guarda fuera del repo (carpeta ignorada por .gitignore) para no subir datos. |
+| 26 | `LOG_DIR.mkdir(exist_ok=True)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 27 | `LOGGER = logging.getLogger("shopify")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 28 | `LOGGER.setLevel(logging.ERROR)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 29 | `if not LOGGER.handlers:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 30 | `_handler = logging.FileHandler(LOG_DIR / "shopify_errores.log", encoding="utf-8")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 31 | `_handler.setFormatter(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 32 | `logging.Formatter("%(asctime)s \| %(levelname)s \| %(message)s")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 33 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 34 | `LOGGER.addHandler(_handler)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 35 | `` | Línea en blanco: separa bloques lógicos. |
+| 36 | `SHOP = os.getenv("SHOPIFY_SHOP", "").strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 37 | `CLIENT_ID = os.getenv("SHOPIFY_CLIENT_ID", "").strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 38 | `CLIENT_SECRET = os.getenv("SHOPIFY_CLIENT_SECRET", "").strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 39 | `API_VERSION = "2026-01"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 40 | `INTENTOS = 5` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 41 | `` | Línea en blanco: separa bloques lógicos. |
+| 42 | `_TOKEN = None` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 43 | `` | Línea en blanco: separa bloques lógicos. |
+| 44 | `` | Línea en blanco: separa bloques lógicos. |
+| 45 | `def normalizar_shop(shop: str) -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 46 | `"""Acepta 'techstore', 'techstore.myshopify.com' o la URL completa con /admin."""` | Docstring: describe el propósito del bloque. |
+| 47 | `shop = shop.strip().replace("https://", "").replace("http://", "").rstrip("/")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 48 | `if shop.endswith("/admin"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 49 | `shop = shop[: -len("/admin")]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 50 | `if "." not in shop:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 51 | `shop += ".myshopify.com"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 52 | `return shop` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 53 | `` | Línea en blanco: separa bloques lógicos. |
+| 54 | `` | Línea en blanco: separa bloques lógicos. |
+| 55 | `def resumen_error(respuesta: requests.Response) -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 56 | `"""Extrae el mensaje útil de una respuesta de error (JSON o HTML)."""` | Docstring: describe el propósito del bloque. |
+| 57 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 58 | `return str(respuesta.json())[:300]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 59 | `except ValueError:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 60 | `titulo = re.search(r"<title>(.*?)</title>", respuesta.text, re.DOTALL)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 61 | `if titulo:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 62 | `return titulo.group(1).strip()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 63 | `return respuesta.text[:300]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 64 | `` | Línea en blanco: separa bloques lógicos. |
 | 65 | `` | Línea en blanco: separa bloques lógicos. |
-| 66 | `def peticion_con_reintento(constructor, descripcion: str) -> requests.Response:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 67 | `"""Ejecuta una petición con espera exponencial si Shopify limita la tasa."""` | Docstring: describe el propósito del bloque. |
-| 68 | `for intento in range(1, INTENTOS + 1):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 69 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 70 | `respuesta = constructor()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 71 | `except requests.RequestException as error:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 72 | `if intento == INTENTOS:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 73 | `raise RuntimeError(f"{descripcion}: {error}") from error` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 74 | `espera = 2 ** (intento - 1)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 75 | `print(f"  {descripcion}: error de red; reintentando en {espera}s...")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 76 | `time.sleep(espera)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 77 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 78 | `` | Línea en blanco: separa bloques lógicos. |
-| 79 | `if respuesta.status_code == 429 and intento < INTENTOS:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 80 | `espera = 2 ** (intento - 1)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 81 | `print(f"  Límite de tasa alcanzado ({descripcion}); reintentando en {espera}s...")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 82 | `time.sleep(espera)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 83 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 84 | `return respuesta` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 85 | `raise RuntimeError(f"No se pudo completar: {descripcion}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 86 | `` | Línea en blanco: separa bloques lógicos. |
-| 87 | `` | Línea en blanco: separa bloques lógicos. |
-| 88 | `def get_shopify_token() -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 89 | `"""Obtiene (y reutiliza) un access token mediante client_credentials."""` | Docstring: describe el propósito del bloque. |
-| 90 | `global _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 91 | `if _TOKEN:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 92 | `return _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 93 | `` | Línea en blanco: separa bloques lógicos. |
-| 94 | `validar_configuracion()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 95 | `url = f"https://{normalizar_shop(SHOP)}/admin/oauth/access_token"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 96 | `respuesta = peticion_con_reintento(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 97 | `lambda: requests.post(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 98 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 99 | `data={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 100 | `"grant_type": "client_credentials",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 101 | `"client_id": CLIENT_ID,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 102 | `"client_secret": CLIENT_SECRET,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 103 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 104 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 105 | `),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 106 | `"solicitud de token",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 107 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 108 | `if respuesta.status_code != 200:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 109 | `raise RuntimeError(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 110 | `f"Error {respuesta.status_code} al pedir el token: "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 111 | `f"{resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 112 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 113 | `datos = respuesta.json()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 114 | `if "access_token" not in datos:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 115 | `raise RuntimeError(f"Shopify no devolvió access_token: {datos}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 116 | `` | Línea en blanco: separa bloques lógicos. |
-| 117 | `_TOKEN = datos["access_token"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 118 | `return _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 119 | `` | Línea en blanco: separa bloques lógicos. |
-| 120 | `` | Línea en blanco: separa bloques lógicos. |
-| 121 | `def graphql_query(query: str, variables: dict \| None = None) -> dict:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 122 | `"""Ejecuta una consulta GraphQL y devuelve el bloque 'data'."""` | Docstring: describe el propósito del bloque. |
-| 123 | `url = f"https://{normalizar_shop(SHOP)}/admin/api/{API_VERSION}/graphql.json"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 124 | `` | Línea en blanco: separa bloques lógicos. |
-| 125 | `for intento in range(1, INTENTOS + 1):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 126 | `respuesta = peticion_con_reintento(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 127 | `lambda: requests.post(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 128 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 129 | `json={"query": query, "variables": variables or {}},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 130 | `headers={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 131 | `"X-Shopify-Access-Token": get_shopify_token(),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 132 | `"Content-Type": "application/json",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 133 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 134 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 135 | `),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 136 | `"consulta GraphQL",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 137 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 138 | `if respuesta.status_code != 200:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 139 | `raise RuntimeError(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 140 | `f"Error {respuesta.status_code} en GraphQL: {resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 141 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 142 | `resultado = respuesta.json()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 143 | `errores = resultado.get("errors") or []` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 144 | `` | Línea en blanco: separa bloques lógicos. |
-| 145 | `es_throttled = any(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 146 | `error.get("extensions", {}).get("code") == "THROTTLED"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 147 | `for error in errores` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 148 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 149 | `if es_throttled and intento < INTENTOS:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 150 | `espera = 2 ** (intento - 1)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 151 | `print(f"  GraphQL limitó la tasa; reintentando en {espera}s...")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 152 | `time.sleep(espera)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 153 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 154 | `if errores:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 155 | `raise RuntimeError(f"Errores de GraphQL: {errores}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 156 | `return resultado.get("data", {})` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 157 | `` | Línea en blanco: separa bloques lógicos. |
-| 158 | `raise RuntimeError("La consulta GraphQL agotó los reintentos por límite de tasa")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 159 | `` | Línea en blanco: separa bloques lógicos. |
-| 160 | `` | Línea en blanco: separa bloques lógicos. |
-| 161 | `if __name__ == "__main__":` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 162 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 163 | `datos = graphql_query("{ shop { name myshopifyDomain } }")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 164 | `tienda = datos["shop"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 165 | `print(f"Conectado a: {tienda['name']} ({tienda['myshopifyDomain']})")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 166 | `except (RuntimeError, requests.RequestException, KeyError) as error:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 167 | `print(f"Error de conexión: {error}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 66 | `def validar_configuracion() -> None:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 67 | `"""Verifica que existan las tres credenciales antes de llamar a la API."""` | Docstring: describe el propósito del bloque. |
+| 68 | `faltantes = [` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 69 | `nombre` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 70 | `for nombre, valor in (` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 71 | `("SHOPIFY_SHOP", SHOP),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 72 | `("SHOPIFY_CLIENT_ID", CLIENT_ID),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 73 | `("SHOPIFY_CLIENT_SECRET", CLIENT_SECRET),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 74 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 75 | `if not valor` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 76 | `]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 77 | `if faltantes:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 78 | `raise RuntimeError("Faltan variables en .env: " + ", ".join(faltantes))` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 79 | `` | Línea en blanco: separa bloques lógicos. |
+| 80 | `` | Línea en blanco: separa bloques lógicos. |
+| 81 | `def peticion_con_reintento(constructor, descripcion: str) -> requests.Response:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 82 | `"""Ejecuta una petición con espera exponencial si Shopify limita la tasa."""` | Docstring: describe el propósito del bloque. |
+| 83 | `for intento in range(1, INTENTOS + 1):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 84 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 85 | `respuesta = constructor()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 86 | `except requests.RequestException as error:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 87 | `LOGGER.error("Error de red en %s (intento %s): %s", descripcion, intento, error)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 88 | `if intento == INTENTOS:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 89 | `raise RuntimeError(f"{descripcion}: {error}") from error` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 90 | `espera = 2 ** (intento - 1)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 91 | `print(f"  {descripcion}: error de red; reintentando en {espera}s...")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 92 | `time.sleep(espera)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 93 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 94 | `` | Línea en blanco: separa bloques lógicos. |
+| 95 | `if respuesta.status_code == 429:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 96 | `LOGGER.error("HTTP 429 en %s (intento %s)", descripcion, intento)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 97 | `if respuesta.status_code == 429 and intento < INTENTOS:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 98 | `espera = 2 ** (intento - 1)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 99 | `print(f"  Límite de tasa alcanzado ({descripcion}); reintentando en {espera}s...")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 100 | `time.sleep(espera)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 101 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 102 | `return respuesta` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 103 | `raise RuntimeError(f"No se pudo completar: {descripcion}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 104 | `` | Línea en blanco: separa bloques lógicos. |
+| 105 | `` | Línea en blanco: separa bloques lógicos. |
+| 106 | `def get_shopify_token() -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 107 | `"""Obtiene (y reutiliza) un access token mediante client_credentials."""` | Docstring: describe el propósito del bloque. |
+| 108 | `global _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 109 | `if _TOKEN:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 110 | `return _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 111 | `` | Línea en blanco: separa bloques lógicos. |
+| 112 | `validar_configuracion()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 113 | `url = f"https://{normalizar_shop(SHOP)}/admin/oauth/access_token"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 114 | `respuesta = peticion_con_reintento(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 115 | `lambda: requests.post(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 116 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 117 | `data={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 118 | `"grant_type": "client_credentials",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 119 | `"client_id": CLIENT_ID,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 120 | `"client_secret": CLIENT_SECRET,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 121 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 122 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 123 | `),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 124 | `"solicitud de token",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 125 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 126 | `if respuesta.status_code != 200:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 127 | `mensaje = (` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 128 | `f"Error {respuesta.status_code} al pedir el token: "` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 129 | `f"{resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 130 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 131 | `LOGGER.error(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 132 | `raise RuntimeError(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 133 | `datos = respuesta.json()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 134 | `if "access_token" not in datos:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 135 | `mensaje = f"Shopify no devolvió access_token: {datos}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 136 | `LOGGER.error(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 137 | `raise RuntimeError(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 138 | `` | Línea en blanco: separa bloques lógicos. |
+| 139 | `_TOKEN = datos["access_token"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 140 | `return _TOKEN` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 141 | `` | Línea en blanco: separa bloques lógicos. |
+| 142 | `` | Línea en blanco: separa bloques lógicos. |
+| 143 | `def graphql_query(query: str, variables: dict \| None = None) -> dict:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 144 | `"""Ejecuta una consulta GraphQL y devuelve el bloque 'data'."""` | Docstring: describe el propósito del bloque. |
+| 145 | `url = f"https://{normalizar_shop(SHOP)}/admin/api/{API_VERSION}/graphql.json"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 146 | `` | Línea en blanco: separa bloques lógicos. |
+| 147 | `for intento in range(1, INTENTOS + 1):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 148 | `respuesta = peticion_con_reintento(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 149 | `lambda: requests.post(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 150 | `url,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 151 | `json={"query": query, "variables": variables or {}},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 152 | `headers={` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 153 | `"X-Shopify-Access-Token": get_shopify_token(),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 154 | `"Content-Type": "application/json",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 155 | `},` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 156 | `timeout=30,` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 157 | `),` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 158 | `"consulta GraphQL",` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 159 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 160 | `if respuesta.status_code != 200:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 161 | `mensaje = (` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 162 | `f"Error {respuesta.status_code} en GraphQL: {resumen_error(respuesta)}"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 163 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 164 | `LOGGER.error(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 165 | `raise RuntimeError(mensaje)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 166 | `resultado = respuesta.json()` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 167 | `errores = resultado.get("errors") or []` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 168 | `` | Línea en blanco: separa bloques lógicos. |
+| 169 | `es_throttled = any(` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 170 | `error.get("extensions", {}).get("code") == "THROTTLED"` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 171 | `for error in errores` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 172 | `)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 173 | `if es_throttled and intento < INTENTOS:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 174 | `espera = 2 ** (intento - 1)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 175 | `print(f"  GraphQL limitó la tasa; reintentando en {espera}s...")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 176 | `time.sleep(espera)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 177 | `continue` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 178 | `if errores:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 179 | `LOGGER.error("Errores de GraphQL: %s", errores)` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 180 | `raise RuntimeError(f"Errores de GraphQL: {errores}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 181 | `return resultado.get("data", {})` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 182 | `` | Línea en blanco: separa bloques lógicos. |
+| 183 | `raise RuntimeError("La consulta GraphQL agotó los reintentos por límite de tasa")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 184 | `` | Línea en blanco: separa bloques lógicos. |
+| 185 | `` | Línea en blanco: separa bloques lógicos. |
+| 186 | `if __name__ == "__main__":` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 187 | `try:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 188 | `datos = graphql_query("{ shop { name myshopifyDomain } }")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 189 | `tienda = datos["shop"]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 190 | `print(f"Conectado a: {tienda['name']} ({tienda['myshopifyDomain']})")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 191 | `except (RuntimeError, requests.RequestException, KeyError) as error:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 192 | `print(f"Error de conexión: {error}")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 
 ## `carrito/datos.py`
 

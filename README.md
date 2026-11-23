@@ -133,6 +133,7 @@ El script:
 - Crea productos con precio, SKU, stock, categoría e imagen.
 - Sincroniza precio e imagen de los productos que ya existen.
 - Crea colecciones por categoría y agrega los productos.
+- Reintenta con backoff exponencial y registra los fallos en `logs/shopify_errores.log` (excluido de Git).
 
 Regenerar la documentación línea por línea:
 

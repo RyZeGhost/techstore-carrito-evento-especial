@@ -2,7 +2,7 @@
 
 **Tienda:** TechStore — `https://techstore-d8vn3rhk.myshopify.com`
 **Grupo:** (completar con los integrantes)
-**Fecha:** 22 de noviembre de 2026
+**Fecha:** 22–23 de noviembre de 2026
 
 ---
 
@@ -25,7 +25,7 @@ La tienda se montó sobre **Shopify**, plataforma validada por el enunciado.
 | Marketing y promociones | Recomendado | Reglas 2x1 y cupones modeladas en el carrito; pueden replicarse como descuentos de Shopify. |
 | Analítica, roles, integraciones | Referencial | No exigidas. |
 
-La evidencia visual de esta etapa (catálogo, navegación, carrito, checkout en modo prueba y repositorio de GitHub) se adjunta en la presentación.
+La evidencia visual de esta etapa (catálogo, navegación, carrito, checkout en modo prueba y repositorio de GitHub) tiene espacios reservados en el anexo de [`presentacion.md`](presentacion.md), pendientes de insertar las capturas por el grupo.
 
 ### Integración desde Python
 
@@ -33,6 +33,8 @@ Se creó `shopify_client.py`, que usa el flujo **client credentials**:
 
 1. `get_shopify_token()` intercambia `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET` por un token de 24 h mediante `POST /admin/oauth/access_token`.
 2. `graphql_query(query, variables)` envía el token en `X-Shopify-Access-Token` a la Admin GraphQL API `2026-01`.
+
+Se usa GraphQL directo (sin Bulk Operations ni REST) porque el catálogo tiene solo 22 SKU: una carga idempotente con backoff exponencial es suficiente y evita gestionar operaciones asíncronas. Los errores de red, HTTP 429, fallos de token y errores GraphQL se registran en `logs/shopify_errores.log`, carpeta excluida del repositorio. `peticion_con_reintento()` aplica espera exponencial y `carrito/datos.py` valida el esquema JSON antes de cualquier petición.
 
 Prueba ejecutada:
 
@@ -99,7 +101,7 @@ Las tres implementaciones devuelven diccionarios **exactamente iguales** en todo
 
 ### Errores y correcciones
 
-Ver [`errores_corregidos.md`](errores_corregidos.md). Incluye 23 incidencias reales, desde credenciales y scopes de Shopify hasta cambios de la API 2026, imágenes, precios, limpieza del checkout, validación del catálogo y límites de tasa.
+Ver [`errores_corregidos.md`](errores_corregidos.md). Incluye 24 incidencias reales, desde credenciales y scopes de Shopify hasta cambios de la API 2026, imágenes, precios, limpieza del checkout, validación del catálogo, límites de tasa y registro de errores.
 
 ### Explicación del código
 
