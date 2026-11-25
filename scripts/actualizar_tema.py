@@ -145,14 +145,17 @@ def main():
 
     escribir_asset(tema["id"], clave, modificado, args.dry_run)
 
-    # Dawn guarda "products_per_page" en el JSON de la sección: lo alineamos.
-    clave_settings = clave.replace(".liquid", ".json")
-    settings = leer_asset(tema["id"], clave_settings)
-    if settings and "products_per_page" in settings:
+    # Alineamos también el JSON que guarda el ajuste "products_per_page".
+    # Según la versión de Dawn puede vivir con la sección o en el template.
+    for clave_settings in (clave.replace(".liquid", ".json"), "templates/collection.json"):
+        settings = leer_asset(tema["id"], clave_settings)
+        if not settings or "products_per_page" not in settings:
+            continue
         nuevo_settings = re.sub(
             r'("products_per_page"\s*:\s*)\d+', rf"\g<1>{POR_PAGINA}", settings, count=1
         )
         if not args.dry_run:
+            RESPALDO.mkdir(exist_ok=True)
             (RESPALDO / clave_settings.replace("/", "_")).write_text(
                 settings, encoding="utf-8"
             )

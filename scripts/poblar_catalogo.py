@@ -10,6 +10,7 @@ El script es idempotente: si el SKU ya existe, lo omite.
 import argparse
 import sys
 import unicodedata
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Permite importar el módulo de la raíz aunque se ejecute como paquete.
@@ -24,6 +25,7 @@ PRODUCTOS_QUERY = """
     nodes {
       id
       title
+      publishedAt
       variants(first: 250) { nodes { id sku price } }
       media(first: 20) { nodes { id } }
     }
@@ -77,6 +79,15 @@ mutation ImagenAgregar($productId: ID!, $media: [CreateMediaInput!]!) {
 }
 """
 
+PRODUCT_PUBLISH = """
+mutation PublicarProducto($id: ID!, $fecha: DateTime!) {
+  productUpdate(input: {id: $id, publishedAt: $fecha}) {
+    product { id title publishedAt }
+    userErrors { field message }
+  }
+}
+"""
+
 COLLECTION_CREATE = """
 mutation ColeccionCrear($input: CollectionInput!) {
   collectionCreate(input: $input) {
@@ -106,6 +117,23 @@ mutation AgregarProductos($id: ID!, $productIds: [ID!]!) {
   }
 }
 """
+
+
+def fecha_publicacion():
+    """Devuelve una fecha UTC válida para el tipo DateTime de Shopify."""
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace(
+        "+00:00", "Z"
+    )
+
+
+def publicar_producto(producto_id, fecha):
+    """Publica un producto en el canal Online Store si aún no lo está."""
+    respuesta = graphql_query(
+        PRODUCT_PUBLISH, {"id": producto_id, "fecha": fecha}
+    )["productUpdate"]
+    if respuesta["userErrors"]:
+        raise RuntimeError(f"Error publicando producto: {respuesta['userErrors']}")
+    return respuesta["product"]["publishedAt"]
 
 
 def skus_existentes():
@@ -190,8 +218,8 @@ def crear_producto(producto, location_id):
     return respuesta["product"]
 
 
-def sincronizar_producto(producto, nodo):
-    """Ajusta precio e imagen de un producto que ya existe en Shopify."""
+def sincronizar_producto(producto, nodo, fecha):
+    """Ajusta precio, imagen y publicación de un producto existente."""
     cambios = []
     variante = next(
         (v for v in nodo["variants"]["nodes"] if v["sku"] == producto["sku"]), None
@@ -217,6 +245,12 @@ def sincronizar_producto(producto, nodo):
         if respuesta["userErrors"]:
             raise RuntimeError(f"Error agregando imagen: {respuesta['userErrors']}")
         cambios.append("imagen")
+
+    # `status: ACTIVE` no basta: sin `publishedAt` el producto no aparece en
+    # Online Store aunque esté en una colección. Por eso se publica aquí.
+    if not nodo.get("publishedAt"):
+        publicar_producto(nodo["id"], fecha)
+        cambios.append("publicación")
 
     return cambios
 
@@ -279,6 +313,7 @@ def main():
 
     catalogo = cargar_catalogo()
     existentes, nodos = skus_existentes()
+    fecha = fecha_publicacion()
     print(f"SKUs existentes en la tienda: {len(existentes)}")
 
     nodos_por_sku = {}
@@ -294,16 +329,28 @@ def main():
 
     if args.dry_run:
         for producto in pendientes:
-            print(f"  [DRY RUN] Crear {producto['sku']} - {producto['nombre']}")
+            print(
+                f"  [DRY RUN] Crear {producto['sku']} - {producto['nombre']} "
+                "(y publicar en Online Store)"
+            )
         for producto in catalogo["productos"]:
             nodo = nodos_por_sku.get(producto["sku"])
             if nodo:
-                sin_precio = any(
+                razones = []
+                if any(
                     v["sku"] == producto["sku"] and v["price"] != str(producto["precio"])
                     for v in nodo["variants"]["nodes"]
-                )
-                if sin_precio or not nodo["media"]["nodes"]:
-                    print(f"  [DRY RUN] Sincronizar {producto['sku']}")
+                ):
+                    razones.append("precio")
+                if not nodo["media"]["nodes"]:
+                    razones.append("imagen")
+                if not nodo.get("publishedAt"):
+                    razones.append("publicación")
+                if razones:
+                    print(
+                        f"  [DRY RUN] Sincronizar {producto['sku']}: "
+                        f"{', '.join(razones)}"
+                    )
         return 0
 
     location_id = location_principal() if pendientes else None
@@ -312,12 +359,13 @@ def main():
     for producto in pendientes:
         creado = crear_producto(producto, location_id)
         ids_por_sku[producto["sku"]] = creado["id"]
-        print(f"  Creado {producto['sku']} -> {creado['handle']}")
+        publicar_producto(creado["id"], fecha)
+        print(f"  Creado {producto['sku']} -> {creado['handle']} (publicado)")
 
     for producto in catalogo["productos"]:
         nodo = nodos_por_sku.get(producto["sku"])
         if nodo:
-            cambios = sincronizar_producto(producto, nodo)
+            cambios = sincronizar_producto(producto, nodo, fecha)
             if cambios:
                 print(f"  Actualizado {producto['sku']}: {', '.join(cambios)}")
 
