@@ -546,11 +546,17 @@ if len(carrito) > 0 and cartel is not None:
 # acumuladores con ``+=``. ``subtotal`` suma los importes antes de descuento,
 # ``descuento_total`` suma el descuento de cada línea y, una vez cerrado el for,
 # ``total_final`` se deriva con una resta. No se recalcula ningún precio: este
-# bloque solo lee el estado que los anteriores dejaron en la lista. Luego se
-# construyen ``cliente``, ``resumen`` y ``resultado`` con asignaciones campo por
-# campo; el orden de inserción fija el orden de claves del JSON, por eso el
-# archivo es determinista. ``avisos`` se comparte por referencia en dos lugares
-# del resultado. El bloque ``with`` abre el archivo en modo escritura y lo cierra
+# bloque solo lee el estado que los anteriores dejaron en la lista.
+# A continuación se normaliza el esquema de salida para que coincida con el de
+# los otros dos paradigmas. Se reconstruye cada línea con un for campo por campo:
+# se omite ``precio_original`` (propio del regalo) y se inserta
+# ``precio_unitario_original`` justo después de ``precio_unitario`` cuando la
+# línea no lo trae; las cámaras ya lo tienen y se copian tal cual. A ``regalo``
+# se le quita ``motivo`` y ``resumen`` queda con cuatro claves. Todo se hace con
+# bucles, asignaciones, ``del`` y ``append``: no hay def, class ni comprensiones.
+# El orden de inserción fija el orden de claves del JSON, por eso el archivo es
+# determinista. El bloque ``with`` abre el archivo en modo escritura con salto
+# LF explícito (``newline="\n"``) para que Windows no convierta a CRLF, y lo cierra
 # automáticamente al salir; json.dump vuelca el dict con indentación y caracteres
 # UTF-8 reales, y se añade un salto de línea final.
 
@@ -564,6 +570,20 @@ for linea in carrito:
 
 total_final = subtotal - descuento_total
 
+carrito_normalizado = []
+for linea in carrito:
+    linea_normalizada = {}
+    for clave, valor in linea.items():
+        if clave == "precio_original":
+            continue
+        linea_normalizada[clave] = valor
+        if clave == "precio_unitario" and "precio_unitario_original" not in linea:
+            linea_normalizada["precio_unitario_original"] = valor
+    carrito_normalizado.append(linea_normalizada)
+
+if "motivo" in regalo:
+    del regalo["motivo"]
+
 cliente = {}
 cliente["puertas"] = puertas
 cliente["ventanas"] = ventanas
@@ -572,32 +592,20 @@ cliente["cantidad_camaras"] = cantidad_camaras
 cliente["cantidad_sensores_movimiento"] = cantidad_sensores_movimiento
 
 resumen = {}
-resumen["cantidad_sensores_apertura"] = cantidad_sensores_apertura
-resumen["cantidad_sensores_movimiento"] = cantidad_sensores_movimiento
-resumen["cantidad_camaras"] = cantidad_camaras
-resumen["etiquetas_movimiento_usadas"] = etiquetas_movimiento
-resumen["etiquetas_movimiento_excluidas"] = etiquetas_excluidas
-resumen["subtotal_sensores_apertura"] = subtotal_apertura
-resumen["subtotal_sensores_movimiento"] = subtotal_movimiento
-resumen["subtotal_camaras"] = subtotal_camaras
-resumen["descuento_camaras_porcentaje"] = porcentaje_camaras
-resumen["descuento_camaras_monto"] = descuento_camaras_monto
-resumen["subtotal_camaras_con_descuento"] = subtotal_camaras - descuento_camaras_monto
+resumen["cantidad_items"] = len(carrito_normalizado)
 resumen["subtotal"] = subtotal
 resumen["descuento_total"] = descuento_total
 resumen["total_final"] = total_final
-resumen["total"] = total_final
-resumen["avisos"] = avisos
 
 resultado = {}
 resultado["cliente"] = cliente
-resultado["carrito"] = carrito
+resultado["carrito"] = carrito_normalizado
 resultado["regalo"] = regalo
 resultado["resumen"] = resumen
 resultado["inventario"] = inventario
 resultado["avisos"] = avisos
 
-with RUTA_RESULTADO.open("w", encoding="utf-8") as archivo:
+with RUTA_RESULTADO.open("w", encoding="utf-8", newline="\n") as archivo:
     json.dump(resultado, archivo, ensure_ascii=False, indent=2)
     archivo.write("\n")
 

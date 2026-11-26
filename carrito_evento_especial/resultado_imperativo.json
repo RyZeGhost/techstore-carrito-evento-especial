@@ -16,6 +16,7 @@
       ],
       "cantidad": 6,
       "precio_unitario": 9990,
+      "precio_unitario_original": 9990,
       "subtotal": 59940,
       "descuento": 0,
       "total": 59940,
@@ -32,6 +33,7 @@
       ],
       "cantidad": 2,
       "precio_unitario": 14990,
+      "precio_unitario_original": 14990,
       "subtotal": 29980,
       "descuento": 0,
       "total": 29980,
@@ -63,7 +65,7 @@
       ],
       "cantidad": 1,
       "precio_unitario": 0,
-      "precio_original": 4990,
+      "precio_unitario_original": 0,
       "subtotal": 0,
       "descuento": 0,
       "total": 0,
@@ -78,29 +80,13 @@
     "cantidad": 1,
     "precio_original": 4990,
     "precio_final": 0,
-    "subtotal": 0,
-    "motivo": "Regalo automático: carrito con artículos y stock del cartel."
+    "subtotal": 0
   },
   "resumen": {
-    "cantidad_sensores_apertura": 6,
-    "cantidad_sensores_movimiento": 2,
-    "cantidad_camaras": 3,
-    "etiquetas_movimiento_usadas": [
-      "sensor_movimiento",
-      "inmune_mascotas"
-    ],
-    "etiquetas_movimiento_excluidas": [],
-    "subtotal_sensores_apertura": 59940,
-    "subtotal_sensores_movimiento": 29980,
-    "subtotal_camaras": 74970,
-    "descuento_camaras_porcentaje": 0.1,
-    "descuento_camaras_monto": 7497,
-    "subtotal_camaras_con_descuento": 67473,
+    "cantidad_items": 4,
     "subtotal": 164890,
     "descuento_total": 7497,
-    "total_final": 157393,
-    "total": 157393,
-    "avisos": []
+    "total_final": 157393
   },
   "inventario": {
     "CAM-AXIS2": 20,
