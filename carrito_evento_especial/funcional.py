@@ -290,6 +290,82 @@ def filtrar_por_etiquetas(
     )
 
 
+def _cumple_mascotas(
+    producto: Producto, tiene_mascotas: bool, reglas: ReglasKit
+) -> bool:
+    """Exige inmunidad cuando hay mascotas y la excluye cuando no las hay."""
+    inmune = producto.tiene_etiqueta(reglas.etiqueta_inmune)
+    return inmune if tiene_mascotas else not inmune
+
+
+def sensores_apertura_disponibles(
+    catalogo: tuple[Producto, ...], reglas: ReglasKit = REGLAS
+) -> tuple[Producto, ...]:
+    """(a) Extrae sensores de apertura con stock, con ``filter`` y generador."""
+    return tuple(
+        filter(
+            lambda producto: producto.stock > 0,
+            (
+                producto
+                for producto in catalogo
+                if producto.tiene_etiqueta(reglas.etiqueta_apertura)
+            ),
+        )
+    )
+
+
+def sensores_movimiento_disponibles(
+    catalogo: tuple[Producto, ...],
+    tiene_mascotas: bool,
+    reglas: ReglasKit = REGLAS,
+) -> tuple[Producto, ...]:
+    """(b) Extrae movimiento, exigiendo ``inmune_mascotas`` si aplica."""
+    return tuple(
+        filter(
+            lambda producto: producto.stock > 0,
+            (
+                producto
+                for producto in catalogo
+                if producto.tiene_etiqueta(reglas.etiqueta_movimiento)
+                and _cumple_mascotas(producto, tiene_mascotas, reglas)
+            ),
+        )
+    )
+
+
+def camaras_disponibles(
+    catalogo: tuple[Producto, ...], reglas: ReglasKit = REGLAS
+) -> tuple[Producto, ...]:
+    """(c) Extrae cámaras con stock, con ``filter`` y expresión generadora."""
+    return tuple(
+        filter(
+            lambda producto: producto.stock > 0,
+            (
+                producto
+                for producto in catalogo
+                if producto.tiene_etiqueta(reglas.etiqueta_camara)
+            ),
+        )
+    )
+
+
+def cartel_disuasivo_disponible(
+    catalogo: tuple[Producto, ...], reglas: ReglasKit = REGLAS
+) -> Producto | None:
+    """(c) Devuelve el primer cartel con stock, o ``None`` si no hay."""
+    return next(
+        filter(
+            lambda producto: producto.stock > 0,
+            (
+                producto
+                for producto in catalogo
+                if producto.tiene_etiqueta(reglas.etiqueta_regalo)
+            ),
+        ),
+        None,
+    )
+
+
 def seleccionar(
     productos: tuple[Producto, ...],
     cantidad: int,
@@ -360,9 +436,9 @@ def regla_apertura(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
         return estado
 
     producto, cantidad, avisos = seleccionar(
-        estado.catalogo,
+        sensores_apertura_disponibles(estado.catalogo, reglas),
         cantidad,
-        (reglas.etiqueta_apertura,),
+        (),
         mensaje_aviso="Sensores de apertura ajustados de",
     )
     if producto is None:
@@ -390,18 +466,12 @@ def regla_movimiento(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
     if cantidad == 0:
         return estado
 
-    incluidas = (reglas.etiqueta_movimiento,)
-    excluidas: tuple[str, ...] = ()
-    if estado.cliente.tiene_mascotas:
-        incluidas = incluidas + (reglas.etiqueta_inmune,)
-    else:
-        excluidas = excluidas + (reglas.etiqueta_inmune,)
-
     producto, cantidad, avisos = seleccionar(
-        estado.catalogo,
+        sensores_movimiento_disponibles(
+            estado.catalogo, estado.cliente.tiene_mascotas, reglas
+        ),
         cantidad,
-        incluidas,
-        excluidas,
+        (),
         mensaje_aviso="Sensores de movimiento ajustados de",
     )
     if producto is None:
@@ -431,9 +501,9 @@ def regla_camaras(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
 
     porcentaje = porcentaje_camaras(cantidad, reglas)
     producto, cantidad, avisos = seleccionar(
-        estado.catalogo,
+        camaras_disponibles(estado.catalogo, reglas),
         cantidad,
-        (reglas.etiqueta_camara,),
+        (),
         mensaje_aviso="Cámaras ajustadas de",
     )
     if producto is None:
@@ -467,10 +537,7 @@ def regla_regalo(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
     if len(estado.items) == 0:
         return estado
 
-    carteles = filtrar_por_etiquetas(
-        estado.catalogo, (reglas.etiqueta_regalo,)
-    )
-    cartel = next(filter(lambda p: p.stock > 0, carteles), None)
+    cartel = cartel_disuasivo_disponible(estado.catalogo, reglas)
     if cartel is None:
         return replace(
             estado,
