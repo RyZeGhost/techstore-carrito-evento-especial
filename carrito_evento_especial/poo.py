@@ -6,6 +6,8 @@ Este módulo modela el agregado completo del carrito:
 * ``ItemCarrito``: una línea del carrito, con cantidad, precio y descuento privados.
 * ``CarritoEventoEspecial``: encapsula la colección de líneas, el estado del
   cliente y ejecuta polimórficamente las reglas de configuración del kit.
+* ``RepositorioShopifyJSON``: carga el catálogo como ``Producto`` y persiste el
+  estado final en ``resultado_poo.json``.
 
 El encapsulamiento se aplica con atributos ``_precio``, ``_stock`` y
 ``_cantidad``, expuestos solo mediante propiedades ``@property`` que validan el
@@ -775,14 +777,86 @@ class CarritoEventoEspecial:
         return vista
 
 
+class RepositorioShopifyJSON:
+    """Persistencia JSON: carga el catálogo y guarda el resultado del carrito.
+
+    Mantiene privadas las rutas y expone solo dos operaciones: ``cargar_catalogo``
+    devuelve ``Producto`` ya instanciados y ``exportar_resultado`` escribe el
+    estado final del agregado con el mismo formato determinista en todas las
+    ejecuciones.
+    """
+
+    def __init__(self, ruta_catalogo=None, ruta_resultado=None):
+        self._ruta_catalogo = RUTA_CATALOGO
+        self._ruta_resultado = RUTA_CATALOGO.parent / "resultado_poo.json"
+        if ruta_catalogo is not None:
+            self.ruta_catalogo = ruta_catalogo
+        if ruta_resultado is not None:
+            self.ruta_resultado = ruta_resultado
+
+    @staticmethod
+    def _validar_ruta(nombre, valor):
+        """Acepta ``str`` o ``Path`` y exige extensión JSON."""
+        if isinstance(valor, Path):
+            ruta = valor
+        elif isinstance(valor, str) and valor.strip():
+            ruta = Path(valor)
+        else:
+            raise TypeError(nombre + " debe ser una cadena o pathlib.Path")
+        if ruta.suffix.lower() != ".json":
+            raise ValueError(nombre + " debe terminar en .json")
+        return ruta
+
+    @property
+    def ruta_catalogo(self):
+        return self._ruta_catalogo
+
+    @ruta_catalogo.setter
+    def ruta_catalogo(self, valor):
+        self._ruta_catalogo = self._validar_ruta("ruta_catalogo", valor)
+
+    @property
+    def ruta_resultado(self):
+        return self._ruta_resultado
+
+    @ruta_resultado.setter
+    def ruta_resultado(self, valor):
+        self._ruta_resultado = self._validar_ruta("ruta_resultado", valor)
+
+    def cargar_catalogo(self):
+        """Lee el archivo JSON y devuelve una lista de ``Producto``."""
+        with self._ruta_catalogo.open(encoding="utf-8") as archivo:
+            datos = json.load(archivo)
+        if not isinstance(datos, dict) or not isinstance(datos.get("productos"), list):
+            raise ValueError("catalogo_shopify.json debe contener una lista 'productos'")
+
+        productos = []
+        for fila in datos["productos"]:
+            productos.append(Producto.desde_dict(fila))
+        return productos
+
+    def exportar_resultado(self, carrito):
+        """Serializa el estado final del agregado y devuelve la ruta escrita."""
+        if not isinstance(carrito, CarritoEventoEspecial):
+            raise TypeError("carrito debe ser una instancia de CarritoEventoEspecial")
+
+        contenido = carrito.a_dict()
+        # newline="\n" evita que Windows convierta los saltos en CRLF: el JSON
+        # resultante es byte-idéntico en cualquier sistema operativo.
+        with self._ruta_resultado.open("w", encoding="utf-8", newline="\n") as archivo:
+            json.dump(contenido, archivo, ensure_ascii=False, indent=2)
+            archivo.write("\n")
+        return self._ruta_resultado
+
+
 if __name__ == "__main__":
-    # El agregado recibe el catálogo crudo y el estado del cliente; las reglas se
-    # tratan como objetos intercambiables: mismo mensaje y mismos argumentos.
-    with RUTA_CATALOGO.open(encoding="utf-8") as archivo:
-        catalogo = json.load(archivo)
+    # El repositorio entrega ``Producto`` instanciados; el agregado los clona
+    # para que las reservas de stock no modifiquen los objetos cargados.
+    repositorio = RepositorioShopifyJSON()
+    productos = repositorio.cargar_catalogo()
 
     carrito = CarritoEventoEspecial(
-        catalogo=catalogo,
+        catalogo=productos,
         puertas=2,
         ventanas=4,
         tiene_mascotas=True,
@@ -797,4 +871,5 @@ if __name__ == "__main__":
     reglas.append(ReglaCartelRegalo())
 
     carrito.ejecutar_reglas(reglas)
+    repositorio.exportar_resultado(carrito)
     print(json.dumps(carrito.a_dict(), ensure_ascii=False, indent=2))
