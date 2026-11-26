@@ -137,6 +137,26 @@ class Cliente:
     cantidad_sensores_movimiento: int
 
 
+def cantidad_positiva(valor: int) -> int:
+    """Devuelve el entero positivo recibido, o ``0`` si no lo es."""
+    if isinstance(valor, bool) or not isinstance(valor, int) or valor <= 0:
+        return 0
+    return valor
+
+
+def normalizar_cliente(cliente: Cliente) -> Cliente:
+    """Devuelve un ``Cliente`` nuevo con toda cantidad no positiva en ``0``."""
+    return replace(
+        cliente,
+        puertas=cantidad_positiva(cliente.puertas),
+        ventanas=cantidad_positiva(cliente.ventanas),
+        cantidad_camaras=cantidad_positiva(cliente.cantidad_camaras),
+        cantidad_sensores_movimiento=cantidad_positiva(
+            cliente.cantidad_sensores_movimiento
+        ),
+    )
+
+
 @dataclass(frozen=True)
 class Regalo:
     """Estado del obsequio; la instancia vacía es el valor neutral."""
@@ -406,6 +426,8 @@ def seleccionar(
     mensaje_aviso: str = "",
 ) -> tuple[Producto | None, int, tuple[str, ...]]:
     """Elige el SKU más barato con stock y ajusta stock parcial sin mutar."""
+    if cantidad_positiva(cantidad) == 0:
+        return None, 0, ()
     elegibles = filtrar_por_etiquetas(productos, incluidas, excluidas)
     stock_maximo = max(map(lambda p: p.stock, elegibles), default=0)
     if stock_maximo <= 0:
@@ -443,8 +465,10 @@ def reemplazar_producto(
 
 def porcentaje_camaras(cantidad: int, reglas: ReglasKit = REGLAS) -> float:
     """Resuelve el tramo de descuento aplicable con ``filter``."""
-    if isinstance(cantidad, bool) or not isinstance(cantidad, int) or cantidad < 0:
+    if isinstance(cantidad, bool) or not isinstance(cantidad, int):
         raise ValueError("cantidad de cámaras debe ser un entero no negativo")
+    if cantidad <= 0:
+        return 0.0
     tramo = next(
         filter(
             lambda t: cantidad >= t.minimo
@@ -484,7 +508,10 @@ def items_sensores_apertura(
     la tupla de ítems y los avisos de stock parcial, sin alterar las tuplas
     de entrada.
     """
-    solicitada = parametros.puertas + parametros.ventanas
+    solicitada = (
+        cantidad_positiva(parametros.puertas)
+        + cantidad_positiva(parametros.ventanas)
+    )
     if solicitada <= 0:
         return (), ()
 
@@ -506,7 +533,7 @@ def items_sensores_movimiento(
     Usa la misma transformación con ``map`` que la regla de apertura, pero
     toma la cantidad desde ``cantidad_sensores_movimiento`` del kit.
     """
-    solicitada = parametros.cantidad_sensores_movimiento
+    solicitada = cantidad_positiva(parametros.cantidad_sensores_movimiento)
     if solicitada <= 0:
         return (), ()
 
@@ -624,7 +651,10 @@ def aplicar_transformaciones(
 
 def regla_apertura(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
     """Agrega ``puertas + ventanas`` sensores o registra un aviso."""
-    cantidad = estado.cliente.puertas + estado.cliente.ventanas
+    cantidad = (
+        cantidad_positiva(estado.cliente.puertas)
+        + cantidad_positiva(estado.cliente.ventanas)
+    )
     if cantidad == 0:
         return estado
 
@@ -651,7 +681,7 @@ def regla_apertura(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
 
 def regla_movimiento(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
     """Elige sensores inmunes a mascotas o estándar según la bandera."""
-    cantidad = estado.cliente.cantidad_sensores_movimiento
+    cantidad = cantidad_positiva(estado.cliente.cantidad_sensores_movimiento)
     if cantidad == 0:
         return estado
 
@@ -680,7 +710,7 @@ def regla_movimiento(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
 
 def regla_camaras(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
     """Agrega cámaras a precio de lista; el descuento aplica después."""
-    cantidad = estado.cliente.cantidad_camaras
+    cantidad = cantidad_positiva(estado.cliente.cantidad_camaras)
     if cantidad == 0:
         return estado
 
@@ -726,12 +756,16 @@ PIPELINE: tuple[Callable[..., Estado], ...] = (
 def inicializar(
     catalogo: tuple[Producto, ...], cliente: Cliente = CLIENTE_PRUEBA
 ) -> Estado:
-    """Crea el estado inicial con tuplas vacías y regalo neutral."""
-    return Estado(catalogo=catalogo, cliente=cliente)
+    """Estado inicial: tuplas vacías, regalo neutral y entradas saneadas."""
+    return Estado(
+        catalogo=tuple(catalogo), cliente=normalizar_cliente(cliente)
+    )
 
 
 def resolver(estado: Estado) -> Estado:
-    """Aplica el pipeline de reglas con ``reduce``."""
+    """Aplica el pipeline con ``reduce``; catálogo vacío es estado vacío seguro."""
+    if not estado.catalogo:
+        return estado
     return reduce(lambda acumulado, regla: regla(acumulado), PIPELINE, estado)
 
 
