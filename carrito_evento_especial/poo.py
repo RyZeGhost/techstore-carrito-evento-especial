@@ -1,9 +1,11 @@
 """Carrito Evento Especial - paradigma Orientado a Objetos.
 
-Este módulo modela las dos entidades base del carrito:
+Este módulo modela el agregado completo del carrito:
 
 * ``Producto``: un SKU del catálogo, con sus datos privados y acceso controlado.
 * ``ItemCarrito``: una línea del carrito, con cantidad, precio y descuento privados.
+* ``CarritoEventoEspecial``: encapsula la colección de líneas, el estado del
+  cliente y ejecuta polimórficamente las reglas de configuración del kit.
 
 El encapsulamiento se aplica con atributos ``_precio``, ``_stock`` y
 ``_cantidad``, expuestos solo mediante propiedades ``@property`` que validan el
@@ -513,39 +515,256 @@ class ReglaCartelRegalo(ReglaConfiguracionKit):
         return item
 
 
+class CarritoEventoEspecial:
+    """Agregado que encapsula el carrito, el estado del cliente y las reglas.
+
+    El exterior no manipula la lista de líneas ni el catálogo interno: solo
+    interactúa mediante propiedades y métodos. Al ejecutar reglas envía el mismo
+    mensaje ``aplicar(carrito, catalogo, parametros)`` a cada objeto, sin conocer
+    su clase concreta; por eso el motor es polimórfico.
+    """
+
+    def __init__(self, catalogo, puertas=0, ventanas=0, tiene_mascotas=False,
+                 cantidad_camaras=0, cantidad_sensores_movimiento=0):
+        self._items = []
+        self._catalogo = []
+        self._puertas = 0
+        self._ventanas = 0
+        self._tiene_mascotas = False
+        self._cantidad_camaras = 0
+        self._cantidad_sensores_movimiento = 0
+        self._avisos = []
+        self._regalo = {"incluido": False}
+
+        self.catalogo = catalogo
+        self.puertas = puertas
+        self.ventanas = ventanas
+        self.tiene_mascotas = tiene_mascotas
+        self.cantidad_camaras = cantidad_camaras
+        self.cantidad_sensores_movimiento = cantidad_sensores_movimiento
+
+    @staticmethod
+    def _validar_entero(nombre, valor):
+        """Centraliza la validación de dominio de los enteros del cliente."""
+        if isinstance(valor, bool) or not isinstance(valor, int):
+            raise TypeError(nombre + " debe ser un entero")
+        if valor < 0:
+            raise ValueError(nombre + " no puede ser negativo")
+        return valor
+
+    @property
+    def items(self):
+        """Copia en tupla de las líneas: el exterior no puede agregar ni quitar."""
+        return tuple(self._items)
+
+    @property
+    def cantidad_items(self):
+        return len(self._items)
+
+    @property
+    def catalogo(self):
+        """Copia en tupla de los ``Producto`` internos, con su stock ya reservado."""
+        return tuple(self._catalogo)
+
+    @catalogo.setter
+    def catalogo(self, valor):
+        """Acepta el dict del JSON o ``Producto`` y guarda copias privadas.
+
+        Al clonar cada producto, las reservas de stock de las reglas quedan
+        confinadas al carrito y no alteran el diccionario original del JSON ni
+        los objetos que el llamador pudiera conservar fuera de la clase.
+        """
+        productos = []
+        if isinstance(valor, dict):
+            datos_productos = valor.get("productos")
+            if not isinstance(datos_productos, list):
+                raise TypeError("catalogo debe tener una lista 'productos'")
+            for datos in datos_productos:
+                productos.append(Producto.desde_dict(datos))
+        else:
+            if isinstance(valor, (str, bytes)):
+                raise TypeError("catalogo debe ser un dict o una colección de Producto")
+            for producto in valor:
+                if not isinstance(producto, Producto):
+                    raise TypeError("catalogo debe contener instancias de Producto")
+                productos.append(Producto(
+                    sku=producto.sku,
+                    titulo=producto.titulo,
+                    categoria=producto.categoria,
+                    precio=producto.precio,
+                    stock=producto.stock,
+                    etiquetas=producto.etiquetas,
+                    origen=producto.origen,
+                ))
+        self._catalogo = productos
+
+    @property
+    def puertas(self):
+        return self._puertas
+
+    @puertas.setter
+    def puertas(self, valor):
+        self._puertas = self._validar_entero("puertas", valor)
+
+    @property
+    def ventanas(self):
+        return self._ventanas
+
+    @ventanas.setter
+    def ventanas(self, valor):
+        self._ventanas = self._validar_entero("ventanas", valor)
+
+    @property
+    def tiene_mascotas(self):
+        return self._tiene_mascotas
+
+    @tiene_mascotas.setter
+    def tiene_mascotas(self, valor):
+        if not isinstance(valor, bool):
+            raise TypeError("tiene_mascotas debe ser booleano")
+        self._tiene_mascotas = valor
+
+    @property
+    def cantidad_camaras(self):
+        return self._cantidad_camaras
+
+    @cantidad_camaras.setter
+    def cantidad_camaras(self, valor):
+        self._cantidad_camaras = self._validar_entero("cantidad_camaras", valor)
+
+    @property
+    def cantidad_sensores_movimiento(self):
+        return self._cantidad_sensores_movimiento
+
+    @cantidad_sensores_movimiento.setter
+    def cantidad_sensores_movimiento(self, valor):
+        self._cantidad_sensores_movimiento = self._validar_entero(
+            "cantidad_sensores_movimiento", valor
+        )
+
+    @property
+    def avisos(self):
+        return list(self._avisos)
+
+    @property
+    def regalo(self):
+        return dict(self._regalo)
+
+    @property
+    def subtotal(self):
+        """Suma derivada de las líneas; no se almacena para evitar duplicar estado."""
+        total = 0
+        for item in self._items:
+            total += item.subtotal
+        return total
+
+    @property
+    def descuento_total(self):
+        total = 0
+        for item in self._items:
+            total += item.descuento
+        return total
+
+    @property
+    def total_final(self):
+        return self.subtotal - self.descuento_total
+
+    def agregar_item(self, item):
+        """Incorpora una línea validada a la colección privada."""
+        if not isinstance(item, ItemCarrito):
+            raise TypeError("item debe ser una instancia de ItemCarrito")
+        self._items.append(item)
+        return item
+
+    def _parametros(self):
+        """Traduce el estado privado al dict que espera ``ReglaConfiguracionKit``."""
+        parametros = {}
+        parametros["puertas"] = self._puertas
+        parametros["ventanas"] = self._ventanas
+        parametros["tiene_mascotas"] = self._tiene_mascotas
+        parametros["cantidad_camaras"] = self._cantidad_camaras
+        parametros["cantidad_sensores_movimiento"] = self._cantidad_sensores_movimiento
+        # Se comparte la lista real para que los avisos de las reglas queden en
+        # el estado del carrito; el dict de regalo se vuelve a leer tras cada regla.
+        parametros["avisos"] = self._avisos
+        parametros["regalo"] = self._regalo
+        return parametros
+
+    def ejecutar_reglas(self, reglas):
+        """Aplica cada regla con el mismo mensaje y devuelve las que se ejecutaron.
+
+        El ``carrito`` y el ``catalogo`` que se pasan son los objetos privados
+        reales: las reglas agregan líneas y descuentan stock sobre el estado del
+        agregado, no sobre copias desechables.
+        """
+        if isinstance(reglas, (str, bytes)):
+            raise TypeError("reglas debe ser una colección de ReglaConfiguracionKit")
+
+        aplicadas = []
+        for regla in reglas:
+            if not isinstance(regla, ReglaConfiguracionKit):
+                raise TypeError(
+                    "cada regla debe ser una instancia de ReglaConfiguracionKit"
+                )
+            parametros = self._parametros()
+            regla.aplicar(self._items, self._catalogo, parametros)
+            self._regalo = parametros.get("regalo", self._regalo)
+            aplicadas.append(regla)
+        return tuple(aplicadas)
+
+    def a_dict(self):
+        """Exporta una vista completa y plana del estado del agregado."""
+        vista = {}
+
+        cliente = {}
+        cliente["puertas"] = self._puertas
+        cliente["ventanas"] = self._ventanas
+        cliente["tiene_mascotas"] = self._tiene_mascotas
+        cliente["cantidad_camaras"] = self._cantidad_camaras
+        cliente["cantidad_sensores_movimiento"] = self._cantidad_sensores_movimiento
+        vista["cliente"] = cliente
+
+        lineas = []
+        for item in self._items:
+            lineas.append(item.a_dict())
+        vista["carrito"] = lineas
+        vista["regalo"] = dict(self._regalo)
+
+        resumen = {}
+        resumen["cantidad_items"] = self.cantidad_items
+        resumen["subtotal"] = self.subtotal
+        resumen["descuento_total"] = self.descuento_total
+        resumen["total_final"] = self.total_final
+        vista["resumen"] = resumen
+
+        inventario = {}
+        for producto in self._catalogo:
+            inventario[producto.sku] = producto.stock
+        vista["inventario"] = inventario
+        vista["avisos"] = list(self._avisos)
+        return vista
+
+
 if __name__ == "__main__":
-    # Las cuatro reglas se tratan como objetos intercambiables: mismo mensaje
-    # ``aplicar``, mismo orden de argumentos, comportamiento polimórfico.
+    # El agregado recibe el catálogo crudo y el estado del cliente; las reglas se
+    # tratan como objetos intercambiables: mismo mensaje y mismos argumentos.
     with RUTA_CATALOGO.open(encoding="utf-8") as archivo:
         catalogo = json.load(archivo)
 
-    productos = []
-    for datos in catalogo["productos"]:
-        productos.append(Producto.desde_dict(datos))
+    carrito = CarritoEventoEspecial(
+        catalogo=catalogo,
+        puertas=2,
+        ventanas=4,
+        tiene_mascotas=True,
+        cantidad_camaras=3,
+        cantidad_sensores_movimiento=2,
+    )
 
-    parametros = {}
-    parametros["puertas"] = 2
-    parametros["ventanas"] = 4
-    parametros["tiene_mascotas"] = True
-    parametros["cantidad_camaras"] = 3
-    parametros["cantidad_sensores_movimiento"] = 2
-
-    carrito = []
     reglas = []
     reglas.append(ReglaSensoresApertura())
     reglas.append(ReglaSensorMovimientoMascotas())
     reglas.append(ReglaCamarasDescuentoProgresivo())
     reglas.append(ReglaCartelRegalo())
 
-    for regla in reglas:
-        regla.aplicar(carrito, productos, parametros)
-
-    lineas = []
-    for item in carrito:
-        lineas.append(item.a_dict())
-
-    demostracion = {}
-    demostracion["carrito"] = lineas
-    demostracion["avisos"] = parametros.get("avisos", [])
-    demostracion["regalo"] = parametros.get("regalo", {"incluido": False})
-    print(json.dumps(demostracion, ensure_ascii=False, indent=2))
+    carrito.ejecutar_reglas(reglas)
+    print(json.dumps(carrito.a_dict(), ensure_ascii=False, indent=2))
