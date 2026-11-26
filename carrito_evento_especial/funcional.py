@@ -1,32 +1,34 @@
-"""Carrito Evento Especial - paradigma funcional.
+"""Carrito Evento Especial - paradigma estrictamente funcional.
 
-Este módulo resuelve el mismo kit usando únicamente funciones puras y
-estructuras inmutables:
+Reglas cumplidas:
 
-* ``Producto``, ``ItemCarrito``, ``Cliente``, ``Regalo``, ``ReglasKit`` y
-  ``Estado`` son ``@dataclass(frozen=True)``; ``TramoDescuento`` es un
-  ``NamedTuple``.
-* ``map``, ``filter`` y ``reduce`` hacen el trabajo de selección, reserva de
-  stock, totales y composición de funciones.
-* Ninguna lista ni diccionario se muta: cada regla devuelve un ``Estado`` nuevo
-  con ``dataclasses.replace`` y las colecciones se construyen con tuplas,
-  compresiones o ``map``/``filter``.
+* Todas las estructuras de dominio son ``@dataclass(frozen=True)`` o
+  ``NamedTuple``, y sus colecciones son ``tuple``.
+* No hay ``.append()``, ni asignación de atributos: cada regla devuelve un
+  ``Estado`` nuevo con ``dataclasses.replace``.
+* No hay diccionarios mutables en la lógica: el catálogo entrante se envuelve
+  en ``MappingProxyType`` y el resultado se modela con ``ResultadoKit``.
+* ``map``, ``filter``, ``reduce`` y ``compose`` resuelven selección, stock,
+  totales y composición del pipeline.
 
-Las únicas operaciones con efecto son las fronteras del programa:
-``cargar_catalogo`` lee el JSON y ``exportar_resultado`` escribe el JSON.
-Toda la lógica de negocio entre ambas es pura y determinista.
+Los únicos contenedores mutables se materializan en la frontera de E/S:
+``desbloquear`` crea dicts/listas planos para que ``json.dump`` pueda escribir
+``resultado_funcional.json``. Ninguna función de negocio los recibe ni los
+modifica.
 
 Regla de aislamiento: este archivo se escribió sin leer ni copiar los otros
-paradigmas (``imperativo.py`` y ``poo.py``). La información de precios, stock
-y etiquetas sale de ``catalogo_shopify.json``.
+paradigmas (``imperativo.py`` y ``poo.py``). Los datos salen de
+``catalogo_shopify.json``.
 """
 
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, field, replace
+from collections.abc import Mapping
+from dataclasses import dataclass, field, replace
 from functools import reduce
 from pathlib import Path
+from types import MappingProxyType
 from typing import Callable, NamedTuple
 
 RUTA_CATALOGO = Path(__file__).resolve().parent / "catalogo_shopify.json"
@@ -39,11 +41,7 @@ RUTA_RESULTADO = Path(__file__).resolve().parent / "resultado_funcional.json"
 
 
 def compose(*funciones: Callable) -> Callable:
-    """Compone funciones de derecha a izquierda mediante ``reduce``.
-
-    ``compose(f, g)(x)`` equivale a ``f(g(x))``. Es una función pura: no toca
-    las funciones recibidas y devuelve una nueva función cerrada sobre ellas.
-    """
+    """Compone funciones de derecha a izquierda mediante ``reduce``."""
     return reduce(
         lambda acumulada, siguiente: lambda valor: acumulada(siguiente(valor)),
         funciones,
@@ -53,9 +51,7 @@ def compose(*funciones: Callable) -> Callable:
 
 def sumar_atributo(items: tuple, atributo: str) -> int:
     """Suma un atributo entero de una tupla de ítems usando ``reduce``."""
-    return reduce(
-        lambda total, item: total + getattr(item, atributo), items, 0
-    )
+    return reduce(lambda total, item: total + getattr(item, atributo), items, 0)
 
 
 def pesos(valor: int) -> str:
@@ -67,12 +63,12 @@ def pesos(valor: int) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Estructuras inmutables
+# Estructuras inmutables del catálogo, los ítems y el estado
 # ---------------------------------------------------------------------------
 
 
 class TramoDescuento(NamedTuple):
-    """Tramo de descuento por volumen; ``maximo=None`` significa sin límite."""
+    """Tramo de descuento por volumen; ``maximo=None`` es sin límite."""
 
     minimo: int
     maximo: int | None
@@ -81,7 +77,7 @@ class TramoDescuento(NamedTuple):
 
 @dataclass(frozen=True)
 class Producto:
-    """SKU del catálogo; sus campos son inmutables y las etiquetas son tupla."""
+    """SKU del catálogo; etiquetas inmutables como tupla."""
 
     sku: str
     titulo: str
@@ -92,17 +88,17 @@ class Producto:
     origen: str = ""
 
     def tiene_etiqueta(self, etiqueta: str) -> bool:
-        """Indica si el producto lleva una etiqueta sin exponer la tupla."""
+        """Indica si lleva una etiqueta sin exponer la tupla interna."""
         return etiqueta in self.etiquetas
 
     def con_stock(self, cantidad: int) -> "Producto":
-        """Devuelve un producto nuevo con otro stock; nunca se auto-modifica."""
+        """Devuelve otro ``Producto`` con distinto stock; no se auto-modifica."""
         return replace(self, stock=cantidad)
 
 
 @dataclass(frozen=True)
 class ItemCarrito:
-    """Línea inmutable del carrito con importes derivados como propiedades."""
+    """Línea inmutable con importes derivados como propiedades."""
 
     producto: Producto
     cantidad: int
@@ -118,7 +114,7 @@ class ItemCarrito:
 
     @property
     def subtotal(self) -> int:
-        """Subtotal calculado sobre el precio original, sin estado duplicado."""
+        """Subtotal sobre el precio original, sin estado duplicado."""
         return self.precio_unitario_original * self.cantidad
 
     @property
@@ -140,7 +136,7 @@ class Cliente:
 
 @dataclass(frozen=True)
 class Regalo:
-    """Estado del obsequio; la versión vacía es el valor neutral inicial."""
+    """Estado del obsequio; la instancia vacía es el valor neutral."""
 
     incluido: bool = False
     sku: str = ""
@@ -153,7 +149,7 @@ class Regalo:
 
 @dataclass(frozen=True)
 class ReglasKit:
-    """Parámetros de las reglas, congelados para garantizar pureza."""
+    """Parámetros congelados de las reglas."""
 
     etiqueta_apertura: str = "sensor_apertura"
     etiqueta_movimiento: str = "sensor_movimiento"
@@ -177,6 +173,73 @@ class Estado:
     regalo: Regalo = field(default_factory=Regalo)
 
 
+# ---------------------------------------------------------------------------
+# Estructuras inmutables del resultado
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class MapeoInmutable(Mapping):
+    """Mapeo de solo lectura respaldado por una tupla de pares, sin dicts."""
+
+    pares: tuple[tuple[str, object], ...]
+
+    def __getitem__(self, clave: str) -> object:
+        """Busca una clave recorriendo la tupla, sin construir un dict."""
+        for nombre, valor in self.pares:
+            if nombre == clave:
+                return valor
+        raise KeyError(clave)
+
+    def __iter__(self):
+        """Itera las claves en el orden original de la tupla."""
+        return (nombre for nombre, _ in self.pares)
+
+    def __len__(self) -> int:
+        """Devuelve la cantidad de pares."""
+        return len(self.pares)
+
+
+@dataclass(frozen=True)
+class LineaResultado:
+    """Vista plana e inmutable de una línea del carrito."""
+
+    sku: str
+    titulo: str
+    categoria: str
+    etiquetas: tuple[str, ...]
+    cantidad: int
+    precio_unitario: int
+    precio_unitario_original: int
+    subtotal: int
+    descuento: int
+    total: int
+    stock_producto: int
+    es_regalo: bool
+
+
+@dataclass(frozen=True)
+class Resumen:
+    """Totales derivados, calculados con ``reduce``."""
+
+    cantidad_items: int
+    subtotal: int
+    descuento_total: int
+    total_final: int
+
+
+@dataclass(frozen=True)
+class ResultadoKit:
+    """Resultado completo del kit sin un solo diccionario mutable."""
+
+    cliente: Cliente
+    carrito: tuple[LineaResultado, ...]
+    regalo: Regalo
+    resumen: Resumen
+    inventario: tuple[tuple[str, int], ...]
+    avisos: tuple[str, ...]
+
+
 REGLAS = ReglasKit()
 CLIENTE_PRUEBA = Cliente(
     puertas=2,
@@ -192,8 +255,8 @@ CLIENTE_PRUEBA = Cliente(
 # ---------------------------------------------------------------------------
 
 
-def producto_desde_dict(datos: dict) -> Producto:
-    """Construye un ``Producto`` a partir de un elemento del catálogo JSON."""
+def producto_desde_dict(datos: Mapping) -> Producto:
+    """Construye un ``Producto`` desde un mapeo de solo lectura del JSON."""
     return Producto(
         sku=datos["sku"],
         titulo=datos["titulo"],
@@ -205,9 +268,9 @@ def producto_desde_dict(datos: dict) -> Producto:
     )
 
 
-def catalogo_desde_dict(datos: dict) -> tuple[Producto, ...]:
-    """Mapea la lista de productos del JSON a una tupla inmutable."""
-    return tuple(map(producto_desde_dict, datos["productos"]))
+def catalogo_desde_dict(datos: Mapping) -> tuple[Producto, ...]:
+    """Mapea los productos del JSON a una tupla inmutable."""
+    return tuple(map(producto_desde_dict, tuple(datos["productos"])))
 
 
 def filtrar_por_etiquetas(
@@ -215,7 +278,7 @@ def filtrar_por_etiquetas(
     incluidas: tuple[str, ...],
     excluidas: tuple[str, ...] = (),
 ) -> tuple[Producto, ...]:
-    """Filtra productos por etiquetas incluidas y excluidas con ``filter``."""
+    """Filtra por etiquetas incluidas y excluidas con ``filter``."""
     return tuple(
         filter(
             lambda producto: (
@@ -234,11 +297,7 @@ def seleccionar(
     excluidas: tuple[str, ...] = (),
     mensaje_aviso: str = "",
 ) -> tuple[Producto | None, int, tuple[str, ...]]:
-    """Elige el SKU más barato con stock y ajusta stock parcial sin mutar nada.
-
-    Devuelve una tupla ``(producto, cantidad, avisos)``. Si no hay unidades,
-    el producto es ``None`` y la regla llama decide cómo avisar.
-    """
+    """Elige el SKU más barato con stock y ajusta stock parcial sin mutar."""
     elegibles = filtrar_por_etiquetas(productos, incluidas, excluidas)
     stock_maximo = max(map(lambda p: p.stock, elegibles), default=0)
     if stock_maximo <= 0:
@@ -267,12 +326,10 @@ def seleccionar(
 def reemplazar_producto(
     catalogo: tuple[Producto, ...], producto: Producto
 ) -> tuple[Producto, ...]:
-    """Devuelve un catálogo nuevo con un producto sustituido por su SKU."""
+    """Devuelve un catálogo nuevo con el producto sustituido por su SKU."""
     return tuple(
-        map(
-            lambda actual: producto if actual.sku == producto.sku else actual,
-            catalogo,
-        )
+        map(lambda actual: producto if actual.sku == producto.sku else actual,
+            catalogo)
     )
 
 
@@ -296,10 +353,8 @@ def porcentaje_camaras(cantidad: int, reglas: ReglasKit = REGLAS) -> float:
 # ---------------------------------------------------------------------------
 
 
-def regla_apertura(
-    estado: Estado, reglas: ReglasKit = REGLAS
-) -> Estado:
-    """Agrega ``puertas + ventanas`` sensores de apertura o registra un aviso."""
+def regla_apertura(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
+    """Agrega ``puertas + ventanas`` sensores o registra un aviso."""
     cantidad = estado.cliente.puertas + estado.cliente.ventanas
     if cantidad == 0:
         return estado
@@ -329,9 +384,7 @@ def regla_apertura(
     )
 
 
-def regla_movimiento(
-    estado: Estado, reglas: ReglasKit = REGLAS
-) -> Estado:
+def regla_movimiento(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
     """Elige sensores inmunes a mascotas o estándar según la bandera."""
     cantidad = estado.cliente.cantidad_sensores_movimiento
     if cantidad == 0:
@@ -370,9 +423,7 @@ def regla_movimiento(
     )
 
 
-def regla_camaras(
-    estado: Estado, reglas: ReglasKit = REGLAS
-) -> Estado:
+def regla_camaras(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
     """Aplica 10% o 20% solo a cámaras, conservando el precio original."""
     cantidad = estado.cliente.cantidad_camaras
     if cantidad == 0:
@@ -411,9 +462,7 @@ def regla_camaras(
     )
 
 
-def regla_regalo(
-    estado: Estado, reglas: ReglasKit = REGLAS
-) -> Estado:
+def regla_regalo(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
     """Regala un cartel a $0 si hay artículos y stock del cartel."""
     if len(estado.items) == 0:
         return estado
@@ -456,7 +505,7 @@ def regla_regalo(
     )
 
 
-PIPELINE: tuple[Callable[[Estado], Estado], ...] = (
+PIPELINE: tuple[Callable[..., Estado], ...] = (
     regla_apertura,
     regla_movimiento,
     regla_camaras,
@@ -472,76 +521,166 @@ def inicializar(
 
 
 def resolver(estado: Estado) -> Estado:
-    """Aplica el pipeline de reglas con ``reduce`` y composición de efectos."""
+    """Aplica el pipeline de reglas con ``reduce``."""
     return reduce(lambda acumulado, regla: regla(acumulado), PIPELINE, estado)
 
 
 # ---------------------------------------------------------------------------
-# Serialización pura
+# Proyección a estructuras inmutables de resultado
 # ---------------------------------------------------------------------------
 
 
-def item_a_dict(item: ItemCarrito) -> dict:
-    """Convierte una línea inmutable en un dict plano nuevo."""
-    return {
-        "sku": item.sku,
-        "titulo": item.producto.titulo,
-        "categoria": item.producto.categoria,
-        "etiquetas": list(item.producto.etiquetas),
-        "cantidad": item.cantidad,
-        "precio_unitario": item.precio_unitario,
-        "precio_unitario_original": item.precio_unitario_original,
-        "subtotal": item.subtotal,
-        "descuento": item.descuento,
-        "total": item.total,
-        "stock_producto": item.producto.stock,
-        "es_regalo": item.es_regalo,
-    }
+def linea_desde_item(item: ItemCarrito) -> LineaResultado:
+    """Proyecta una línea del carrito a un registro congelado."""
+    return LineaResultado(
+        sku=item.sku,
+        titulo=item.producto.titulo,
+        categoria=item.producto.categoria,
+        etiquetas=item.producto.etiquetas,
+        cantidad=item.cantidad,
+        precio_unitario=item.precio_unitario,
+        precio_unitario_original=item.precio_unitario_original,
+        subtotal=item.subtotal,
+        descuento=item.descuento,
+        total=item.total,
+        stock_producto=item.producto.stock,
+        es_regalo=item.es_regalo,
+    )
 
 
-def estado_a_dict(estado: Estado) -> dict:
-    """Produce el resultado serializable sin mutar el estado recibido."""
-    return {
-        "cliente": asdict(estado.cliente),
-        "carrito": list(map(item_a_dict, estado.items)),
-        "regalo": asdict(estado.regalo),
-        "resumen": {
-            "cantidad_items": len(estado.items),
-            "subtotal": sumar_atributo(estado.items, "subtotal"),
-            "descuento_total": sumar_atributo(estado.items, "descuento"),
-            "total_final": sumar_atributo(estado.items, "total"),
-        },
-        "inventario": {producto.sku: producto.stock for producto in estado.catalogo},
-        "avisos": list(estado.avisos),
-    }
+def estado_a_resultado(estado: Estado) -> ResultadoKit:
+    """Convierte el estado final en ``ResultadoKit``, sin dicts ni listas."""
+    lineas = tuple(map(linea_desde_item, estado.items))
+    return ResultadoKit(
+        cliente=estado.cliente,
+        carrito=lineas,
+        regalo=estado.regalo,
+        resumen=Resumen(
+            cantidad_items=len(lineas),
+            subtotal=sumar_atributo(estado.items, "subtotal"),
+            descuento_total=sumar_atributo(estado.items, "descuento"),
+            total_final=sumar_atributo(estado.items, "total"),
+        ),
+        inventario=tuple((p.sku, p.stock) for p in estado.catalogo),
+        avisos=estado.avisos,
+    )
 
 
-procesar = compose(estado_a_dict, resolver)
+def cliente_a_mapping(cliente: Cliente) -> Mapping:
+    """Proyecta el cliente a un mapeo de solo lectura para JSON."""
+    return MapeoInmutable(
+        tuple((
+            ("puertas", cliente.puertas),
+            ("ventanas", cliente.ventanas),
+            ("tiene_mascotas", cliente.tiene_mascotas),
+            ("cantidad_camaras", cliente.cantidad_camaras),
+            ("cantidad_sensores_movimiento",
+             cliente.cantidad_sensores_movimiento),
+        ))
+    )
+
+
+def linea_a_mapping(linea: LineaResultado) -> Mapping:
+    """Proyecta una línea a un mapeo de solo lectura para JSON."""
+    return MapeoInmutable(
+        tuple((
+            ("sku", línea_sku(linea)),
+            ("titulo", linea.titulo),
+            ("categoria", linea.categoria),
+            ("etiquetas", tuple(linea.etiquetas)),
+            ("cantidad", linea.cantidad),
+            ("precio_unitario", linea.precio_unitario),
+            ("precio_unitario_original", linea.precio_unitario_original),
+            ("subtotal", linea.subtotal),
+            ("descuento", linea.descuento),
+            ("total", linea.total),
+            ("stock_producto", linea.stock_producto),
+            ("es_regalo", linea.es_regalo),
+        ))
+    )
+
+
+def línea_sku(linea: LineaResultado) -> str:
+    """Devuelve el SKU de una línea del resultado."""
+    return linea.sku
+
+
+def regalo_a_mapping(regalo: Regalo) -> Mapping:
+    """Proyecta el regalo a un mapeo de solo lectura para JSON."""
+    return MapeoInmutable(
+        tuple((
+            ("incluido", regalo.incluido),
+            ("sku", regalo.sku),
+            ("titulo", regalo.titulo),
+            ("cantidad", regalo.cantidad),
+            ("precio_original", regalo.precio_original),
+            ("precio_final", regalo.precio_final),
+            ("subtotal", regalo.subtotal),
+        ))
+    )
+
+
+def resumen_a_mapping(resumen: Resumen) -> Mapping:
+    """Proyecta el resumen a un mapeo de solo lectura para JSON."""
+    return MapeoInmutable(
+        tuple((
+            ("cantidad_items", resumen.cantidad_items),
+            ("subtotal", resumen.subtotal),
+            ("descuento_total", resumen.descuento_total),
+            ("total_final", resumen.total_final),
+        ))
+    )
+
+
+def resultado_a_mapping(resultado: ResultadoKit) -> Mapping:
+    """Proyecta el resultado completo a mapeos inmutables para JSON."""
+    return MapeoInmutable(
+        tuple((
+            ("cliente", cliente_a_mapping(resultado.cliente)),
+            ("carrito", tuple(map(linea_a_mapping, resultado.carrito))),
+            ("regalo", regalo_a_mapping(resultado.regalo)),
+            ("resumen", resumen_a_mapping(resultado.resumen)),
+            ("inventario", MapeoInmutable(tuple(resultado.inventario))),
+            ("avisos", tuple(resultado.avisos)),
+        ))
+    )
+
+
+procesar = compose(resultado_a_mapping, estado_a_resultado, resolver)
 
 
 # ---------------------------------------------------------------------------
-# Fronteras de E/S (únicas operaciones con efecto del módulo)
+# Frontera de E/S: aquí sí se materializan contenedores mutables para JSON
 # ---------------------------------------------------------------------------
+
+
+def desbloquear(valor: object) -> object:
+    """Convierte mapeos y tuplas inmutables en dicts y listas para ``json``."""
+    if isinstance(valor, Mapping):
+        return {clave: desbloquear(item) for clave, item in valor.items()}
+    if isinstance(valor, tuple):
+        return [desbloquear(item) for item in valor]
+    return valor
 
 
 def cargar_catalogo(ruta: Path = RUTA_CATALOGO) -> tuple[Producto, ...]:
-    """Lee el JSON del catálogo y lo devuelve como tupla inmutable."""
+    """Lee el JSON y devuelve una tupla de productos inmutables."""
     with Path(ruta).open("r", encoding="utf-8") as archivo:
-        datos = json.load(archivo)
+        datos = MappingProxyType(json.load(archivo))
     return catalogo_desde_dict(datos)
 
 
-def exportar_resultado(resultado: dict, ruta: Path = RUTA_RESULTADO) -> Path:
+def exportar_resultado(resultado: Mapping, ruta: Path = RUTA_RESULTADO) -> Path:
     """Escribe el resultado de forma determinista y devuelve la ruta."""
     destino = Path(ruta)
     with destino.open("w", encoding="utf-8", newline="\n") as archivo:
-        json.dump(resultado, archivo, ensure_ascii=False, indent=2)
+        json.dump(desbloquear(resultado), archivo, ensure_ascii=False, indent=2)
         archivo.write("\n")
     return destino
 
 
-def imprimir_desglose(resultado: dict) -> None:
-    """Muestra el desglose legible del kit a partir del resultado inmutable."""
+def imprimir_desglose(resultado: Mapping) -> None:
+    """Muestra el desglose legible leyendo solo mapeos de solo lectura."""
     cliente = resultado["cliente"]
     print("Kit de Seguridad Residencial")
     print(
@@ -583,10 +722,11 @@ def imprimir_desglose(resultado: dict) -> None:
             "Regalo: " + regalo["sku"] + " (normalmente "
             + pesos(regalo["precio_original"]) + ")"
         )
-    print("Avisos:", ", ".join(resultado["avisos"]) if resultado["avisos"] else "ninguno")
+    avisos = resultado["avisos"]
+    print("Avisos:", ", ".join(avisos) if avisos else "ninguno")
 
 
-def main() -> dict:
+def main() -> Mapping:
     """Ejecuta el pipeline funcional completo y exporta el resultado."""
     catalogo = cargar_catalogo()
     resultado = procesar(inicializar(catalogo))
