@@ -1,0 +1,1678 @@
+{
+  "meta": {
+    "archivo": "catalogo_shopify.json",
+    "etapa": "Etapa 2 - Desarrollo Multiparadigma en Python",
+    "tienda": "games4you-k5xbi4h0.myshopify.com",
+    "nombre_tienda": "SecureHome Seguridad",
+    "api_version": "2026-10",
+    "generado_utc": "2026-11-26T21:02:17.560745+00:00",
+    "origen": "Shopify Admin API + datos de prueba del kit",
+    "notas": [
+      "Los 30 productos con origen 'shopify' se leen de la tienda configurada: id, handle, título, categoría, precio, variantes e imagen.",
+      "Shopify no gestiona inventario (inventory_management=null, inventory_quantity 0/-1); stock y stock_disponible se toman del catálogo local de prueba para poder evaluar la regla de regalo.",
+      "Se añaden 3 SKU de prueba (SEN-APERT1, SEN-APERT2, PROM-CARTEL1) porque la tienda no publica sensores de apertura ni cartel disuasivo; son necesarios para las reglas del kit. No se modificó Shopify.",
+      "Las etiquetas funcionales se asignan en este archivo de prueba; las etiquetas reales de Shopify se conservan en tags_shopify.",
+      "inmune_mascotas se aplica solo a SEN-PIR2, SEN-PIR3 y SEN-PIR4."
+    ]
+  },
+  "reglas_kit": {
+    "nombre": "Kit de Seguridad Residencial / Carrito Evento Especial",
+    "sensores_apertura": {
+      "etiqueta": "sensor_apertura",
+      "cantidad": "puertas + ventanas"
+    },
+    "filtro_mascotas": {
+      "etiqueta_base": "sensor_movimiento",
+      "etiqueta_inmune": "inmune_mascotas",
+      "regla": "si tiene_mascotas es verdadero, usar solo SKU con inmune_mascotas"
+    },
+    "descuento_camaras": {
+      "etiqueta": "camara",
+      "tramos": [
+        {
+          "min": 2,
+          "max": 3,
+          "descuento": 0.1
+        },
+        {
+          "min": 4,
+          "max": null,
+          "descuento": 0.2
+        }
+      ]
+    },
+    "regalo": {
+      "etiqueta": "cartel_disuasivo",
+      "cantidad": 1,
+      "precio_final": 0,
+      "condicion": "el carrito incluye al menos un sensor o una cámara",
+      "requiere_stock": true
+    }
+  },
+  "categorias": [
+    {
+      "id": 649872015724,
+      "titulo": "Alarmas",
+      "handle": "alarmas",
+      "descripcion": "<p>Alarmas en SecureHome Seguridad.</p>",
+      "skus": [
+        "ALM-SMOKE",
+        "ALM-RING",
+        "ALM-PROG2",
+        "ALM-PROG1",
+        "ALM-PANEL",
+        "ALM-SIREN"
+      ],
+      "cantidad_productos": 6
+    },
+    {
+      "id": 649871982956,
+      "titulo": "Cámaras",
+      "handle": "camaras",
+      "descripcion": "<p>Cámaras en SecureHome Seguridad.</p>",
+      "skus": [
+        "CAM-AXIS2",
+        "CAM-AXIS1",
+        "CAM-DLINK",
+        "CAM-BLINK1",
+        "CAM-BLINK2",
+        "CAM-TPLINK"
+      ],
+      "cantidad_productos": 6
+    },
+    {
+      "id": 649872048492,
+      "titulo": "Candados",
+      "handle": "candados",
+      "descripcion": "<p>Candados en SecureHome Seguridad.</p>",
+      "skus": [
+        "CAN-BEST",
+        "CAN-WEB",
+        "CAN-CHUBB",
+        "CAN-BRASS",
+        "CAN-PROFI",
+        "CAN-CLEAR"
+      ],
+      "cantidad_productos": 6
+    },
+    {
+      "id": 649872081260,
+      "titulo": "Chapas biométricas",
+      "handle": "chapas-biometricas",
+      "descripcion": "<p>Chapas biométricas en SecureHome Seguridad.</p>",
+      "skus": [
+        "BIO-FINGER",
+        "BIO-AUGUST",
+        "BIO-NEST",
+        "BIO-YALE2",
+        "BIO-YALE3",
+        "BIO-YALE1"
+      ],
+      "cantidad_productos": 6
+    },
+    {
+      "id": 649871950188,
+      "titulo": "Sensores de movimiento",
+      "handle": "sensores-de-movimiento",
+      "descripcion": "<p>Sensores de movimiento en SecureHome Seguridad.</p>",
+      "skus": [
+        "SEN-PIR5",
+        "SEN-PIR4",
+        "SEN-PIR6",
+        "SEN-PIR1",
+        "SEN-PIR3",
+        "SEN-PIR2"
+      ],
+      "cantidad_productos": 6
+    },
+    {
+      "id": "prueba-sensores-apertura",
+      "titulo": "Sensores de apertura",
+      "handle": "sensores-de-apertura",
+      "descripcion": "Categoría de prueba; no existe en la tienda.",
+      "skus": [
+        "SEN-APERT1",
+        "SEN-APERT2"
+      ],
+      "cantidad_productos": 2
+    },
+    {
+      "id": "prueba-promociones",
+      "titulo": "Promociones",
+      "handle": "promociones",
+      "descripcion": "Categoría de prueba; no existe en la tienda.",
+      "skus": [
+        "PROM-CARTEL1"
+      ],
+      "cantidad_productos": 1
+    }
+  ],
+  "productos": [
+    {
+      "origen": "shopify",
+      "id": 15525207081324,
+      "sku": "CAM-AXIS2",
+      "titulo": "Cámara AXIS 214 PTZ",
+      "handle": "camara-axis-214-ptz",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Cámaras",
+      "categorias_coleccion": [
+        "Cámaras"
+      ],
+      "precio": 99990,
+      "precio_formateado": "$99.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "catalogo-securehome",
+        "Cámaras",
+        "Exterior",
+        "PoE",
+        "seguridad"
+      ],
+      "tags_funcionales": [
+        "camara"
+      ],
+      "tags": [
+        "catalogo-securehome",
+        "Cámaras",
+        "Exterior",
+        "PoE",
+        "seguridad",
+        "camara"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_cam-axis2.jpg?v=1795725395",
+      "variantes": [
+        {
+          "id": 68329442378092,
+          "titulo": "Default Title",
+          "sku": "CAM-AXIS2",
+          "precio": 99990,
+          "precio_formateado": "$99.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525206917484,
+      "sku": "CAM-AXIS1",
+      "titulo": "Cámara AXIS P3717 360°",
+      "handle": "camara-axis-p3717-360",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Cámaras",
+      "categorias_coleccion": [
+        "Cámaras"
+      ],
+      "precio": 119990,
+      "precio_formateado": "$119.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "catalogo-securehome",
+        "Cámaras",
+        "Exterior",
+        "PoE",
+        "seguridad"
+      ],
+      "tags_funcionales": [
+        "camara"
+      ],
+      "tags": [
+        "catalogo-securehome",
+        "Cámaras",
+        "Exterior",
+        "PoE",
+        "seguridad",
+        "camara"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_cam-axis1.jpg?v=1795725391",
+      "variantes": [
+        {
+          "id": 68329442214252,
+          "titulo": "Default Title",
+          "sku": "CAM-AXIS1",
+          "precio": 119990,
+          "precio_formateado": "$119.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525207409004,
+      "sku": "CAM-DLINK",
+      "titulo": "Cámara D-Link DCS-5211L",
+      "handle": "camara-d-link-dcs-5211l",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Cámaras",
+      "categorias_coleccion": [
+        "Cámaras"
+      ],
+      "precio": 34990,
+      "precio_formateado": "$34.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "catalogo-securehome",
+        "Cámaras",
+        "Interior",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "tags_funcionales": [
+        "camara"
+      ],
+      "tags": [
+        "catalogo-securehome",
+        "Cámaras",
+        "Interior",
+        "seguridad",
+        "Wi-Fi",
+        "camara"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_cam-dlink.jpg?v=1795725404",
+      "variantes": [
+        {
+          "id": 68329442705772,
+          "titulo": "Default Title",
+          "sku": "CAM-DLINK",
+          "precio": 34990,
+          "precio_formateado": "$34.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525206557036,
+      "sku": "CAM-BLINK1",
+      "titulo": "Cámara de seguridad Blink Mini",
+      "handle": "camara-de-seguridad-blink-mini",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Cámaras",
+      "categorias_coleccion": [
+        "Cámaras"
+      ],
+      "precio": 29990,
+      "precio_formateado": "$29.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "catalogo-securehome",
+        "Cámaras",
+        "Interior",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "tags_funcionales": [
+        "camara"
+      ],
+      "tags": [
+        "catalogo-securehome",
+        "Cámaras",
+        "Interior",
+        "seguridad",
+        "Wi-Fi",
+        "camara"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_cam-blink1.jpg?v=1795725384",
+      "variantes": [
+        {
+          "id": 68329441853804,
+          "titulo": "Default Title",
+          "sku": "CAM-BLINK1",
+          "precio": 29990,
+          "precio_formateado": "$29.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525206688108,
+      "sku": "CAM-BLINK2",
+      "titulo": "Cámara de seguridad Blink Outdoor 4",
+      "handle": "camara-de-seguridad-blink-outdoor-4",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Cámaras",
+      "categorias_coleccion": [
+        "Cámaras"
+      ],
+      "precio": 49990,
+      "precio_formateado": "$49.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "catalogo-securehome",
+        "Cámaras",
+        "Exterior",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "tags_funcionales": [
+        "camara"
+      ],
+      "tags": [
+        "catalogo-securehome",
+        "Cámaras",
+        "Exterior",
+        "seguridad",
+        "Wi-Fi",
+        "camara"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_cam-blink2.jpg?v=1795725388",
+      "variantes": [
+        {
+          "id": 68329441984876,
+          "titulo": "Default Title",
+          "sku": "CAM-BLINK2",
+          "precio": 49990,
+          "precio_formateado": "$49.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525207212396,
+      "sku": "CAM-TPLINK",
+      "titulo": "Cámara IP TP-Link",
+      "handle": "camara-ip-tp-link",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Cámaras",
+      "categorias_coleccion": [
+        "Cámaras"
+      ],
+      "precio": 24990,
+      "precio_formateado": "$24.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "catalogo-securehome",
+        "Cámaras",
+        "Interior",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "tags_funcionales": [
+        "camara"
+      ],
+      "tags": [
+        "catalogo-securehome",
+        "Cámaras",
+        "Interior",
+        "seguridad",
+        "Wi-Fi",
+        "camara"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_cam-tplink.jpg?v=1795725400",
+      "variantes": [
+        {
+          "id": 68329442509164,
+          "titulo": "Default Title",
+          "sku": "CAM-TPLINK",
+          "precio": 24990,
+          "precio_formateado": "$24.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525209669996,
+      "sku": "CAN-BEST",
+      "titulo": "Candado Best 4B72",
+      "handle": "candado-best-4b72",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Candados",
+      "categorias_coleccion": [
+        "Candados"
+      ],
+      "precio": 99990,
+      "precio_formateado": "$99.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Aluminio",
+        "Candados",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Aluminio",
+        "Candados",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_can-best.jpg?v=1795725457",
+      "variantes": [
+        {
+          "id": 68329445228908,
+          "titulo": "Default Title",
+          "sku": "CAN-BEST",
+          "precio": 99990,
+          "precio_formateado": "$99.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525208981868,
+      "sku": "CAN-WEB",
+      "titulo": "Candado Burg-Wächter",
+      "handle": "candado-burg-wachter",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Candados",
+      "categorias_coleccion": [
+        "Candados"
+      ],
+      "precio": 10990,
+      "precio_formateado": "$10.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Acero",
+        "Candados",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Acero",
+        "Candados",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_can-web.jpg?v=1795725443",
+      "variantes": [
+        {
+          "id": 68329444540780,
+          "titulo": "Default Title",
+          "sku": "CAN-WEB",
+          "precio": 10990,
+          "precio_formateado": "$10.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525209440620,
+      "sku": "CAN-CHUBB",
+      "titulo": "Candado Chubb",
+      "handle": "candado-chubb",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Candados",
+      "categorias_coleccion": [
+        "Candados"
+      ],
+      "precio": 69990,
+      "precio_formateado": "$69.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Acero",
+        "Candados",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Acero",
+        "Candados",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_can-chubb.jpg?v=1795725453",
+      "variantes": [
+        {
+          "id": 68329444999532,
+          "titulo": "Default Title",
+          "sku": "CAN-CHUBB",
+          "precio": 69990,
+          "precio_formateado": "$69.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525208654188,
+      "sku": "CAN-BRASS",
+      "titulo": "Candado de latón con llave",
+      "handle": "candado-de-laton-con-llave",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Candados",
+      "categorias_coleccion": [
+        "Candados"
+      ],
+      "precio": 6990,
+      "precio_formateado": "$6.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Candados",
+        "catalogo-securehome",
+        "Exterior",
+        "Latón",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Candados",
+        "catalogo-securehome",
+        "Exterior",
+        "Latón",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_can-brass.jpg?v=1795725435",
+      "variantes": [
+        {
+          "id": 68329443950956,
+          "titulo": "Default Title",
+          "sku": "CAN-BRASS",
+          "precio": 6990,
+          "precio_formateado": "$6.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525209244012,
+      "sku": "CAN-PROFI",
+      "titulo": "Candado profesional",
+      "handle": "candado-profesional",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Candados",
+      "categorias_coleccion": [
+        "Candados"
+      ],
+      "precio": 34990,
+      "precio_formateado": "$34.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Acero",
+        "Candados",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Acero",
+        "Candados",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_can-profi.jpg?v=1795725448",
+      "variantes": [
+        {
+          "id": 68329444770156,
+          "titulo": "Default Title",
+          "sku": "CAN-PROFI",
+          "precio": 34990,
+          "precio_formateado": "$34.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525208818028,
+      "sku": "CAN-CLEAR",
+      "titulo": "Candado transparente",
+      "handle": "candado-transparente",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Candados",
+      "categorias_coleccion": [
+        "Candados"
+      ],
+      "precio": 4990,
+      "precio_formateado": "$4.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Acero",
+        "Candados",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Acero",
+        "Candados",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_can-clear.jpg?v=1795725439",
+      "variantes": [
+        {
+          "id": 68329444376940,
+          "titulo": "Default Title",
+          "sku": "CAN-CLEAR",
+          "precio": 4990,
+          "precio_formateado": "$4.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525210259820,
+      "sku": "BIO-FINGER",
+      "titulo": "Chapa con lector de huella",
+      "handle": "chapa-con-lector-de-huella",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Chapas biométricas",
+      "categorias_coleccion": [
+        "Chapas biométricas"
+      ],
+      "precio": 26990,
+      "precio_formateado": "$26.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Batería",
+        "catalogo-securehome",
+        "Chapas biométricas",
+        "Huella",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Batería",
+        "catalogo-securehome",
+        "Chapas biométricas",
+        "Huella",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_bio-finger.jpg?v=1795725474",
+      "variantes": [
+        {
+          "id": 68329445818732,
+          "titulo": "Default Title",
+          "sku": "BIO-FINGER",
+          "precio": 26990,
+          "precio_formateado": "$26.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525210587500,
+      "sku": "BIO-AUGUST",
+      "titulo": "Chapa inteligente August",
+      "handle": "chapa-inteligente-august",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Chapas biométricas",
+      "categorias_coleccion": [
+        "Chapas biométricas"
+      ],
+      "precio": 89990,
+      "precio_formateado": "$89.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Bluetooth",
+        "catalogo-securehome",
+        "Chapas biométricas",
+        "Huella",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Bluetooth",
+        "catalogo-securehome",
+        "Chapas biométricas",
+        "Huella",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_bio-august.jpg?v=1795725482",
+      "variantes": [
+        {
+          "id": 68329464398188,
+          "titulo": "Default Title",
+          "sku": "BIO-AUGUST",
+          "precio": 89990,
+          "precio_formateado": "$89.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525210358124,
+      "sku": "BIO-NEST",
+      "titulo": "Chapa inteligente Nest Yale",
+      "handle": "chapa-inteligente-nest-yale",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Chapas biométricas",
+      "categorias_coleccion": [
+        "Chapas biométricas"
+      ],
+      "precio": 149990,
+      "precio_formateado": "$149.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "catalogo-securehome",
+        "Chapas biométricas",
+        "Huella",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "catalogo-securehome",
+        "Chapas biométricas",
+        "Huella",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_bio-nest.jpg?v=1795725478",
+      "variantes": [
+        {
+          "id": 68329445917036,
+          "titulo": "Default Title",
+          "sku": "BIO-NEST",
+          "precio": 149990,
+          "precio_formateado": "$149.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525209932140,
+      "sku": "BIO-YALE2",
+      "titulo": "Chapa Yale facial",
+      "handle": "chapa-yale-facial",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Chapas biométricas",
+      "categorias_coleccion": [
+        "Chapas biométricas"
+      ],
+      "precio": 289990,
+      "precio_formateado": "$289.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Cara",
+        "catalogo-securehome",
+        "Chapas biométricas",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Cara",
+        "catalogo-securehome",
+        "Chapas biométricas",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_bio-yale2.jpg?v=1795725465",
+      "variantes": [
+        {
+          "id": 68329445491052,
+          "titulo": "Default Title",
+          "sku": "BIO-YALE2",
+          "precio": 289990,
+          "precio_formateado": "$289.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525210095980,
+      "sku": "BIO-YALE3",
+      "titulo": "Chapa Yale Luna Pro+",
+      "handle": "chapa-yale-luna-pro",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Chapas biométricas",
+      "categorias_coleccion": [
+        "Chapas biométricas"
+      ],
+      "precio": 449990,
+      "precio_formateado": "$449.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "catalogo-securehome",
+        "Chapas biométricas",
+        "Huella",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "catalogo-securehome",
+        "Chapas biométricas",
+        "Huella",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_bio-yale3.jpg?v=1795725470",
+      "variantes": [
+        {
+          "id": 68329445622124,
+          "titulo": "Default Title",
+          "sku": "BIO-YALE3",
+          "precio": 449990,
+          "precio_formateado": "$449.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525209801068,
+      "sku": "BIO-YALE1",
+      "titulo": "Chapa Yale reconocimiento facial",
+      "handle": "chapa-yale-reconocimiento-facial",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Chapas biométricas",
+      "categorias_coleccion": [
+        "Chapas biométricas"
+      ],
+      "precio": 369990,
+      "precio_formateado": "$369.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Cara",
+        "catalogo-securehome",
+        "Chapas biométricas",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Cara",
+        "catalogo-securehome",
+        "Chapas biométricas",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_bio-yale1.jpg?v=1795725461",
+      "variantes": [
+        {
+          "id": 68329445359980,
+          "titulo": "Default Title",
+          "sku": "BIO-YALE1",
+          "precio": 369990,
+          "precio_formateado": "$369.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525206262124,
+      "sku": "SEN-PIR5",
+      "titulo": "Detector con luz LED",
+      "handle": "detector-con-luz-led",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Sensores de movimiento",
+      "categorias_coleccion": [
+        "Sensores de movimiento"
+      ],
+      "precio": 26990,
+      "precio_formateado": "$26.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Alámbrico",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad",
+        "Sensores de movimiento"
+      ],
+      "tags_funcionales": [
+        "sensor_movimiento"
+      ],
+      "tags": [
+        "Alámbrico",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad",
+        "Sensores de movimiento",
+        "sensor_movimiento"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_sen-pir5.jpg?v=1795725375",
+      "variantes": [
+        {
+          "id": 68329441558892,
+          "titulo": "Default Title",
+          "sku": "SEN-PIR5",
+          "precio": 26990,
+          "precio_formateado": "$26.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525208490348,
+      "sku": "ALM-SMOKE",
+      "titulo": "Detector de humo y monóxido",
+      "handle": "detector-de-humo-y-monoxido",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Alarmas",
+      "categorias_coleccion": [
+        "Alarmas"
+      ],
+      "precio": 14990,
+      "precio_formateado": "$14.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Alarmas",
+        "Batería",
+        "catalogo-securehome",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Alarmas",
+        "Batería",
+        "catalogo-securehome",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_alm-smoke.jpg?v=1795725431",
+      "variantes": [
+        {
+          "id": 68329443787116,
+          "titulo": "Default Title",
+          "sku": "ALM-SMOKE",
+          "precio": 14990,
+          "precio_formateado": "$14.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525206098284,
+      "sku": "SEN-PIR4",
+      "titulo": "Detector de presencia PIR",
+      "handle": "detector-de-presencia-pir",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Sensores de movimiento",
+      "categorias_coleccion": [
+        "Sensores de movimiento"
+      ],
+      "precio": 23990,
+      "precio_formateado": "$23.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "catalogo-securehome",
+        "Interior",
+        "seguridad",
+        "Sensores de movimiento",
+        "Wi-Fi"
+      ],
+      "tags_funcionales": [
+        "sensor_movimiento",
+        "inmune_mascotas"
+      ],
+      "tags": [
+        "catalogo-securehome",
+        "Interior",
+        "seguridad",
+        "Sensores de movimiento",
+        "Wi-Fi",
+        "sensor_movimiento",
+        "inmune_mascotas"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_sen-pir4.jpg?v=1795725370",
+      "variantes": [
+        {
+          "id": 68329441395052,
+          "titulo": "Default Title",
+          "sku": "SEN-PIR4",
+          "precio": 23990,
+          "precio_formateado": "$23.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525207638380,
+      "sku": "ALM-RING",
+      "titulo": "Kit de alarma Ring",
+      "handle": "kit-de-alarma-ring",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Alarmas",
+      "categorias_coleccion": [
+        "Alarmas"
+      ],
+      "precio": 99990,
+      "precio_formateado": "$99.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Alarmas",
+        "Batería",
+        "catalogo-securehome",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Alarmas",
+        "Batería",
+        "catalogo-securehome",
+        "seguridad",
+        "Wi-Fi"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_alm-ring.jpg?v=1795725408",
+      "variantes": [
+        {
+          "id": 68329442935148,
+          "titulo": "Default Title",
+          "sku": "ALM-RING",
+          "precio": 99990,
+          "precio_formateado": "$99.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525207966060,
+      "sku": "ALM-PROG2",
+      "titulo": "Panel de alarma Falck",
+      "handle": "panel-de-alarma-falck",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Alarmas",
+      "categorias_coleccion": [
+        "Alarmas"
+      ],
+      "precio": 84990,
+      "precio_formateado": "$84.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Alarmas",
+        "Alámbrico",
+        "catalogo-securehome",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Alarmas",
+        "Alámbrico",
+        "catalogo-securehome",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_alm-prog2.jpg?v=1795725417",
+      "variantes": [
+        {
+          "id": 68329443262828,
+          "titulo": "Default Title",
+          "sku": "ALM-PROG2",
+          "precio": 84990,
+          "precio_formateado": "$84.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525207769452,
+      "sku": "ALM-PROG1",
+      "titulo": "Panel de alarma Honeywell",
+      "handle": "panel-de-alarma-honeywell",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Alarmas",
+      "categorias_coleccion": [
+        "Alarmas"
+      ],
+      "precio": 69990,
+      "precio_formateado": "$69.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Alarmas",
+        "Alámbrico",
+        "catalogo-securehome",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Alarmas",
+        "Alámbrico",
+        "catalogo-securehome",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_alm-prog1.jpg?v=1795725413",
+      "variantes": [
+        {
+          "id": 68329443066220,
+          "titulo": "Default Title",
+          "sku": "ALM-PROG1",
+          "precio": 69990,
+          "precio_formateado": "$69.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525208326508,
+      "sku": "ALM-PANEL",
+      "titulo": "Panel de alarma Menvier",
+      "handle": "panel-de-alarma-menvier",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Alarmas",
+      "categorias_coleccion": [
+        "Alarmas"
+      ],
+      "precio": 124990,
+      "precio_formateado": "$124.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Alarmas",
+        "Alámbrico",
+        "catalogo-securehome",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Alarmas",
+        "Alámbrico",
+        "catalogo-securehome",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_alm-panel.jpg?v=1795725427",
+      "variantes": [
+        {
+          "id": 68329443623276,
+          "titulo": "Default Title",
+          "sku": "ALM-PANEL",
+          "precio": 124990,
+          "precio_formateado": "$124.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525206425964,
+      "sku": "SEN-PIR6",
+      "titulo": "Sensor de movimiento exterior",
+      "handle": "sensor-de-movimiento-exterior",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Sensores de movimiento",
+      "categorias_coleccion": [
+        "Sensores de movimiento"
+      ],
+      "precio": 22990,
+      "precio_formateado": "$22.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Alámbrico",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad",
+        "Sensores de movimiento"
+      ],
+      "tags_funcionales": [
+        "sensor_movimiento"
+      ],
+      "tags": [
+        "Alámbrico",
+        "catalogo-securehome",
+        "Exterior",
+        "seguridad",
+        "Sensores de movimiento",
+        "sensor_movimiento"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_sen-pir6.jpg?v=1795725379",
+      "variantes": [
+        {
+          "id": 68329441722732,
+          "titulo": "Default Title",
+          "sku": "SEN-PIR6",
+          "precio": 22990,
+          "precio_formateado": "$22.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525205541228,
+      "sku": "SEN-PIR1",
+      "titulo": "Sensor de movimiento PIR",
+      "handle": "sensor-de-movimiento-pir",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Sensores de movimiento",
+      "categorias_coleccion": [
+        "Sensores de movimiento"
+      ],
+      "precio": 19990,
+      "precio_formateado": "$19.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "catalogo-securehome",
+        "Interior",
+        "seguridad",
+        "Sensores de movimiento",
+        "Wi-Fi"
+      ],
+      "tags_funcionales": [
+        "sensor_movimiento"
+      ],
+      "tags": [
+        "catalogo-securehome",
+        "Interior",
+        "seguridad",
+        "Sensores de movimiento",
+        "Wi-Fi",
+        "sensor_movimiento"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_sen-pir1.jpg?v=1795725355",
+      "variantes": [
+        {
+          "id": 68329440837996,
+          "titulo": "Default Title",
+          "sku": "SEN-PIR1",
+          "precio": 19990,
+          "precio_formateado": "$19.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525205934444,
+      "sku": "SEN-PIR3",
+      "titulo": "Sensor PIR de pared",
+      "handle": "sensor-pir-de-pared",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Sensores de movimiento",
+      "categorias_coleccion": [
+        "Sensores de movimiento"
+      ],
+      "precio": 14990,
+      "precio_formateado": "$14.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Batería",
+        "catalogo-securehome",
+        "Interior",
+        "seguridad",
+        "Sensores de movimiento"
+      ],
+      "tags_funcionales": [
+        "sensor_movimiento",
+        "inmune_mascotas"
+      ],
+      "tags": [
+        "Batería",
+        "catalogo-securehome",
+        "Interior",
+        "seguridad",
+        "Sensores de movimiento",
+        "sensor_movimiento",
+        "inmune_mascotas"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_sen-pir3.jpg?v=1795725365",
+      "variantes": [
+        {
+          "id": 68329441231212,
+          "titulo": "Default Title",
+          "sku": "SEN-PIR3",
+          "precio": 14990,
+          "precio_formateado": "$14.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525205770604,
+      "sku": "SEN-PIR2",
+      "titulo": "Sensor PIR Visonic Next",
+      "handle": "sensor-pir-visonic-next",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Sensores de movimiento",
+      "categorias_coleccion": [
+        "Sensores de movimiento"
+      ],
+      "precio": 19990,
+      "precio_formateado": "$19.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "catalogo-securehome",
+        "Interior",
+        "seguridad",
+        "Sensores de movimiento",
+        "Wi-Fi"
+      ],
+      "tags_funcionales": [
+        "sensor_movimiento",
+        "inmune_mascotas"
+      ],
+      "tags": [
+        "catalogo-securehome",
+        "Interior",
+        "seguridad",
+        "Sensores de movimiento",
+        "Wi-Fi",
+        "sensor_movimiento",
+        "inmune_mascotas"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_sen-pir2.jpg?v=1795725361",
+      "variantes": [
+        {
+          "id": 68329441067372,
+          "titulo": "Default Title",
+          "sku": "SEN-PIR2",
+          "precio": 19990,
+          "precio_formateado": "$19.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "shopify",
+      "id": 15525208162668,
+      "sku": "ALM-SIREN",
+      "titulo": "Sirena exterior de alarma",
+      "handle": "sirena-exterior-de-alarma",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Alarmas",
+      "categorias_coleccion": [
+        "Alarmas"
+      ],
+      "precio": 27990,
+      "precio_formateado": "$27.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_seguridad.json ( Shopify no gestiona inventario )",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [
+        "Alarmas",
+        "Alámbrico",
+        "catalogo-securehome",
+        "seguridad"
+      ],
+      "tags_funcionales": [],
+      "tags": [
+        "Alarmas",
+        "Alámbrico",
+        "catalogo-securehome",
+        "seguridad"
+      ],
+      "imagen": "https://cdn.shopify.com/s/files/1/1033/3293/8092/files/seguridad_alm-siren.jpg?v=1795725423",
+      "variantes": [
+        {
+          "id": 68329443459436,
+          "titulo": "Default Title",
+          "sku": "ALM-SIREN",
+          "precio": 27990,
+          "precio_formateado": "$27.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "prueba",
+      "id": "prueba-SEN-APERT1",
+      "sku": "SEN-APERT1",
+      "titulo": "Sensor de apertura magnético",
+      "handle": "sensor-apertura-magnetico",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Sensores de apertura",
+      "categorias_coleccion": [
+        "Sensores de apertura"
+      ],
+      "precio": 12990,
+      "precio_formateado": "$12.990 CLP",
+      "stock": 20,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_prueba",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [],
+      "tags_funcionales": [
+        "sensor_apertura"
+      ],
+      "tags": [
+        "sensor_apertura"
+      ],
+      "imagen": null,
+      "variantes": [
+        {
+          "id": "prueba-SEN-APERT1-1",
+          "titulo": "Default Title",
+          "sku": "SEN-APERT1",
+          "precio": 12990,
+          "precio_formateado": "$12.990 CLP",
+          "stock": 20,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "prueba",
+      "id": "prueba-SEN-APERT2",
+      "sku": "SEN-APERT2",
+      "titulo": "Sensor de apertura para puerta",
+      "handle": "sensor-apertura-puerta",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Sensores de apertura",
+      "categorias_coleccion": [
+        "Sensores de apertura"
+      ],
+      "precio": 9990,
+      "precio_formateado": "$9.990 CLP",
+      "stock": 15,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_prueba",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [],
+      "tags_funcionales": [
+        "sensor_apertura"
+      ],
+      "tags": [
+        "sensor_apertura"
+      ],
+      "imagen": null,
+      "variantes": [
+        {
+          "id": "prueba-SEN-APERT2-1",
+          "titulo": "Default Title",
+          "sku": "SEN-APERT2",
+          "precio": 9990,
+          "precio_formateado": "$9.990 CLP",
+          "stock": 15,
+          "stock_disponible": true
+        }
+      ]
+    },
+    {
+      "origen": "prueba",
+      "id": "prueba-PROM-CARTEL1",
+      "sku": "PROM-CARTEL1",
+      "titulo": "Cartel disuasivo",
+      "handle": "cartel-disuasivo",
+      "vendor": "SecureHome Seguridad",
+      "categoria": "Promociones",
+      "categorias_coleccion": [
+        "Promociones"
+      ],
+      "precio": 4990,
+      "precio_formateado": "$4.990 CLP",
+      "stock": 10,
+      "stock_disponible": true,
+      "stock_origen": "catalogo_prueba",
+      "inventory_management": null,
+      "inventory_policy": "continue",
+      "tags_shopify": [],
+      "tags_funcionales": [
+        "cartel_disuasivo"
+      ],
+      "tags": [
+        "cartel_disuasivo"
+      ],
+      "imagen": null,
+      "variantes": [
+        {
+          "id": "prueba-PROM-CARTEL1-1",
+          "titulo": "Default Title",
+          "sku": "PROM-CARTEL1",
+          "precio": 4990,
+          "precio_formateado": "$4.990 CLP",
+          "stock": 10,
+          "stock_disponible": true
+        }
+      ]
+    }
+  ]
+}
