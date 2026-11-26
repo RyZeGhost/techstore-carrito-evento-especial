@@ -19,6 +19,11 @@ un desglose legible del kit: ``str`` muestra importes y cantidades, ``repr`` da
 una forma inequívoca para depuración y ``len`` devuelve el stock de un
 ``Producto``, las unidades de un ``ItemCarrito`` y las líneas del carrito.
 
+Las reglas convierten entradas inválidas o falta de stock en
+``ParametroKitInvalidoError`` y ``StockInsuficienteError``, las capturan con
+``try/except`` y las transforman en avisos, de modo que una regla fallida no
+detiene la ejecución de las demás.
+
 Regla de aislamiento: este archivo se escribió sin leer ni copiar los otros
 paradigmas (``imperativo.py`` y ``funcional.py``). La información de precios,
 stock y etiquetas sale de ``catalogo_shopify.json``.
@@ -34,6 +39,14 @@ RUTA_CATALOGO = Path(__file__).resolve().parent / "catalogo_shopify.json"
 def _pesos(valor):
     """Formatea un importe como pesos chilenos: $24.990 en vez de $24990."""
     return "$" + format(valor, ",.0f").replace(",", ".")
+
+
+class StockInsuficienteError(ValueError):
+    """No hay unidades suficientes para completar una reserva del kit."""
+
+
+class ParametroKitInvalidoError(ValueError):
+    """Un parámetro de entrada del kit tiene tipo o dominio inválido."""
 
 
 class Producto:
@@ -162,8 +175,12 @@ class Producto:
 
     def reservar(self, cantidad):
         """Descuenta unidades del stock interno usando el setter validado."""
+        if isinstance(cantidad, bool) or not isinstance(cantidad, int) or cantidad <= 0:
+            raise ParametroKitInvalidoError("cantidad debe ser un entero mayor a cero")
         if not self.hay_stock(cantidad):
-            raise ValueError("stock insuficiente para reservar la cantidad pedida")
+            raise StockInsuficienteError(
+                "stock insuficiente para reservar la cantidad pedida"
+            )
         self.stock = self._stock - cantidad
         return self._stock
 
@@ -378,12 +395,12 @@ class ReglaConfiguracionKit(ABC):
 
     @staticmethod
     def _entero_no_negativo(parametros, clave):
-        """Lee un parámetro entero y rechaza valores inválidos de dominio."""
+        """Lee un parámetro entero y lo valida con excepción personalizada."""
         valor = parametros.get(clave, 0)
         if isinstance(valor, bool) or not isinstance(valor, int):
-            raise TypeError(clave + " debe ser un entero")
+            raise ParametroKitInvalidoError(clave + " debe ser un entero")
         if valor < 0:
-            raise ValueError(clave + " no puede ser negativo")
+            raise ParametroKitInvalidoError(clave + " no puede ser negativo")
         return valor
 
     @staticmethod
@@ -406,6 +423,11 @@ class ReglaConfiguracionKit(ABC):
         if "avisos" not in parametros or not isinstance(parametros["avisos"], list):
             parametros["avisos"] = []
         parametros["avisos"].append(mensaje)
+
+    def _registrar_error(self, parametros, nombre_regla, error):
+        """Convierte una excepción controlada en aviso, sin cortar el flujo."""
+        mensaje = nombre_regla + " omitida: " + str(error)
+        self._registrar_aviso(parametros, mensaje)
 
     def _seleccionar(self, catalogo, parametros, etiquetas, cantidad,
                      excluidas=None, mensaje_aviso=""):
@@ -430,12 +452,17 @@ class ReglaConfiguracionKit(ABC):
             if producto.stock > stock_max:
                 stock_max = producto.stock
 
-        if cantidad > stock_max and mensaje_aviso != "":
+        # Stock parcial: si sobra demanda pero hay unidades, se ajusta la
+        # cantidad y se avisa. Si no hay unidades, la regla lo maneja con
+        # StockInsuficienteError dentro de su propio try/except.
+        if cantidad > stock_max and stock_max > 0:
+            if mensaje_aviso == "":
+                mensaje_aviso = "Cantidad ajustada de"
             texto = mensaje_aviso + " " + str(cantidad) + " a " + str(stock_max)
             self._registrar_aviso(parametros, texto + " por stock disponible.")
             cantidad = stock_max
 
-        if cantidad <= 0:
+        if stock_max <= 0 or cantidad <= 0:
             return None, 0
 
         mejor = None
@@ -446,61 +473,73 @@ class ReglaConfiguracionKit(ABC):
 
 
 class ReglaSensoresApertura(ReglaConfiguracionKit):
-    """Agrega exactamente ``puertas + ventanas`` sensores de apertura."""
+    """Agrega ``puertas + ventanas`` sensores, o avisa y omite la regla."""
 
     def aplicar(self, carrito, catalogo, parametros):
-        cantidad = self._entero_no_negativo(parametros, "puertas")
-        cantidad += self._entero_no_negativo(parametros, "ventanas")
-        if cantidad == 0:
+        try:
+            cantidad = self._entero_no_negativo(parametros, "puertas")
+            cantidad += self._entero_no_negativo(parametros, "ventanas")
+            if cantidad == 0:
+                return None
+
+            producto, cantidad = self._seleccionar(
+                catalogo,
+                parametros,
+                ["sensor_apertura"],
+                cantidad,
+                mensaje_aviso="Sensores de apertura ajustados de",
+            )
+            if producto is None:
+                raise StockInsuficienteError(
+                    "No hay sensores de apertura con stock suficiente"
+                )
+            producto.reservar(cantidad)
+        except (ParametroKitInvalidoError, StockInsuficienteError) as error:
+            self._registrar_error(parametros, "ReglaSensoresApertura", error)
             return None
 
-        producto, cantidad = self._seleccionar(
-            catalogo,
-            parametros,
-            ["sensor_apertura"],
-            cantidad,
-            mensaje_aviso="Sensores de apertura ajustados de",
-        )
-        if producto is None:
-            raise ValueError("No hay sensores de apertura con stock suficiente")
-
-        producto.reservar(cantidad)
         item = ItemCarrito(producto, cantidad)
         carrito.append(item)
         return item
 
 
 class ReglaSensorMovimientoMascotas(ReglaConfiguracionKit):
-    """Elige sensores estándar o ``inmune_mascotas`` según la bandera."""
+    """Elige sensores estándar o ``inmune_mascotas``; avisa si falla."""
 
     def aplicar(self, carrito, catalogo, parametros):
-        cantidad = self._entero_no_negativo(parametros, "cantidad_sensores_movimiento")
-        if cantidad == 0:
+        try:
+            cantidad = self._entero_no_negativo(parametros, "cantidad_sensores_movimiento")
+            if cantidad == 0:
+                return None
+
+            tiene_mascotas = parametros.get("tiene_mascotas", False)
+            if not isinstance(tiene_mascotas, bool):
+                raise ParametroKitInvalidoError("tiene_mascotas debe ser booleano")
+
+            etiquetas = ["sensor_movimiento"]
+            excluidas = []
+            if tiene_mascotas:
+                etiquetas.append("inmune_mascotas")
+            else:
+                excluidas.append("inmune_mascotas")
+
+            producto, cantidad = self._seleccionar(
+                catalogo,
+                parametros,
+                etiquetas,
+                cantidad,
+                excluidas,
+                "Sensores de movimiento ajustados de",
+            )
+            if producto is None:
+                raise StockInsuficienteError(
+                    "No hay sensores de movimiento con stock suficiente"
+                )
+            producto.reservar(cantidad)
+        except (ParametroKitInvalidoError, StockInsuficienteError) as error:
+            self._registrar_error(parametros, "ReglaSensorMovimientoMascotas", error)
             return None
 
-        tiene_mascotas = parametros.get("tiene_mascotas", False)
-        if not isinstance(tiene_mascotas, bool):
-            raise TypeError("tiene_mascotas debe ser booleano")
-
-        etiquetas = ["sensor_movimiento"]
-        excluidas = []
-        if tiene_mascotas:
-            etiquetas.append("inmune_mascotas")
-        else:
-            excluidas.append("inmune_mascotas")
-
-        producto, cantidad = self._seleccionar(
-            catalogo,
-            parametros,
-            etiquetas,
-            cantidad,
-            excluidas,
-            "Sensores de movimiento ajustados de",
-        )
-        if producto is None:
-            raise ValueError("No hay sensores de movimiento con stock suficiente")
-
-        producto.reservar(cantidad)
         item = ItemCarrito(producto, cantidad)
         carrito.append(item)
         return item
@@ -518,9 +557,9 @@ class ReglaCamarasDescuentoProgresivo(ReglaConfiguracionKit):
     def porcentaje_descuento(cantidad):
         """Devuelve 0.0, 0.10 o 0.20 según la cantidad pedida de cámaras."""
         if isinstance(cantidad, bool) or not isinstance(cantidad, int):
-            raise TypeError("cantidad debe ser un entero")
+            raise ParametroKitInvalidoError("cantidad debe ser un entero")
         if cantidad < 0:
-            raise ValueError("cantidad no puede ser negativa")
+            raise ParametroKitInvalidoError("cantidad no puede ser negativa")
         if cantidad >= 4:
             return 0.20
         if cantidad >= 2:
@@ -528,23 +567,29 @@ class ReglaCamarasDescuentoProgresivo(ReglaConfiguracionKit):
         return 0.0
 
     def aplicar(self, carrito, catalogo, parametros):
-        cantidad = self._entero_no_negativo(parametros, "cantidad_camaras")
-        if cantidad == 0:
+        try:
+            cantidad = self._entero_no_negativo(parametros, "cantidad_camaras")
+            if cantidad == 0:
+                return None
+
+            # La escala se resuelve antes de elegir el SKU: el porcentaje depende
+            # de la cantidad pedida, no del precio del producto seleccionado.
+            porcentaje = self.porcentaje_descuento(cantidad)
+            producto, cantidad = self._seleccionar(
+                catalogo, parametros, ["camara"], cantidad
+            )
+            if producto is None:
+                raise StockInsuficienteError("No hay cámaras con stock suficiente")
+
+            # Descuento por unidad sobre el precio de lista. Se redondea a entero
+            # porque el catálogo trabaja en pesos chilenos sin centavos.
+            descuento_unitario = int(round(producto.precio * porcentaje))
+            precio_unitario = producto.precio - descuento_unitario
+            producto.reservar(cantidad)
+        except (ParametroKitInvalidoError, StockInsuficienteError) as error:
+            self._registrar_error(parametros, "ReglaCamarasDescuentoProgresivo", error)
             return None
 
-        # La escala se resuelve antes de elegir el SKU: el porcentaje depende de
-        # la cantidad pedida, no del precio del producto seleccionado.
-        porcentaje = self.porcentaje_descuento(cantidad)
-        producto, cantidad = self._seleccionar(catalogo, parametros, ["camara"], cantidad)
-        if producto is None:
-            raise ValueError("No hay cámaras con stock suficiente")
-
-        # Descuento por unidad sobre el precio de lista. Se redondea a entero
-        # porque el catálogo trabaja en pesos chilenos sin centavos.
-        descuento_unitario = int(round(producto.precio * porcentaje))
-        precio_unitario = producto.precio - descuento_unitario
-
-        producto.reservar(cantidad)
         item = ItemCarrito(
             producto,
             cantidad,
@@ -577,18 +622,22 @@ class ReglaCartelRegalo(ReglaConfiguracionKit):
             parametros["regalo"] = {"incluido": False}
             return None
 
-        cartel = None
-        for producto in self._productos(catalogo):
-            if producto.tiene_etiqueta("cartel_disuasivo") and producto.stock > 0:
-                cartel = producto
-                break
+        try:
+            cartel = None
+            for producto in self._productos(catalogo):
+                if producto.tiene_etiqueta("cartel_disuasivo") and producto.stock > 0:
+                    cartel = producto
+                    break
+            if cartel is None:
+                raise StockInsuficienteError("no hay stock del cartel disuasivo")
 
-        if cartel is None:
+            precio_original = cartel.precio
+            cartel.reservar(1)
+        except (ParametroKitInvalidoError, StockInsuficienteError) as error:
             parametros["regalo"] = {"incluido": False}
+            self._registrar_error(parametros, "ReglaCartelRegalo", error)
             return None
 
-        precio_original = cartel.precio
-        cartel.reservar(1)
         item = self._item_promocional(cartel)
         carrito.append(item)
 
