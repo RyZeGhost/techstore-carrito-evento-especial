@@ -874,20 +874,32 @@ def desbloquear(valor: object) -> object:
     return valor
 
 
-def cargar_catalogo(ruta: Path = RUTA_CATALOGO) -> tuple[Producto, ...]:
+def cargar_catalogo_inmutable(
+    ruta: Path = RUTA_CATALOGO,
+) -> tuple[Producto, ...]:
     """Lee el JSON y devuelve una tupla de productos inmutables."""
     with Path(ruta).open("r", encoding="utf-8") as archivo:
         datos = MappingProxyType(json.load(archivo))
     return catalogo_desde_dict(datos)
 
 
-def exportar_resultado(resultado: Mapping, ruta: Path = RUTA_RESULTADO) -> Path:
+# Alias conservado para el codigo que ya usaba el nombre anterior.
+cargar_catalogo = cargar_catalogo_inmutable
+
+
+def guardar_resultado_json(
+    resultado: Mapping, ruta: Path = RUTA_RESULTADO
+) -> Path:
     """Escribe el resultado de forma determinista y devuelve la ruta."""
     destino = Path(ruta)
     with destino.open("w", encoding="utf-8", newline="\n") as archivo:
         json.dump(desbloquear(resultado), archivo, ensure_ascii=False, indent=2)
         archivo.write("\n")
     return destino
+
+
+# Alias conservado para el codigo que ya usaba el nombre anterior.
+exportar_resultado = guardar_resultado_json
 
 
 def imprimir_desglose(resultado: Mapping) -> None:
@@ -937,12 +949,21 @@ def imprimir_desglose(resultado: Mapping) -> None:
     print("Avisos:", ", ".join(avisos) if avisos else "ninguno")
 
 
-def main() -> Mapping:
+def ejecutar(
+    ruta_catalogo: Path = RUTA_CATALOGO,
+    ruta_resultado: Path = RUTA_RESULTADO,
+) -> Mapping:
     """Ejecuta el pipeline funcional completo y exporta el resultado."""
-    catalogo = cargar_catalogo()
+    catalogo = cargar_catalogo_inmutable(ruta_catalogo)
     resultado = procesar(inicializar(catalogo))
+    guardar_resultado_json(resultado, ruta_resultado)
+    return resultado
+
+
+def main() -> Mapping:
+    """Punto de entrada: ejecuta el borde impuro y muestra el desglose."""
+    resultado = ejecutar()
     imprimir_desglose(resultado)
-    exportar_resultado(resultado)
     return resultado
 
 
