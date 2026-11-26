@@ -448,23 +448,40 @@ class ReglaSensorMovimientoMascotas(ReglaConfiguracionKit):
 
 
 class ReglaCamarasDescuentoProgresivo(ReglaConfiguracionKit):
-    """Aplica 10% en 2-3 cámaras y 20% en 4 o más, solo sobre las cámaras."""
+    """Aplica la escala exacta de descuento por volumen de cámaras.
+
+    Tramos: 0% para 0 o 1 cámara, 10% para 2 o 3, y 20% para 4 o más. El
+    descuento se calcula sobre el precio de lista de cada cámara y solo afecta
+    a las líneas de cámaras; los sensores quedan fuera de esta escala.
+    """
+
+    @staticmethod
+    def porcentaje_descuento(cantidad):
+        """Devuelve 0.0, 0.10 o 0.20 según la cantidad pedida de cámaras."""
+        if isinstance(cantidad, bool) or not isinstance(cantidad, int):
+            raise TypeError("cantidad debe ser un entero")
+        if cantidad < 0:
+            raise ValueError("cantidad no puede ser negativa")
+        if cantidad >= 4:
+            return 0.20
+        if cantidad >= 2:
+            return 0.10
+        return 0.0
 
     def aplicar(self, carrito, catalogo, parametros):
         cantidad = self._entero_no_negativo(parametros, "cantidad_camaras")
         if cantidad == 0:
             return None
 
-        porcentaje = 0.0
-        if cantidad >= 4:
-            porcentaje = 0.20
-        elif cantidad >= 2:
-            porcentaje = 0.10
-
+        # La escala se resuelve antes de elegir el SKU: el porcentaje depende de
+        # la cantidad pedida, no del precio del producto seleccionado.
+        porcentaje = self.porcentaje_descuento(cantidad)
         producto, cantidad = self._seleccionar(catalogo, parametros, ["camara"], cantidad)
         if producto is None:
             raise ValueError("No hay cámaras con stock suficiente")
 
+        # Descuento por unidad sobre el precio de lista. Se redondea a entero
+        # porque el catálogo trabaja en pesos chilenos sin centavos.
         descuento_unitario = int(round(producto.precio * porcentaje))
         precio_unitario = producto.precio - descuento_unitario
 
@@ -481,7 +498,20 @@ class ReglaCamarasDescuentoProgresivo(ReglaConfiguracionKit):
 
 
 class ReglaCartelRegalo(ReglaConfiguracionKit):
-    """Agrega un cartel disuasivo a $0 si el carrito ya tiene artículos."""
+    """Inserta un ``ItemCarrito`` promocional del cartel a costo $0.
+
+    Solo se activa si el carrito ya tiene artículos y si queda stock del cartel.
+    El precio de lista se informa en ``parametros['regalo']``; la línea del
+    carrito mantiene subtotal y descuento en 0 para no alterar los totales.
+    """
+
+    @staticmethod
+    def _item_promocional(cartel):
+        """Construye la línea de regalo con precio final 0 y sin descuento."""
+        # ``precio_unitario_original`` queda en 0 a propósito: si guardara el
+        # precio de lista, el subtotal del carrito incluiría el regalo y habría
+        # que descontarlo para que el total volviera a ser 0.
+        return ItemCarrito(cartel, 1, precio_unitario=0, descuento=0, es_regalo=True)
 
     def aplicar(self, carrito, catalogo, parametros):
         if len(carrito) == 0:
@@ -500,7 +530,7 @@ class ReglaCartelRegalo(ReglaConfiguracionKit):
 
         precio_original = cartel.precio
         cartel.reservar(1)
-        item = ItemCarrito(cartel, 1, precio_unitario=0, descuento=0, es_regalo=True)
+        item = self._item_promocional(cartel)
         carrito.append(item)
 
         parametros["regalo"] = {
