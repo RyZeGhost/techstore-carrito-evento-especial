@@ -14,6 +14,11 @@ El encapsulamiento se aplica con atributos ``_precio``, ``_stock`` y
 dominio antes de asignar. Las validaciones lanzan ``ValueError`` o ``TypeError``
 para que ningún objeto quede en un estado inválido.
 
+Los métodos especiales ``__str__``, ``__repr__`` y ``__len__`` permiten imprimir
+un desglose legible del kit: ``str`` muestra importes y cantidades, ``repr`` da
+una forma inequívoca para depuración y ``len`` devuelve el stock de un
+``Producto``, las unidades de un ``ItemCarrito`` y las líneas del carrito.
+
 Regla de aislamiento: este archivo se escribió sin leer ni copiar los otros
 paradigmas (``imperativo.py`` y ``funcional.py``). La información de precios,
 stock y etiquetas sale de ``catalogo_shopify.json``.
@@ -24,6 +29,11 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 RUTA_CATALOGO = Path(__file__).resolve().parent / "catalogo_shopify.json"
+
+
+def _pesos(valor):
+    """Formatea un importe como pesos chilenos: $24.990 en vez de $24990."""
+    return "$" + format(valor, ",.0f").replace(",", ".")
 
 
 class Producto:
@@ -182,6 +192,27 @@ class Producto:
         vista["origen"] = self._origen
         return vista
 
+    def __str__(self):
+        """Descripción de una línea de catálogo para el desglose en consola."""
+        texto = self._sku + " | " + self._titulo + " | " + self._categoria
+        return texto + " | " + _pesos(self._precio) + " | stock " + str(self._stock)
+
+    def __repr__(self):
+        """Representación inequívoca, cercana a la firma del constructor."""
+        return (
+            "Producto(sku=" + repr(self._sku)
+            + ", titulo=" + repr(self._titulo)
+            + ", categoria=" + repr(self._categoria)
+            + ", precio=" + repr(self._precio)
+            + ", stock=" + repr(self._stock)
+            + ", etiquetas=" + repr(list(self.etiquetas))
+            + ", origen=" + repr(self._origen) + ")"
+        )
+
+    def __len__(self):
+        """El largo de un producto es su stock disponible."""
+        return self._stock
+
 
 class ItemCarrito:
     """Representa una línea del carrito con importes calculados y validados."""
@@ -303,6 +334,32 @@ class ItemCarrito:
         vista["stock_producto"] = self._producto.stock
         vista["es_regalo"] = self._es_regalo
         return vista
+
+    def __str__(self):
+        """Línea legible con unidades, precios, descuento y total neto."""
+        texto = self.sku + " | " + self._producto.titulo
+        texto += " | " + str(self._cantidad) + " x " + _pesos(self._precio_unitario)
+        texto += " | subtotal " + _pesos(self.subtotal)
+        texto += " | descuento -" + _pesos(self._descuento)
+        texto += " | total " + _pesos(self.total)
+        if self._es_regalo:
+            texto += " | REGALO"
+        return texto
+
+    def __repr__(self):
+        """Representación unívoca de la línea, sin depender del ``Producto``."""
+        return (
+            "ItemCarrito(sku=" + repr(self.sku)
+            + ", cantidad=" + repr(self._cantidad)
+            + ", precio_unitario=" + repr(self._precio_unitario)
+            + ", precio_unitario_original=" + repr(self._precio_unitario_original)
+            + ", descuento=" + repr(self._descuento)
+            + ", es_regalo=" + repr(self._es_regalo) + ")"
+        )
+
+    def __len__(self):
+        """El largo de una línea es su cantidad de unidades."""
+        return self._cantidad
 
 
 class ReglaConfiguracionKit(ABC):
@@ -776,6 +833,56 @@ class CarritoEventoEspecial:
         vista["avisos"] = list(self._avisos)
         return vista
 
+    def __str__(self):
+        """Desglose completo del kit, listo para imprimir en consola."""
+        lineas = []
+        lineas.append("Kit de Seguridad Residencial")
+        cliente = "Cliente: " + str(self._puertas) + " puertas, " + str(self._ventanas)
+        cliente += " ventanas, mascotas: " + ("si" if self._tiene_mascotas else "no")
+        cliente += ", camaras: " + str(self._cantidad_camaras)
+        cliente += ", sensores movimiento: " + str(self._cantidad_sensores_movimiento)
+        lineas.append(cliente)
+        lineas.append("-" * 68)
+
+        numero = 0
+        for item in self._items:
+            numero += 1
+            lineas.append(str(numero) + ". " + str(item))
+
+        lineas.append("-" * 68)
+        lineas.append("Subtotal: " + _pesos(self.subtotal))
+        lineas.append("Descuento: -" + _pesos(self.descuento_total))
+        lineas.append("Total final: " + _pesos(self.total_final))
+        if self._regalo.get("incluido"):
+            precio = self._regalo.get("precio_original") or 0
+            lineas.append("Regalo: " + str(self._regalo.get("sku"))
+                          + " (normalmente " + _pesos(precio) + ")")
+        else:
+            lineas.append("Regalo: no incluido")
+
+        if self._avisos:
+            for aviso in self._avisos:
+                lineas.append("Aviso: " + aviso)
+        else:
+            lineas.append("Avisos: ninguno")
+        return "\n".join(lineas)
+
+    def __repr__(self):
+        """Representación unívoca del estado del cliente y del total."""
+        return (
+            "CarritoEventoEspecial(puertas=" + repr(self._puertas)
+            + ", ventanas=" + repr(self._ventanas)
+            + ", tiene_mascotas=" + repr(self._tiene_mascotas)
+            + ", cantidad_camaras=" + repr(self._cantidad_camaras)
+            + ", cantidad_sensores_movimiento=" + repr(self._cantidad_sensores_movimiento)
+            + ", items=" + repr(self.cantidad_items)
+            + ", total_final=" + repr(self.total_final) + ")"
+        )
+
+    def __len__(self):
+        """El largo del carrito es la cantidad de líneas que contiene."""
+        return self.cantidad_items
+
 
 class RepositorioShopifyJSON:
     """Persistencia JSON: carga el catálogo y guarda el resultado del carrito.
@@ -872,4 +979,5 @@ if __name__ == "__main__":
 
     carrito.ejecutar_reglas(reglas)
     repositorio.exportar_resultado(carrito)
-    print(json.dumps(carrito.a_dict(), ensure_ascii=False, indent=2))
+    # str(carrito) imprime el desglose; el JSON ya quedó en resultado_poo.json.
+    print(carrito)
