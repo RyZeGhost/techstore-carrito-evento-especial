@@ -8,7 +8,7 @@ Reglas cumplidas:
   ``Estado`` nuevo con ``dataclasses.replace``.
 * No hay diccionarios mutables en la lógica: el catálogo entrante se envuelve
   en ``MappingProxyType`` y el resultado se modela con ``ResultadoKit``.
-* ``map``, ``filter``, ``reduce`` y ``compose`` resuelven selección, stock,
+* ``map``, ``filter``, ``reduce`` y ``componer`` resuelven selección, stock,
   totales y composición del pipeline.
 
 Los únicos contenedores mutables se materializan en la frontera de E/S:
@@ -55,11 +55,6 @@ def componer(*funciones: Callable) -> Callable:
 
 # Alias conservado para el código que ya usaba el nombre en inglés.
 compose = componer
-
-
-def sumar_atributo(items: tuple, atributo: str) -> int:
-    """Suma un atributo entero de una tupla de ítems usando ``reduce``."""
-    return reduce(lambda total, item: total + getattr(item, atributo), items, 0)
 
 
 def pesos(valor: int) -> str:
@@ -224,6 +219,35 @@ class LineaResultado:
     total: int
     stock_producto: int
     es_regalo: bool
+
+
+@dataclass(frozen=True)
+class ResumenCarrito:
+    """Totales financieros consolidados de los ítems del carrito."""
+
+    subtotal: int = 0
+    descuento_total: int = 0
+    total_final: int = 0
+
+
+def resumen_carrito_desde_items(
+    items: tuple[ItemCarrito, ...],
+) -> ResumenCarrito:
+    """Consolida la tupla final de ítems con ``functools.reduce``.
+
+    Cada paso usa ``dataclasses.replace`` para producir otro valor inmutable:
+    ni los ítems ni el acumulador se modifican.
+    """
+    return reduce(
+        lambda acumulado, item: replace(
+            acumulado,
+            subtotal=acumulado.subtotal + item.subtotal,
+            descuento_total=acumulado.descuento_total + item.descuento,
+            total_final=acumulado.total_final + item.total,
+        ),
+        items,
+        ResumenCarrito(),
+    )
 
 
 @dataclass(frozen=True)
@@ -737,15 +761,16 @@ def linea_desde_item(item: ItemCarrito) -> LineaResultado:
 def estado_a_resultado(estado: Estado) -> ResultadoKit:
     """Convierte el estado final en ``ResultadoKit``, sin dicts ni listas."""
     lineas = tuple(map(linea_desde_item, estado.items))
+    consolidado = resumen_carrito_desde_items(estado.items)
     return ResultadoKit(
         cliente=estado.cliente,
         carrito=lineas,
         regalo=estado.regalo,
         resumen=Resumen(
             cantidad_items=len(lineas),
-            subtotal=sumar_atributo(estado.items, "subtotal"),
-            descuento_total=sumar_atributo(estado.items, "descuento"),
-            total_final=sumar_atributo(estado.items, "total"),
+            subtotal=consolidado.subtotal,
+            descuento_total=consolidado.descuento_total,
+            total_final=consolidado.total_final,
         ),
         inventario=tuple((p.sku, p.stock) for p in estado.catalogo),
         avisos=estado.avisos,
