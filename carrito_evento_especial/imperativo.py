@@ -1,19 +1,35 @@
 """Carrito Evento Especial - paradigma estrictamente imperativo.
 
+Modelo de ejecución: todo el código vive a nivel de módulo, así que se ejecuta
+de arriba hacia abajo una sola vez, sin definir funciones ni clases. El estado
+son variables, listas y diccionarios ordinarios; cada bloque lee ese estado, lo
+modifica en el mismo lugar (in-place) y se lo pasa al siguiente. No hay valores
+de retorno ni ámbitos locales: el control de flujo es secuencial, con ``for``,
+``if/elif/else``, ``break`` y ``raise`` para repetir, saltar o detener el proceso.
+
 El catálogo se lee desde ``catalogo_shopify.json`` hacia variables y listas
-mutables. La lógica se resuelve con asignaciones, acumuladores, bucles ``for``
-y condicionales ``if/else``: no hay clases, ni ``map``/``filter``/``reduce``,
-ni funciones de orden superior.
+mutables. No se usan ``map``/``filter``/``reduce``, ``lambda`` ni
+comprensiones: cada recorrido es un ``for`` explícito con acumuladores.
 """
 
 import json
+import sys
 from pathlib import Path
 
 RUTA_CATALOGO = Path(__file__).resolve().parent / "catalogo_shopify.json"
+RUTA_RESULTADO = Path(__file__).resolve().parent / "resultado_imperativo.json"
 
 # ---------------------------------------------------------------------------
 # 1. Lectura del catálogo hacia variables y listas mutables
 # ---------------------------------------------------------------------------
+# ``catalogo`` es el diccionario crudo devuelto por json.load: queda en memoria
+# como referencia de solo lectura. A partir de él se construye ``productos``,
+# una lista nueva: por cada producto se crea un dict y se vuelcan sus campos con
+# asignaciones. Las listas anidadas (``etiquetas`` y ``variantes``) también se
+# copian elemento por elemento con append, de modo que modificarlas después no
+# altere el JSON original. ``categorias`` se llena igual. Al final se crea
+# ``inventario``, un diccionario independiente con los sku y su stock: será la
+# copia mutable que se descuenta al armar el carrito, sin tocar el stock leído.
 
 with RUTA_CATALOGO.open(encoding="utf-8") as archivo:
     catalogo = json.load(archivo)
@@ -63,6 +79,11 @@ for producto in productos:
 # ---------------------------------------------------------------------------
 # 2. Parámetros de entrada del cliente
 # ---------------------------------------------------------------------------
+# Estas cinco variables son el estado de entrada. Como no hay funciones, no hay
+# parámetros formales: cambiar una asignación cambia los datos con los que
+# trabajarán todos los bloques posteriores. ``tiene_mascotas`` es una bandera
+# booleana; las cantidades se tratan como enteros y se validan antes de mutar
+# cualquier estructura.
 
 puertas = 2
 ventanas = 4
@@ -74,22 +95,145 @@ cantidad_camaras = 3
 # solicitados para no perder esa regla.
 cantidad_sensores_movimiento = 2
 
+# ---------------------------------------------------------------------------
+# 2b. Validaciones imperativas de casos borde y ajuste por stock
+# ---------------------------------------------------------------------------
+# ``avisos`` es una lista mutable que acumula mensajes: nace vacía y solo crece
+# con append. Las validaciones usan ``raise``: si se cumple la condición
+# inválida, el flujo se detiene ahí y ningún bloque posterior se ejecuta, por lo
+# que no se descuenta stock ni se escribe el JSON. El acumulador de apertura
+# empieza en 0 y crece con dos asignaciones ``+=`` (puertas y ventanas). Las
+# banderas y etiquetas se fijan aquí porque el cálculo del stock máximo depende
+# de ellas. Los dos ``stock_max_*`` se recalculan dentro de un for: cada producto
+# puede elevar el valor guardado y al terminar queda el máximo de los elegibles.
+# Si la cantidad pedida supera ese tope, se reasigna la cantidad al máximo y se
+# deja constancia en ``avisos``; el flujo continúa con los valores ya ajustados.
+
+avisos = []
+
+if len(productos) == 0:
+    raise ValueError("El catálogo está vacío: no hay productos para armar el carrito.")
+else:
+    pass
+
 if puertas < 0:
     raise ValueError("puertas no puede ser negativo")
+else:
+    pass
 if ventanas < 0:
     raise ValueError("ventanas no puede ser negativo")
+else:
+    pass
 if cantidad_camaras < 0:
     raise ValueError("cantidad_camaras no puede ser negativo")
+else:
+    pass
 if cantidad_sensores_movimiento < 0:
     raise ValueError("cantidad_sensores_movimiento no puede ser negativo")
+else:
+    pass
 
-# ---------------------------------------------------------------------------
-# 3. Sensores de apertura: acumulador puertas + ventanas
-# ---------------------------------------------------------------------------
-
+# Acumulador de apertura: se calcula aquí para poder ajustarlo al stock
+# disponible antes de recorrer el catálogo en la sección siguiente.
 cantidad_sensores_apertura = 0
 cantidad_sensores_apertura += puertas
 cantidad_sensores_apertura += ventanas
+
+# La bandera de mascotas también se necesita para medir el stock elegible.
+seleccionar_inmune = False
+if tiene_mascotas:
+    seleccionar_inmune = True
+else:
+    seleccionar_inmune = False
+
+etiquetas_movimiento = []
+etiquetas_movimiento.append("sensor_movimiento")
+etiquetas_excluidas = []
+if seleccionar_inmune:
+    etiquetas_movimiento.append("inmune_mascotas")
+else:
+    etiquetas_excluidas.append("inmune_mascotas")
+
+# Stock máximo por grupo, recorriendo el catálogo con for / if.
+stock_max_apertura = 0
+stock_max_movimiento = 0
+for producto in productos:
+    es_apertura = False
+    es_movimiento = False
+    es_inmune = False
+    for etiqueta in producto["tags_funcionales"]:
+        if etiqueta == "sensor_apertura":
+            es_apertura = True
+        else:
+            pass
+        if etiqueta == "sensor_movimiento":
+            es_movimiento = True
+        else:
+            pass
+        if etiqueta == "inmune_mascotas":
+            es_inmune = True
+        else:
+            pass
+
+    if es_apertura:
+        if inventario[producto["sku"]] > stock_max_apertura:
+            stock_max_apertura = inventario[producto["sku"]]
+        else:
+            pass
+    else:
+        pass
+
+    elegible_movimiento = False
+    if seleccionar_inmune:
+        if es_movimiento and es_inmune:
+            elegible_movimiento = True
+        else:
+            elegible_movimiento = False
+    else:
+        if es_movimiento and not es_inmune:
+            elegible_movimiento = True
+        else:
+            elegible_movimiento = False
+
+    if elegible_movimiento:
+        if inventario[producto["sku"]] > stock_max_movimiento:
+            stock_max_movimiento = inventario[producto["sku"]]
+        else:
+            pass
+    else:
+        pass
+
+# Ajuste al máximo disponible, dejando el aviso en la lista mutable.
+if cantidad_sensores_apertura > stock_max_apertura:
+    avisos.append(
+        "Sensores de apertura ajustados de "
+        f"{cantidad_sensores_apertura} a {stock_max_apertura} por stock disponible."
+    )
+    cantidad_sensores_apertura = stock_max_apertura
+else:
+    pass
+
+if cantidad_sensores_movimiento > stock_max_movimiento:
+    avisos.append(
+        "Sensores de movimiento ajustados de "
+        f"{cantidad_sensores_movimiento} a {stock_max_movimiento} por stock disponible."
+    )
+    cantidad_sensores_movimiento = stock_max_movimiento
+else:
+    pass
+
+# ---------------------------------------------------------------------------
+# 3. Sensores de apertura: se usa el acumulador ya ajustado
+# ---------------------------------------------------------------------------
+# ``carrito`` nace como lista vacía y es el contenedor donde se insertarán todas
+# las líneas. Dentro del if se recorre ``productos`` con un for: las variables
+# ``mejor_producto`` y ``mejor_precio`` son estado del bucle, se inicializan en
+# None y se reasignan cada vez que aparece un SKU más barato con stock suficiente.
+# Los if/else solo deciden si se actualiza ese estado. Al salir del bucle, el
+# stock se descuenta in-place del dict ``inventario`` restando en la clave del
+# sku elegido. Después se construye ``linea`` campo por campo con asignaciones y
+# se agrega al final de ``carrito`` con append; ``stock_producto`` ya guarda el
+# valor posterior al descuento.
 
 carrito = []
 subtotal_apertura = 0
@@ -146,23 +290,16 @@ if cantidad_sensores_apertura > 0:
 # ---------------------------------------------------------------------------
 # 4. Sensores de movimiento: filtro de mascotas
 # ---------------------------------------------------------------------------
+# La bandera ``seleccionar_inmune`` (definida arriba) decide la elegibilidad
+# dentro del for: por cada producto se levantan banderas locales
+# ``es_movimiento`` y ``es_inmune`` recorriendo sus etiquetas, y ``elegible`` se
+# reasigna según la bandera global. El mismo patrón de estado de bucle del bloque
+# anterior elige el SKU más barato con stock. La verificación de stock se repite
+# justo antes del append: si pasa, se resta del ``inventario`` y se agrega la
+# línea; si no, el else lanza ValueError y ``carrito`` queda sin esa línea.
 
-etiquetas_movimiento = []
-etiquetas_movimiento.append("sensor_movimiento")
-etiquetas_excluidas = []
-
-# Bandera booleana que gobierna la selección del sensor de movimiento.
-seleccionar_inmune = False
-if tiene_mascotas:
-    seleccionar_inmune = True
-else:
-    seleccionar_inmune = False
-
-if seleccionar_inmune:
-    etiquetas_movimiento.append("inmune_mascotas")
-else:
-    etiquetas_excluidas.append("inmune_mascotas")
-
+# La bandera y las etiquetas ya se definieron en la sección de validaciones,
+# donde se usaron para medir el stock máximo elegible.
 subtotal_movimiento = 0
 
 if cantidad_sensores_movimiento > 0:
@@ -237,6 +374,15 @@ if cantidad_sensores_movimiento > 0:
 # ---------------------------------------------------------------------------
 # 5. Cámaras: descuento progresivo sobre el subtotal de cámaras
 # ---------------------------------------------------------------------------
+# Primero una cadena if/elif/else asigna ``porcentaje_camaras`` una sola vez,
+# antes de cualquier recorrido: 20% para 4 o más, 10% para 2-3 y 0 en caso
+# contrario. Luego el for selecciona el SKU más barato con stock, con el mismo
+# esquema de ``mejor_producto``/``mejor_precio``. A diferencia de los bloques
+# anteriores, el precio unitario es mutable: ``precio_unitario`` arranca con el
+# precio original y se reduce con ``-=``. El acumulador ``descuento_total`` crece
+# con ``+=`` y se copia en ``descuento_camaras_monto`` para distinguirlo del
+# descuento global que se calculará al final. La línea entra a ``carrito`` con
+# el precio ya mutado y el total neto.
 
 # Tramos definidos con if / elif / else según cantidad_camaras:
 # 2-3 unidades = 10% de descuento; 4 o más = 20%; 0 o 1 = sin descuento.
@@ -250,6 +396,7 @@ else:
 
 subtotal_camaras = 0
 descuento_total = 0
+descuento_camaras_monto = 0
 
 if cantidad_camaras > 0:
     mejor_producto = None
@@ -300,6 +447,7 @@ if cantidad_camaras > 0:
     subtotal_camaras = precio_unitario_original * cantidad_camaras
     monto_descuento = monto_descuento_unitario * cantidad_camaras
     descuento_total += monto_descuento
+    descuento_camaras_monto = descuento_total
 
     linea = {}
     linea["sku"] = mejor_producto["sku"]
@@ -321,19 +469,19 @@ if cantidad_camaras > 0:
 # ---------------------------------------------------------------------------
 # 6. Regalo automático: cartel disuasivo a $0
 # ---------------------------------------------------------------------------
+# Se recorre el catálogo con un for y la bandera ``es_cartel``; en cuanto se
+# encuentra un cartel con stock mayor que cero se guarda en ``cartel`` y se
+# ejecuta ``break`` para salir del bucle, sin evaluar los SKU restantes. El if
+# exterior exige que ``carrito`` ya tenga elementos: usa ``len()`` sobre la lista
+# mutable, no una bandera derivada de etiquetas. Dentro se descuenta 1 del
+# inventario del cartel y se agrega una línea nueva con precio_unitario,
+# subtotal, descuento y total en 0, más ``es_regalo`` en True. Esa línea también
+# vive en ``carrito``, por lo que el bucle final del resumen la contabilizará con
+# subtotal cero.
 
-hay_sensor_o_camara = False
-for linea in carrito:
-    for etiqueta in linea["etiquetas"]:
-        if etiqueta == "sensor_apertura":
-            hay_sensor_o_camara = True
-        elif etiqueta == "sensor_movimiento":
-            hay_sensor_o_camara = True
-        elif etiqueta == "camara":
-            hay_sensor_o_camara = True
-        else:
-            pass
-
+# El regalo se activa cuando el carrito ya tiene artículos (todos los que se
+# insertan son sensores o cámaras). Se recorre el catálogo buscando el cartel
+# disuasivo con stock disponible en la copia mutable del inventario.
 cartel = None
 for producto in productos:
     es_cartel = False
@@ -344,8 +492,9 @@ for producto in productos:
             pass
 
     if es_cartel:
-        if inventario[producto["sku"]] >= 1:
+        if inventario[producto["sku"]] > 0:
             cartel = producto
+            break
         else:
             pass
     else:
@@ -359,9 +508,9 @@ regalo["cantidad"] = 0
 regalo["precio_original"] = 0
 regalo["precio_final"] = 0
 regalo["subtotal"] = 0
-regalo["motivo"] = "No hay sensores ni cámaras en el carrito."
+regalo["motivo"] = "El carrito está vacío o no hay stock del cartel disuasivo."
 
-if hay_sensor_o_camara and cartel is not None:
+if len(carrito) > 0 and cartel is not None:
     inventario[cartel["sku"]] -= 1
 
     regalo["incluido"] = True
@@ -371,7 +520,7 @@ if hay_sensor_o_camara and cartel is not None:
     regalo["precio_original"] = cartel["precio"]
     regalo["precio_final"] = 0
     regalo["subtotal"] = 0
-    regalo["motivo"] = "Regalo automático: hay sensor o cámara y stock del cartel."
+    regalo["motivo"] = "Regalo automático: carrito con artículos y stock del cartel."
 
     linea = {}
     linea["sku"] = cartel["sku"]
@@ -381,21 +530,39 @@ if hay_sensor_o_camara and cartel is not None:
     for etiqueta in cartel["tags_funcionales"]:
         linea["etiquetas"].append(etiqueta)
     linea["cantidad"] = 1
-    linea["precio_unitario"] = cartel["precio"]
-    linea["subtotal"] = cartel["precio"]
-    linea["descuento"] = cartel["precio"]
+    linea["precio_unitario"] = 0
+    linea["precio_original"] = cartel["precio"]
+    linea["subtotal"] = 0
+    linea["descuento"] = 0
     linea["total"] = 0
     linea["stock_producto"] = inventario[cartel["sku"]]
     linea["es_regalo"] = True
     carrito.append(linea)
 
 # ---------------------------------------------------------------------------
-# 7. Resultado
+# 7. Cálculo secuencial y guardado del resultado
 # ---------------------------------------------------------------------------
+# Único recorrido final sobre ``carrito``: en cada iteración se mutan tres
+# acumuladores con ``+=``. ``subtotal`` suma los importes antes de descuento,
+# ``descuento_total`` suma el descuento de cada línea y, una vez cerrado el for,
+# ``total_final`` se deriva con una resta. No se recalcula ningún precio: este
+# bloque solo lee el estado que los anteriores dejaron en la lista. Luego se
+# construyen ``cliente``, ``resumen`` y ``resultado`` con asignaciones campo por
+# campo; el orden de inserción fija el orden de claves del JSON, por eso el
+# archivo es determinista. ``avisos`` se comparte por referencia en dos lugares
+# del resultado. El bloque ``with`` abre el archivo en modo escritura y lo cierra
+# automáticamente al salir; json.dump vuelca el dict con indentación y caracteres
+# UTF-8 reales, y se añade un salto de línea final.
 
-total = 0
+subtotal = 0
+descuento_total = 0
+total_final = 0
+
 for linea in carrito:
-    total += linea["total"]
+    subtotal += linea["subtotal"]
+    descuento_total += linea["descuento"]
+
+total_final = subtotal - descuento_total
 
 cliente = {}
 cliente["puertas"] = puertas
@@ -414,10 +581,13 @@ resumen["subtotal_sensores_apertura"] = subtotal_apertura
 resumen["subtotal_sensores_movimiento"] = subtotal_movimiento
 resumen["subtotal_camaras"] = subtotal_camaras
 resumen["descuento_camaras_porcentaje"] = porcentaje_camaras
-resumen["descuento_camaras_monto"] = descuento_total
+resumen["descuento_camaras_monto"] = descuento_camaras_monto
+resumen["subtotal_camaras_con_descuento"] = subtotal_camaras - descuento_camaras_monto
+resumen["subtotal"] = subtotal
 resumen["descuento_total"] = descuento_total
-resumen["subtotal_camaras_con_descuento"] = subtotal_camaras - descuento_total
-resumen["total"] = total
+resumen["total_final"] = total_final
+resumen["total"] = total_final
+resumen["avisos"] = avisos
 
 resultado = {}
 resultado["cliente"] = cliente
@@ -425,6 +595,15 @@ resultado["carrito"] = carrito
 resultado["regalo"] = regalo
 resultado["resumen"] = resumen
 resultado["inventario"] = inventario
+resultado["avisos"] = avisos
 
+with RUTA_RESULTADO.open("w", encoding="utf-8") as archivo:
+    json.dump(resultado, archivo, ensure_ascii=False, indent=2)
+    archivo.write("\n")
+
+# Al ejecutar como script los avisos van a stderr para no mezclarse con el JSON
+# de stdout. El guardián ``__name__`` evita esta impresión si el archivo se importa.
 if __name__ == "__main__":
+    for aviso in avisos:
+        sys.stderr.write("AVISO: " + aviso + "\n")
     print(json.dumps(resultado, ensure_ascii=False, indent=2))

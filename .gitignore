@@ -4,3 +4,4 @@ __pycache__/
 *.py[cod]
 logs/
 backups/
+carrito_evento_especial/versiones/

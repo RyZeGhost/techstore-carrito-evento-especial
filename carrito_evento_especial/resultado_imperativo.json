@@ -1,0 +1,141 @@
+{
+  "cliente": {
+    "puertas": 2,
+    "ventanas": 4,
+    "tiene_mascotas": true,
+    "cantidad_camaras": 3,
+    "cantidad_sensores_movimiento": 2
+  },
+  "carrito": [
+    {
+      "sku": "SEN-APERT2",
+      "titulo": "Sensor de apertura para puerta",
+      "categoria": "Sensores de apertura",
+      "etiquetas": [
+        "sensor_apertura"
+      ],
+      "cantidad": 6,
+      "precio_unitario": 9990,
+      "subtotal": 59940,
+      "descuento": 0,
+      "total": 59940,
+      "stock_producto": 9,
+      "es_regalo": false
+    },
+    {
+      "sku": "SEN-PIR3",
+      "titulo": "Sensor PIR de pared",
+      "categoria": "Sensores de movimiento",
+      "etiquetas": [
+        "sensor_movimiento",
+        "inmune_mascotas"
+      ],
+      "cantidad": 2,
+      "precio_unitario": 14990,
+      "subtotal": 29980,
+      "descuento": 0,
+      "total": 29980,
+      "stock_producto": 18,
+      "es_regalo": false
+    },
+    {
+      "sku": "CAM-TPLINK",
+      "titulo": "Cámara IP TP-Link",
+      "categoria": "Cámaras",
+      "etiquetas": [
+        "camara"
+      ],
+      "cantidad": 3,
+      "precio_unitario": 22491,
+      "precio_unitario_original": 24990,
+      "subtotal": 74970,
+      "descuento": 7497,
+      "total": 67473,
+      "stock_producto": 17,
+      "es_regalo": false
+    },
+    {
+      "sku": "PROM-CARTEL1",
+      "titulo": "Cartel disuasivo",
+      "categoria": "Promociones",
+      "etiquetas": [
+        "cartel_disuasivo"
+      ],
+      "cantidad": 1,
+      "precio_unitario": 0,
+      "precio_original": 4990,
+      "subtotal": 0,
+      "descuento": 0,
+      "total": 0,
+      "stock_producto": 9,
+      "es_regalo": true
+    }
+  ],
+  "regalo": {
+    "incluido": true,
+    "sku": "PROM-CARTEL1",
+    "titulo": "Cartel disuasivo",
+    "cantidad": 1,
+    "precio_original": 4990,
+    "precio_final": 0,
+    "subtotal": 0,
+    "motivo": "Regalo automático: carrito con artículos y stock del cartel."
+  },
+  "resumen": {
+    "cantidad_sensores_apertura": 6,
+    "cantidad_sensores_movimiento": 2,
+    "cantidad_camaras": 3,
+    "etiquetas_movimiento_usadas": [
+      "sensor_movimiento",
+      "inmune_mascotas"
+    ],
+    "etiquetas_movimiento_excluidas": [],
+    "subtotal_sensores_apertura": 59940,
+    "subtotal_sensores_movimiento": 29980,
+    "subtotal_camaras": 74970,
+    "descuento_camaras_porcentaje": 0.1,
+    "descuento_camaras_monto": 7497,
+    "subtotal_camaras_con_descuento": 67473,
+    "subtotal": 164890,
+    "descuento_total": 7497,
+    "total_final": 157393,
+    "total": 157393,
+    "avisos": []
+  },
+  "inventario": {
+    "CAM-AXIS2": 20,
+    "CAM-AXIS1": 20,
+    "CAM-DLINK": 20,
+    "CAM-BLINK1": 20,
+    "CAM-BLINK2": 20,
+    "CAM-TPLINK": 17,
+    "CAN-BEST": 20,
+    "CAN-WEB": 20,
+    "CAN-CHUBB": 20,
+    "CAN-BRASS": 20,
+    "CAN-PROFI": 20,
+    "CAN-CLEAR": 20,
+    "BIO-FINGER": 20,
+    "BIO-AUGUST": 20,
+    "BIO-NEST": 20,
+    "BIO-YALE2": 20,
+    "BIO-YALE3": 20,
+    "BIO-YALE1": 20,
+    "SEN-PIR5": 20,
+    "ALM-SMOKE": 20,
+    "SEN-PIR4": 20,
+    "ALM-RING": 20,
+    "ALM-PROG2": 20,
+    "ALM-PROG1": 20,
+    "ALM-PANEL": 20,
+    "SEN-PIR6": 20,
+    "SEN-PIR1": 20,
+    "SEN-PIR3": 18,
+    "SEN-PIR2": 20,
+    "ALM-SIREN": 20,
+    "SEN-APERT1": 20,
+    "SEN-APERT2": 9,
+    "PROM-CARTEL1": 9
+  },
+  "avisos": []
+}
