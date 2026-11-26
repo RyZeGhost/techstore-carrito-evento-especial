@@ -425,6 +425,68 @@ def porcentaje_camaras(cantidad: int, reglas: ReglasKit = REGLAS) -> float:
 
 
 # ---------------------------------------------------------------------------
+# Transformaciones puras con map: productos filtrados -> tupla de ítems
+# ---------------------------------------------------------------------------
+
+
+def item_desde_producto(producto: Producto, cantidad: int) -> ItemCarrito:
+    """Construye un ítem nuevo con el stock reservado, sin tocar el producto."""
+    return ItemCarrito(
+        producto=producto.con_stock(producto.stock - cantidad),
+        cantidad=cantidad,
+        precio_unitario=producto.precio,
+        precio_unitario_original=producto.precio,
+        descuento=0,
+    )
+
+
+def items_sensores_apertura(
+    productos_filtrados: tuple[Producto, ...],
+    parametros: Cliente,
+    mensaje_aviso: str = "Sensores de apertura ajustados de",
+) -> tuple[tuple[ItemCarrito, ...], tuple[str, ...]]:
+    """Devuelve ítems con exactamente ``puertas + ventanas`` sensores.
+
+    Recibe los sensores ya filtrados y los parámetros del kit; selecciona el
+    SKU más barato con stock y transforma ese producto con ``map``. Devuelve
+    la tupla de ítems y los avisos de stock parcial, sin alterar las tuplas
+    de entrada.
+    """
+    solicitada = parametros.puertas + parametros.ventanas
+    if solicitada <= 0:
+        return (), ()
+
+    producto, cantidad, avisos = seleccionar(
+        productos_filtrados, solicitada, (), mensaje_aviso=mensaje_aviso
+    )
+    if producto is None:
+        return (), avisos
+    return tuple(map(lambda p: item_desde_producto(p, cantidad), (producto,))), avisos
+
+
+def items_sensores_movimiento(
+    productos_filtrados: tuple[Producto, ...],
+    parametros: Cliente,
+    mensaje_aviso: str = "Sensores de movimiento ajustados de",
+) -> tuple[tuple[ItemCarrito, ...], tuple[str, ...]]:
+    """Devuelve ítems con la cantidad exacta de sensores de movimiento.
+
+    Usa la misma transformación con ``map`` que la regla de apertura, pero
+    toma la cantidad desde ``cantidad_sensores_movimiento`` del kit.
+    """
+    solicitada = parametros.cantidad_sensores_movimiento
+    if solicitada <= 0:
+        return (), ()
+
+    producto, cantidad, avisos = seleccionar(
+        productos_filtrados, solicitada, (), mensaje_aviso=mensaje_aviso
+    )
+    if producto is None:
+        return (), avisos
+    return tuple(map(lambda p: item_desde_producto(p, cantidad), (producto,))), avisos
+
+
+# ---------------------------------------------------------------------------
 # Reglas puras: Estado -> Estado
 # ---------------------------------------------------------------------------
 
@@ -435,13 +497,11 @@ def regla_apertura(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
     if cantidad == 0:
         return estado
 
-    producto, cantidad, avisos = seleccionar(
+    items, avisos = items_sensores_apertura(
         sensores_apertura_disponibles(estado.catalogo, reglas),
-        cantidad,
-        (),
-        mensaje_aviso="Sensores de apertura ajustados de",
+        estado.cliente,
     )
-    if producto is None:
+    if not items:
         return replace(
             estado,
             avisos=estado.avisos + (
@@ -450,12 +510,10 @@ def regla_apertura(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
             ),
         )
 
-    reservado = producto.con_stock(producto.stock - cantidad)
-    item = ItemCarrito(reservado, cantidad, producto.precio, producto.precio, 0)
     return replace(
         estado,
-        catalogo=reemplazar_producto(estado.catalogo, reservado),
-        items=estado.items + (item,),
+        catalogo=reemplazar_producto(estado.catalogo, items[0].producto),
+        items=estado.items + items,
         avisos=estado.avisos + avisos,
     )
 
@@ -466,15 +524,13 @@ def regla_movimiento(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
     if cantidad == 0:
         return estado
 
-    producto, cantidad, avisos = seleccionar(
+    items, avisos = items_sensores_movimiento(
         sensores_movimiento_disponibles(
             estado.catalogo, estado.cliente.tiene_mascotas, reglas
         ),
-        cantidad,
-        (),
-        mensaje_aviso="Sensores de movimiento ajustados de",
+        estado.cliente,
     )
-    if producto is None:
+    if not items:
         return replace(
             estado,
             avisos=estado.avisos + (
@@ -483,12 +539,10 @@ def regla_movimiento(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
             ),
         )
 
-    reservado = producto.con_stock(producto.stock - cantidad)
-    item = ItemCarrito(reservado, cantidad, producto.precio, producto.precio, 0)
     return replace(
         estado,
-        catalogo=reemplazar_producto(estado.catalogo, reservado),
-        items=estado.items + (item,),
+        catalogo=reemplazar_producto(estado.catalogo, items[0].producto),
+        items=estado.items + items,
         avisos=estado.avisos + avisos,
     )
 
