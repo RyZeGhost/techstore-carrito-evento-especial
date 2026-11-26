@@ -9,10 +9,16 @@ Este módulo modela el agregado completo del carrito:
 * ``RepositorioShopifyJSON``: carga el catálogo como ``Producto`` y persiste el
   estado final en ``resultado_poo.json``.
 
-El encapsulamiento se aplica con atributos ``_precio``, ``_stock`` y
-``_cantidad``, expuestos solo mediante propiedades ``@property`` que validan el
-dominio antes de asignar. Las validaciones lanzan ``ValueError`` o ``TypeError``
-para que ningún objeto quede en un estado inválido.
+Paradigmas aplicados de forma explícita:
+
+* Encapsulamiento: atributos privados y ``@property`` validados en ``Producto``,
+  ``ItemCarrito``, ``CarritoEventoEspecial`` y ``RepositorioShopifyJSON``.
+* Herencia: ``ReglaConfiguracionKit(ABC)`` define el contrato abstracto y sus
+  cuatro subclases concretas lo implementan.
+* Composición: ``ItemCarrito`` contiene un ``Producto``; el carrito contiene
+  líneas, productos y reglas; el repositorio compone catálogo y resultado.
+* Polimorfismo: ``ejecutar_reglas`` envía el mismo mensaje ``aplicar`` a cada
+  objeto ``ReglaConfiguracionKit`` sin conocer su clase concreta.
 
 Los métodos especiales ``__str__``, ``__repr__`` y ``__len__`` permiten imprimir
 un desglose legible del kit: ``str`` muestra importes y cantidades, ``repr`` da
@@ -26,8 +32,7 @@ detiene la ejecución de las demás.
 
 Regla de aislamiento: este archivo se escribió sin leer ni copiar los otros
 paradigmas (``imperativo.py`` y ``funcional.py``). La información de precios,
-stock y etiquetas sale de ``catalogo_shopify.json``.
-"""
+stock y etiquetas sale de ``catalogo_shopify.json``."""
 
 import json
 from abc import ABC, abstractmethod
@@ -37,24 +42,50 @@ RUTA_CATALOGO = Path(__file__).resolve().parent / "catalogo_shopify.json"
 
 
 def _pesos(valor):
-    """Formatea un importe como pesos chilenos: $24.990 en vez de $24990."""
+    """Encapsulamiento: función auxiliar privada del módulo; no expone estado.
+    Composición: da formato a importes usados por las tres clases con ``__str__``.
+    Polimorfismo: recibe cualquier número sin depender del tipo de objeto que lo entrega."""
     return "$" + format(valor, ",.0f").replace(",", ".")
 
 
 class StockInsuficienteError(ValueError):
-    """No hay unidades suficientes para completar una reserva del kit."""
+    """Error de dominio cuando faltan unidades para una reserva.
+
+    Encapsulamiento: no añade estado mutable; solo transporta un mensaje.
+    Herencia: deriva de ``ValueError`` para conservar compatibilidad con las
+    validaciones previas.
+    Composición: es lanzada por ``Producto.reservar`` y por las reglas del kit.
+    Polimorfismo: las cuatro reglas la capturan de forma uniforme dentro de ``try/except``."""
 
 
 class ParametroKitInvalidoError(ValueError):
-    """Un parámetro de entrada del kit tiene tipo o dominio inválido."""
+    """Error de dominio para entradas del kit con tipo o rango inválido.
+
+    Encapsulamiento: no expone atributos; comunica solo el parámetro afectado.
+    Herencia: deriva de ``ValueError`` para integrarse con las validaciones existentes.
+    Composición: la lanzan los helpers de reglas, ``reservar`` y ``porcentaje_descuento``.
+    Polimorfismo: se maneja igual en todas las reglas mediante el mismo bloque ``except``."""
 
 
 class Producto:
-    """Representa un producto del catálogo con acceso controlado a sus datos."""
+    """Representa un SKU del catálogo con acceso controlado a sus datos.
+
+    Encapsulamiento: ``_sku``, ``_titulo``, ``_categoria``, ``_precio``, ``_stock``,
+    ``_etiquetas`` y ``_origen`` son privados y se exponen solo mediante ``@property``.
+    Composición: lleva una colección interna de etiquetas defendida con copia en tupla.
+    Herencia: no deriva de otra clase; es una entidad base del modelo.
+    Polimorfismo: ``desde_dict`` es un ``classmethod`` que construye la misma clase
+    desde el JSON sin acoplarse al repositorio."""
 
     def __init__(self, sku, titulo, categoria, precio, stock, etiquetas=None, origen=""):
         # Se crean todos los atributos privados antes de usar los setters, para
         # que las validaciones de las propiedades encuentren un estado coherente.
+        """Encapsulamiento: crea primero los atributos privados y luego usa los setters
+        para que cada validación encuentre un estado coherente.
+        Composición: recibe la colección de etiquetas y delega su normalización en la
+        propiedad ``etiquetas``.
+        Herencia: no interviene; es el constructor de una entidad base.
+        Polimorfismo: no interviene directamente, pero ``desde_dict`` reutiliza este constructor."""
         self._sku = ""
         self._titulo = ""
         self._categoria = ""
@@ -73,42 +104,59 @@ class Producto:
 
     @property
     def sku(self):
-        """Identificador del producto; solo se acepta una cadena no vacía."""
+        """Encapsulamiento: getter controlado de ``_sku``; devuelve el valor sin permitir
+        escritura directa desde fuera de la clase.
+        Composición: expone el identificador usado por ``ItemCarrito`` y el inventario."""
         return self._sku
 
     @sku.setter
     def sku(self, valor):
+        """Encapsulamiento: valida cadena no vacía antes de asignar ``_sku``.
+        Herencia: no interviene; la validación es propia de la entidad.
+        Polimorfismo: no interviene; mantiene la interfaz común de propiedades del modelo."""
         if not isinstance(valor, str) or not valor.strip():
             raise ValueError("sku debe ser una cadena no vacía")
         self._sku = valor.strip()
 
     @property
     def titulo(self):
+        """Encapsulamiento: getter de ``_titulo`` sin acceso directo al privado.
+        Composición: el título se reutiliza en líneas, regalo y desglose en consola."""
         return self._titulo
 
     @titulo.setter
     def titulo(self, valor):
+        """Encapsulamiento: exige cadena no vacía antes de guardar ``_titulo``.
+        Polimorfismo: mantiene la misma convención de validación que las demás propiedades."""
         if not isinstance(valor, str) or not valor.strip():
             raise ValueError("titulo debe ser una cadena no vacía")
         self._titulo = valor.strip()
 
     @property
     def categoria(self):
+        """Encapsulamiento: getter de ``_categoria`` controlado por la clase.
+        Composición: la categoría se exporta en las líneas del carrito."""
         return self._categoria
 
     @categoria.setter
     def categoria(self, valor):
+        """Encapsulamiento: valida cadena no vacía antes de asignar ``_categoria``.
+        Polimorfismo: aplica el mismo patrón de setter validado que ``sku`` y ``titulo``."""
         if not isinstance(valor, str) or not valor.strip():
             raise ValueError("categoria debe ser una cadena no vacía")
         self._categoria = valor.strip()
 
     @property
     def precio(self):
-        """Precio unitario; se rechazan booleanos, no numéricos y negativos."""
+        """Encapsulamiento: getter de ``_precio``; evita modificar el importe sin validar.
+        Composición: las reglas leen este precio para calcular descuentos."""
         return self._precio
 
     @precio.setter
     def precio(self, valor):
+        """Encapsulamiento: rechaza booleanos, no numéricos y negativos antes de fijar
+        ``_precio``, garantizando el dominio del objeto.
+        Polimorfismo: mismo patrón de validación que ``precio_unitario`` en ``ItemCarrito``."""
         if isinstance(valor, bool) or not isinstance(valor, (int, float)):
             raise TypeError("precio debe ser un número")
         if valor < 0:
@@ -117,11 +165,14 @@ class Producto:
 
     @property
     def stock(self):
-        """Unidades disponibles; entero no negativo."""
+        """Encapsulamiento: getter de ``_stock`` sin exponer escritura libre.
+        Composición: las reglas consultan el stock para decidir reservas."""
         return self._stock
 
     @stock.setter
     def stock(self, valor):
+        """Encapsulamiento: acepta solo enteros no negativos antes de asignar ``_stock``.
+        Polimorfismo: comparte la regla de dominio con otras cantidades del modelo."""
         if isinstance(valor, bool) or not isinstance(valor, int):
             raise TypeError("stock debe ser un entero")
         if valor < 0:
@@ -130,11 +181,16 @@ class Producto:
 
     @property
     def etiquetas(self):
-        """Devuelve una copia en tupla: el exterior no puede alterar la lista interna."""
+        """Encapsulamiento: devuelve una copia en tupla de ``_etiquetas``, de modo que el
+        exterior no pueda modificar la lista interna.
+        Composición: las reglas consultan etiquetas sin recibir la colección original."""
         return tuple(self._etiquetas)
 
     @etiquetas.setter
     def etiquetas(self, valores):
+        """Encapsulamiento: descarta ``None``, rechaza cadenas y elementos no cadena,
+        elimina duplicados y guarda la lista resultante en ``_etiquetas``.
+        Polimorfismo: aplica la misma disciplina de validación que los otros setters."""
         if valores is None:
             self._etiquetas = []
             return
@@ -150,23 +206,31 @@ class Producto:
 
     @property
     def origen(self):
+        """Encapsulamiento: getter de ``_origen`` controlado por la clase.
+        Composición: el origen se conserva al exportar el producto con ``a_dict``."""
         return self._origen
 
     @origen.setter
     def origen(self, valor):
+        """Encapsulamiento: valida que sea cadena antes de guardar ``_origen``.
+        Polimorfismo: mantiene la interfaz de propiedades validadas del modelo."""
         if not isinstance(valor, str):
             raise TypeError("origen debe ser una cadena")
         self._origen = valor
 
     def tiene_etiqueta(self, etiqueta):
-        """Indica si el producto posee una etiqueta funcional concreta."""
+        """Encapsulamiento: consulta ``_etiquetas`` sin entregar la colección privada.
+        Composición: es usada por ``_seleccionar`` para filtrar productos por regla.
+        Polimorfismo: la misma consulta sirve para sensores, cámaras y cartel."""
         for propia in self._etiquetas:
             if propia == etiqueta:
                 return True
         return False
 
     def hay_stock(self, cantidad):
-        """Comprueba si hay unidades suficientes sin modificar el objeto."""
+        """Encapsulamiento: valida la cantidad y lee ``_stock`` sin modificar el estado.
+        Composición: ``reservar`` la usa como paso previo al descuento de inventario.
+        Polimorfismo: todas las reglas confían en el mismo contrato de disponibilidad."""
         if isinstance(cantidad, bool) or not isinstance(cantidad, int):
             raise TypeError("cantidad debe ser un entero")
         if cantidad <= 0:
@@ -174,7 +238,11 @@ class Producto:
         return self._stock >= cantidad
 
     def reservar(self, cantidad):
-        """Descuenta unidades del stock interno usando el setter validado."""
+        """Encapsulamiento: descuenta unidades usando el setter de ``stock``, nunca
+        asignando ``_stock`` directamente.
+        Composición: es invocada por las cuatro reglas para descontar inventario.
+        Polimorfismo: lanza ``StockInsuficienteError`` o ``ParametroKitInvalidoError``,
+        que las reglas capturan de forma uniforme."""
         if isinstance(cantidad, bool) or not isinstance(cantidad, int) or cantidad <= 0:
             raise ParametroKitInvalidoError("cantidad debe ser un entero mayor a cero")
         if not self.hay_stock(cantidad):
@@ -186,7 +254,9 @@ class Producto:
 
     @classmethod
     def desde_dict(cls, datos):
-        """Construye un Producto a partir de un elemento del catálogo JSON."""
+        """Composición: construye un ``Producto`` a partir de un elemento del JSON.
+        Polimorfismo: al ser ``classmethod`` respeta la clase concreta desde la que se llama.
+        Encapsulamiento: usa los setters en lugar de tocar atributos privados directamente."""
         return cls(
             sku=datos["sku"],
             titulo=datos["titulo"],
@@ -198,7 +268,10 @@ class Producto:
         )
 
     def a_dict(self):
-        """Exporta una vista plana del objeto, sin exponer sus atributos privados."""
+        """Encapsulamiento: exporta una vista plana sin ceder referencias a atributos
+        privados y devolviendo una copia de las etiquetas.
+        Composición: el dict resultante alimenta ``ItemCarrito`` y el repositorio.
+        Polimorfismo: misma interfaz de exportación que ``ItemCarrito`` y el carrito."""
         vista = {}
         vista["sku"] = self._sku
         vista["titulo"] = self._titulo
@@ -210,12 +283,16 @@ class Producto:
         return vista
 
     def __str__(self):
-        """Descripción de una línea de catálogo para el desglose en consola."""
+        """Encapsulamiento: lee solo propiedades públicas controladas para formatear el SKU.
+        Polimorfismo: todos los objetos del modelo pueden pasarse a ``str`` con salida legible.
+        Composición: su salida se inserta en el desglose del carrito."""
         texto = self._sku + " | " + self._titulo + " | " + self._categoria
         return texto + " | " + _pesos(self._precio) + " | stock " + str(self._stock)
 
     def __repr__(self):
-        """Representación inequívoca, cercana a la firma del constructor."""
+        """Encapsulamiento: reconstruye la firma pública desde los atributos privados.
+        Polimorfismo: método especial estándar compartido con las otras clases del modelo.
+        Composición: incluye etiquetas y origen para una representación unívoca."""
         return (
             "Producto(sku=" + repr(self._sku)
             + ", titulo=" + repr(self._titulo)
@@ -227,15 +304,28 @@ class Producto:
         )
 
     def __len__(self):
-        """El largo de un producto es su stock disponible."""
+        """Encapsulamiento: expone ``_stock`` como longitud sin acceso directo al privado.
+        Polimorfismo: cada clase define su propia longitud coherente con su dominio.
+        Composición: el carrito usa ``len`` sobre sus propias líneas, no sobre productos."""
         return self._stock
 
 
 class ItemCarrito:
-    """Representa una línea del carrito con importes calculados y validados."""
+    """Representa una línea del carrito con importes calculados y validados.
+
+    Encapsulamiento: ``_producto``, ``_cantidad``, ``_precio_unitario``,
+    ``_precio_unitario_original``, ``_descuento`` y ``_es_regalo`` son privados.
+    Composición: contiene un ``Producto`` y delega en él SKU, título, etiquetas y stock.
+    Herencia: no hereda; colabora con la jerarquía de reglas como destino de ``aplicar``.
+    Polimorfismo: ``a_dict``, ``__str__`` y ``__repr__`` tratan igual una línea normal
+    y una línea promocional de regalo."""
 
     def __init__(self, producto, cantidad, precio_unitario=None, descuento=0,
                  es_regalo=False, precio_unitario_original=None):
+        """Encapsulamiento: inicializa privados y pasa por los setters antes de usarlos.
+        Composición: valida que el argumento sea un ``Producto`` y lo guarda como colaborador.
+        Polimorfismo: el mismo constructor atiende líneas normales y de regalo mediante
+        ``es_regalo`` y ``precio_unitario_original``."""
         self._producto = None
         self._cantidad = 0
         self._precio_unitario = 0
@@ -261,19 +351,28 @@ class ItemCarrito:
 
     @property
     def producto(self):
+        """Encapsulamiento: getter de ``_producto``; la referencia no se puede reasignar.
+        Composición: expone el objeto contenido para que la línea delegue en él.
+        Polimorfismo: todas las líneas comparten la misma forma de acceder a su producto."""
         return self._producto
 
     @property
     def sku(self):
+        """Encapsulamiento: obtiene el SKU delegando en el ``Producto`` contenido.
+        Composición: demuestra delegación entre ``ItemCarrito`` y ``Producto``.
+        Polimorfismo: mismo acceso para líneas de sensores, cámaras y regalo."""
         return self._producto.sku
 
     @property
     def cantidad(self):
-        """Unidades de la línea; entero positivo."""
+        """Encapsulamiento: getter de ``_cantidad`` sin exposición directa.
+        Composición: interviene en ``subtotal`` y en ``len`` de la línea."""
         return self._cantidad
 
     @cantidad.setter
     def cantidad(self, valor):
+        """Encapsulamiento: exige entero positivo antes de asignar ``_cantidad``.
+        Polimorfismo: replica la disciplina de validación de cantidades del modelo."""
         if isinstance(valor, bool) or not isinstance(valor, int):
             raise TypeError("cantidad debe ser un entero")
         if valor <= 0:
@@ -282,11 +381,15 @@ class ItemCarrito:
 
     @property
     def precio_unitario(self):
-        """Precio aplicado en la línea; se rechazan negativos y no numéricos."""
+        """Encapsulamiento: getter de ``_precio_unitario`` controlado por la clase.
+        Composición: es el precio final que aparece en el desglose del kit."""
         return self._precio_unitario
 
     @precio_unitario.setter
     def precio_unitario(self, valor):
+        """Encapsulamiento: rechaza booleanos, no numéricos y negativos antes de fijar
+        ``_precio_unitario``.
+        Polimorfismo: misma validación que ``Producto.precio``."""
         if isinstance(valor, bool) or not isinstance(valor, (int, float)):
             raise TypeError("precio_unitario debe ser un número")
         if valor < 0:
@@ -295,11 +398,15 @@ class ItemCarrito:
 
     @property
     def precio_unitario_original(self):
-        """Precio de lista antes de descuentos; base del subtotal."""
+        """Encapsulamiento: getter del precio de lista previo al descuento.
+        Composición: evita el doble descuento al calcular ``subtotal`` sobre este valor.
+        Polimorfismo: las reglas de cámaras y la de regalo usan el mismo contrato."""
         return self._precio_unitario_original
 
     @precio_unitario_original.setter
     def precio_unitario_original(self, valor):
+        """Encapsulamiento: valida número no negativo antes de guardar el precio original.
+        Polimorfismo: comparte criterio con ``precio_unitario`` y ``Producto.precio``."""
         if isinstance(valor, bool) or not isinstance(valor, (int, float)):
             raise TypeError("precio_unitario_original debe ser un número")
         if valor < 0:
@@ -308,11 +415,15 @@ class ItemCarrito:
 
     @property
     def descuento(self):
-        """Monto descontado; no puede ser negativo ni mayor que el subtotal."""
+        """Encapsulamiento: getter de ``_descuento`` sin mutación externa.
+        Composición: el carrito suma estos importes en ``descuento_total``."""
         return self._descuento
 
     @descuento.setter
     def descuento(self, valor):
+        """Encapsulamiento: exige número no negativo y no mayor que el ``subtotal`` antes
+        de asignar ``_descuento``.
+        Polimorfismo: la regla de cámaras y la de regalo usan la misma propiedad."""
         if isinstance(valor, bool) or not isinstance(valor, (int, float)):
             raise TypeError("descuento debe ser un número")
         if valor < 0:
@@ -323,20 +434,30 @@ class ItemCarrito:
 
     @property
     def subtotal(self):
-        """Importe antes de descuento, derivado del precio original."""
+        """Encapsulamiento: propiedad derivada de ``_precio_unitario_original`` y
+        ``_cantidad``; no almacena estado duplicado.
+        Composición: se calcula a partir de los privados de la propia línea.
+        Polimorfismo: es la misma interfaz para todas las líneas del carrito."""
         return self._precio_unitario_original * self._cantidad
 
     @property
     def total(self):
-        """Importe final de la línea, derivado del subtotal y el descuento."""
+        """Encapsulamiento: deriva el neto de ``subtotal`` y ``_descuento`` sin guardarlo.
+        Composición: el desglose del carrito suma estos totales por línea.
+        Polimorfismo: funciona igual para líneas con y sin descuento."""
         return self.subtotal - self._descuento
 
     @property
     def es_regalo(self):
+        """Encapsulamiento: getter de ``_es_regalo``; nadie puede activar el regalo desde fuera.
+        Composición: la bandera distingue la línea promocional dentro del carrito.
+        Polimorfismo: ``a_dict`` y ``__str__`` cambian su salida según esta bandera."""
         return self._es_regalo
 
     def a_dict(self):
-        """Exporta la línea como diccionario plano para el JSON de resultado."""
+        """Encapsulamiento: exporta una vista plana sin ceder los atributos privados.
+        Composición: delega en ``Producto`` para título, categoría y etiquetas.
+        Polimorfismo: el repositorio serializa cualquier línea con la misma interfaz."""
         vista = {}
         vista["sku"] = self.sku
         vista["titulo"] = self._producto.titulo
@@ -353,7 +474,9 @@ class ItemCarrito:
         return vista
 
     def __str__(self):
-        """Línea legible con unidades, precios, descuento y total neto."""
+        """Encapsulamiento: lee propiedades validadas para mostrar cantidades e importes.
+        Polimorfismo: añade la marca ``REGALO`` según el estado, reutilizando el mismo formato.
+        Composición: cada línea se inserta numerada en el desglose del carrito."""
         texto = self.sku + " | " + self._producto.titulo
         texto += " | " + str(self._cantidad) + " x " + _pesos(self._precio_unitario)
         texto += " | subtotal " + _pesos(self.subtotal)
@@ -364,7 +487,9 @@ class ItemCarrito:
         return texto
 
     def __repr__(self):
-        """Representación unívoca de la línea, sin depender del ``Producto``."""
+        """Encapsulamiento: expresa los privados como una firma unívoca de constructor.
+        Polimorfismo: método especial estándar, igual que en ``Producto`` y el carrito.
+        Composición: incluye precio original y bandera de regalo para depurar sin ambigüedad."""
         return (
             "ItemCarrito(sku=" + repr(self.sku)
             + ", cantidad=" + repr(self._cantidad)
@@ -375,27 +500,36 @@ class ItemCarrito:
         )
 
     def __len__(self):
-        """El largo de una línea es su cantidad de unidades."""
+        """Encapsulamiento: devuelve ``_cantidad`` como longitud de la línea.
+        Polimorfismo: define una longitud coherente con el dominio de la línea.
+        Composición: el carrito suma longitudes propias, no las de sus líneas."""
         return self._cantidad
 
 
 class ReglaConfiguracionKit(ABC):
-    """Base abstracta: define la interfaz común de todas las reglas del kit.
+    """Base abstracta que define la interfaz común de las reglas del kit.
 
-    Cada subclase implementa ``aplicar`` y recibe siempre los mismos tres
-    argumentos. El polimorfismo permite al motor iterar una lista de reglas
-    sin conocer la clase concreta: todas se llaman igual y todas mutan el
-    ``carrito`` que se les pasa.
-    """
+    Herencia: declara ``aplicar`` como ``@abstractmethod``; las cuatro subclases
+    concretas la implementan y la base no se puede instanciar.
+    Polimorfismo: el motor envía el mismo mensaje ``aplicar`` sin conocer la clase.
+    Encapsulamiento: centraliza validación, selección, avisos y manejo de errores en
+    helpers privados reutilizables.
+    Composición: recibe ya construidos el ``carrito``, el ``catalogo`` y los
+    ``parametros`` sobre los que trabaja."""
 
     @abstractmethod
     def aplicar(self, carrito, catalogo, parametros):
-        """Aplica la regla; devuelve el ``ItemCarrito`` agregado o ``None``."""
+        """Herencia: método abstracto que toda subclase concreta debe implementar.
+        Polimorfismo: es el mensaje común que el carrito envía sin conocer la subclase.
+        Encapsulamiento: define la interfaz pública; la lógica de ejecución queda en cada subclase.
+        Composición: recibe carrito, catálogo y parámetros como colaboradores ya listos."""
         raise NotImplementedError
 
     @staticmethod
     def _entero_no_negativo(parametros, clave):
-        """Lee un parámetro entero y lo valida con excepción personalizada."""
+        """Encapsulamiento: valida tipo y rango dentro de la base antes de usar el valor.
+        Polimorfismo: lanza ``ParametroKitInvalidoError``, manejado igual por todas las reglas.
+        Composición: forma parte de los helpers compartidos por las cuatro subclases."""
         valor = parametros.get(clave, 0)
         if isinstance(valor, bool) or not isinstance(valor, int):
             raise ParametroKitInvalidoError(clave + " debe ser un entero")
@@ -405,7 +539,10 @@ class ReglaConfiguracionKit(ABC):
 
     @staticmethod
     def _productos(catalogo):
-        """Acepta el dict del JSON o una lista de ``Producto`` ya instanciados."""
+        """Composición: acepta el dict del JSON o una lista de ``Producto`` y devuelve
+        productos ya instanciados para que las reglas trabajen sobre objetos.
+        Encapsulamiento: no modifica la estructura original cuando recibe el dict.
+        Polimorfismo: las reglas concretas no necesitan saber de dónde salieron los productos."""
         productos = []
         if isinstance(catalogo, dict):
             for datos in catalogo["productos"]:
@@ -419,19 +556,28 @@ class ReglaConfiguracionKit(ABC):
 
     @staticmethod
     def _registrar_aviso(parametros, mensaje):
-        """Acumula avisos en una lista mutable compartida en ``parametros``."""
+        """Encapsulamiento: muta de forma controlada la lista de avisos compartida en
+        ``parametros``, creándola si no existe.
+        Composición: la lista de avisos pertenece al carrito y se comparte entre reglas.
+        Polimorfismo: cualquier regla puede avisar con el mismo mecanismo."""
         if "avisos" not in parametros or not isinstance(parametros["avisos"], list):
             parametros["avisos"] = []
         parametros["avisos"].append(mensaje)
 
     def _registrar_error(self, parametros, nombre_regla, error):
-        """Convierte una excepción controlada en aviso, sin cortar el flujo."""
+        """Encapsulamiento: convierte una excepción controlada en mensaje de aviso sin
+        exponer el error crudo al carrito.
+        Composición: reutiliza ``_registrar_aviso`` en lugar de duplicar lógica.
+        Polimorfismo: uniformiza el tratamiento de errores en las cuatro reglas."""
         mensaje = nombre_regla + " omitida: " + str(error)
         self._registrar_aviso(parametros, mensaje)
 
     def _seleccionar(self, catalogo, parametros, etiquetas, cantidad,
                      excluidas=None, mensaje_aviso=""):
-        """Filtra por etiquetas, ajusta al stock máximo y elige el SKU más barato."""
+        """Composición: filtra productos, ajusta a stock parcial y elige el SKU más barato.
+        Encapsulamiento: lee etiquetas, precio y stock solo mediante propiedades de ``Producto``.
+        Polimorfismo: la misma selección sirve a sensores, cámaras y cartel.
+        Herencia: helper protegido por convención, disponible para todas las subclases."""
         if excluidas is None:
             excluidas = []
 
@@ -473,9 +619,19 @@ class ReglaConfiguracionKit(ABC):
 
 
 class ReglaSensoresApertura(ReglaConfiguracionKit):
-    """Agrega ``puertas + ventanas`` sensores, o avisa y omite la regla."""
+    """Regla concreta que agrega sensores por puertas y ventanas.
+
+    Herencia: implementa el ``aplicar`` abstracto de ``ReglaConfiguracionKit``.
+    Polimorfismo: se ejecuta con la misma firma que las demás reglas del kit.
+    Encapsulamiento: usa helpers privados de la base y ``try/except`` controlado.
+    Composición: convierte un ``Producto`` del catálogo en un ``ItemCarrito``."""
 
     def aplicar(self, carrito, catalogo, parametros):
+        """Herencia: implementa el ``aplicar`` abstracto de la base.
+        Polimorfismo: se ejecuta con la misma firma que las otras tres reglas.
+        Encapsulamiento: su ``try/except`` convierte entradas inválidas o sin stock en avisos.
+        Composición: suma ``puertas + ventanas`` y convierte el ``Producto`` elegido en
+        un ``ItemCarrito`` dentro del carrito."""
         try:
             cantidad = self._entero_no_negativo(parametros, "puertas")
             cantidad += self._entero_no_negativo(parametros, "ventanas")
@@ -504,9 +660,18 @@ class ReglaSensoresApertura(ReglaConfiguracionKit):
 
 
 class ReglaSensorMovimientoMascotas(ReglaConfiguracionKit):
-    """Elige sensores estándar o ``inmune_mascotas``; avisa si falla."""
+    """Regla concreta que elige sensores según la bandera de mascotas.
+
+    Herencia: implementa el ``aplicar`` abstracto de ``ReglaConfiguracionKit``.
+    Polimorfismo: comparte interfaz con las otras reglas pese a filtrar distinto.
+    Encapsulamiento: valida la bandera y las etiquetas sin exponer estado propio.
+    Composición: selecciona un ``Producto`` y lo inserta como ``ItemCarrito``."""
 
     def aplicar(self, carrito, catalogo, parametros):
+        """Herencia: implementa el ``aplicar`` abstracto de la base.
+        Polimorfismo: mantiene la interfaz común aunque cambia el filtro de etiquetas.
+        Encapsulamiento: valida la bandera ``tiene_mascotas`` dentro del ``try`` y avisa si falla.
+        Composición: usa ``_seleccionar`` y agrega un ``ItemCarrito`` al carrito."""
         try:
             cantidad = self._entero_no_negativo(parametros, "cantidad_sensores_movimiento")
             if cantidad == 0:
@@ -546,16 +711,19 @@ class ReglaSensorMovimientoMascotas(ReglaConfiguracionKit):
 
 
 class ReglaCamarasDescuentoProgresivo(ReglaConfiguracionKit):
-    """Aplica la escala exacta de descuento por volumen de cámaras.
+    """Regla concreta con la escala de descuento por volumen de cámaras.
 
-    Tramos: 0% para 0 o 1 cámara, 10% para 2 o 3, y 20% para 4 o más. El
-    descuento se calcula sobre el precio de lista de cada cámara y solo afecta
-    a las líneas de cámaras; los sensores quedan fuera de esta escala.
-    """
+    Herencia: implementa el ``aplicar`` abstracto de ``ReglaConfiguracionKit``.
+    Polimorfismo: recibe el mismo mensaje que las demás reglas y devuelve una línea.
+    Encapsulamiento: ``porcentaje_descuento`` valida dominio con excepción propia.
+    Composición: usa el precio del ``Producto`` para construir el ``ItemCarrito``."""
 
     @staticmethod
     def porcentaje_descuento(cantidad):
-        """Devuelve 0.0, 0.10 o 0.20 según la cantidad pedida de cámaras."""
+        """Encapsulamiento: valida dominio propio y lanza ``ParametroKitInvalidoError``.
+        Polimorfismo: todas las reglas comparten el mismo tipo de error ante entradas inválidas.
+        Composición: devuelve el porcentaje que ``aplicar`` usa sobre el precio del producto.
+        Herencia: método estático propio de la subclase, no redefine el contrato base."""
         if isinstance(cantidad, bool) or not isinstance(cantidad, int):
             raise ParametroKitInvalidoError("cantidad debe ser un entero")
         if cantidad < 0:
@@ -567,6 +735,11 @@ class ReglaCamarasDescuentoProgresivo(ReglaConfiguracionKit):
         return 0.0
 
     def aplicar(self, carrito, catalogo, parametros):
+        """Herencia: implementa el ``aplicar`` abstracto de la base.
+        Polimorfismo: recibe el mismo mensaje que las reglas de sensores y regalo.
+        Encapsulamiento: maneja errores con ``try/except`` y conserva
+        ``precio_unitario_original`` para evitar doble descuento.
+        Composición: aplica la escala sobre el ``Producto`` y agrega el ``ItemCarrito``."""
         try:
             cantidad = self._entero_no_negativo(parametros, "cantidad_camaras")
             if cantidad == 0:
@@ -602,22 +775,31 @@ class ReglaCamarasDescuentoProgresivo(ReglaConfiguracionKit):
 
 
 class ReglaCartelRegalo(ReglaConfiguracionKit):
-    """Inserta un ``ItemCarrito`` promocional del cartel a costo $0.
+    """Regla concreta que regala un cartel disuasivo a costo cero.
 
-    Solo se activa si el carrito ya tiene artículos y si queda stock del cartel.
-    El precio de lista se informa en ``parametros['regalo']``; la línea del
-    carrito mantiene subtotal y descuento en 0 para no alterar los totales.
-    """
+    Herencia: implementa el ``aplicar`` abstracto de ``ReglaConfiguracionKit``.
+    Polimorfismo: se ejecuta igual que las reglas de sensores y cámaras.
+    Encapsulamiento: ``_item_promocional`` fija precio, descuento y bandera de regalo.
+    Composición: transforma el ``Producto`` cartel en un ``ItemCarrito`` promocional."""
 
     @staticmethod
     def _item_promocional(cartel):
-        """Construye la línea de regalo con precio final 0 y sin descuento."""
+        """Composición: construye un ``ItemCarrito`` a partir del ``Producto`` cartel.
+        Encapsulamiento: fija precio cero, descuento cero y ``es_regalo`` en True sin
+        exponer los privados de la línea.
+        Polimorfismo: el carrito trata esta línea igual que las demás al serializarla.
+        Herencia: helper estático propio de la subclase."""
         # ``precio_unitario_original`` queda en 0 a propósito: si guardara el
         # precio de lista, el subtotal del carrito incluiría el regalo y habría
         # que descontarlo para que el total volviera a ser 0.
         return ItemCarrito(cartel, 1, precio_unitario=0, descuento=0, es_regalo=True)
 
     def aplicar(self, carrito, catalogo, parametros):
+        """Herencia: implementa el ``aplicar`` abstracto de la base.
+        Polimorfismo: se ejecuta igual que las otras reglas dentro del bucle del carrito.
+        Encapsulamiento: captura ``StockInsuficienteError`` y deja ``regalo`` en ``False``
+        sin interrumpir la ejecución.
+        Composición: exige carrito no vacío, reserva stock del cartel y agrega la línea promocional."""
         if len(carrito) == 0:
             parametros["regalo"] = {"incluido": False}
             return None
@@ -654,16 +836,21 @@ class ReglaCartelRegalo(ReglaConfiguracionKit):
 
 
 class CarritoEventoEspecial:
-    """Agregado que encapsula el carrito, el estado del cliente y las reglas.
+    """Agregado que encapsula el carrito, el cliente y las reglas.
 
-    El exterior no manipula la lista de líneas ni el catálogo interno: solo
-    interactúa mediante propiedades y métodos. Al ejecutar reglas envía el mismo
-    mensaje ``aplicar(carrito, catalogo, parametros)`` a cada objeto, sin conocer
-    su clase concreta; por eso el motor es polimórfico.
-    """
+    Encapsulamiento: ``_items``, ``_catalogo``, el estado del cliente, ``_avisos`` y
+    ``_regalo`` son privados con ``@property`` validados.
+    Composición: contiene ``ItemCarrito``, ``Producto`` y objetos regla.
+    Herencia: no deriva de otra clase; coordina la jerarquía ``ReglaConfiguracionKit``.
+    Polimorfismo: ``ejecutar_reglas`` invoca ``aplicar`` en cada regla concreta sin
+    conocer su tipo."""
 
     def __init__(self, catalogo, puertas=0, ventanas=0, tiene_mascotas=False,
                  cantidad_camaras=0, cantidad_sensores_movimiento=0):
+        """Encapsulamiento: crea primero todos los privados y luego usa los setters.
+        Composición: recibe el catálogo y lo clona en ``_catalogo`` para no mutar objetos externos.
+        Herencia: no hereda; es el agregado que coordina la jerarquía de reglas.
+        Polimorfismo: prepara el estado que luego se enviará a cualquier regla concreta."""
         self._items = []
         self._catalogo = []
         self._puertas = 0
@@ -683,7 +870,9 @@ class CarritoEventoEspecial:
 
     @staticmethod
     def _validar_entero(nombre, valor):
-        """Centraliza la validación de dominio de los enteros del cliente."""
+        """Encapsulamiento: centraliza la validación de dominio de los enteros del cliente.
+        Polimorfismo: el mismo validador sirve para puertas, ventanas, cámaras y movimiento.
+        Composición: helper interno reutilizado por varios setters del agregado."""
         if isinstance(valor, bool) or not isinstance(valor, int):
             raise TypeError(nombre + " debe ser un entero")
         if valor < 0:
@@ -692,26 +881,32 @@ class CarritoEventoEspecial:
 
     @property
     def items(self):
-        """Copia en tupla de las líneas: el exterior no puede agregar ni quitar."""
+        """Encapsulamiento: devuelve una tupla copia, impidiendo agregar o quitar líneas
+        desde fuera del agregado.
+        Composición: expone las líneas contenido para el desglose y las pruebas.
+        Polimorfismo: la colección contiene ``ItemCarrito`` sin importar su clase de regla de origen."""
         return tuple(self._items)
 
     @property
     def cantidad_items(self):
+        """Encapsulamiento: deriva el conteo de ``_items`` sin exponer la lista.
+        Composición: se usa en ``resumen``, ``__len__`` y ``__repr__``.
+        Polimorfismo: cuenta igual líneas normales y de regalo."""
         return len(self._items)
 
     @property
     def catalogo(self):
-        """Copia en tupla de los ``Producto`` internos, con su stock ya reservado."""
+        """Encapsulamiento: devuelve una tupla copia de los ``Producto`` internos.
+        Composición: expone el inventario ya reservado para el desglose y las pruebas.
+        Polimorfismo: el repositorio y las reglas trabajan sobre la misma interfaz de catálogo."""
         return tuple(self._catalogo)
 
     @catalogo.setter
     def catalogo(self, valor):
-        """Acepta el dict del JSON o ``Producto`` y guarda copias privadas.
-
-        Al clonar cada producto, las reservas de stock de las reglas quedan
-        confinadas al carrito y no alteran el diccionario original del JSON ni
-        los objetos que el llamador pudiera conservar fuera de la clase.
-        """
+        """Encapsulamiento: clona cada ``Producto`` antes de guardarlo en ``_catalogo``,
+        aislando las reservas de stock de objetos externos.
+        Composición: acepta el dict del JSON o una colección de ``Producto``.
+        Polimorfismo: el mismo agregado admite catálogo crudo o ya instanciado."""
         productos = []
         if isinstance(valor, dict):
             datos_productos = valor.get("productos")
@@ -738,59 +933,87 @@ class CarritoEventoEspecial:
 
     @property
     def puertas(self):
+        """Encapsulamiento: getter de ``_puertas`` controlado por el agregado.
+        Composición: forma parte del estado enviado a las reglas como parámetro."""
         return self._puertas
 
     @puertas.setter
     def puertas(self, valor):
+        """Encapsulamiento: usa ``_validar_entero`` antes de asignar ``_puertas``.
+        Polimorfismo: mismo patrón que los demás atributos del cliente."""
         self._puertas = self._validar_entero("puertas", valor)
 
     @property
     def ventanas(self):
+        """Encapsulamiento: getter de ``_ventanas`` sin acceso directo al privado.
+        Composición: junto con ``puertas`` alimenta la regla de apertura."""
         return self._ventanas
 
     @ventanas.setter
     def ventanas(self, valor):
+        """Encapsulamiento: valida entero no negativo antes de guardar ``_ventanas``.
+        Polimorfismo: comparte validador con el resto del estado del cliente."""
         self._ventanas = self._validar_entero("ventanas", valor)
 
     @property
     def tiene_mascotas(self):
+        """Encapsulamiento: getter de ``_tiene_mascotas`` controlado por la clase.
+        Composición: la regla de movimiento consulta esta bandera vía parámetros."""
         return self._tiene_mascotas
 
     @tiene_mascotas.setter
     def tiene_mascotas(self, valor):
+        """Encapsulamiento: exige booleano antes de asignar ``_tiene_mascotas``.
+        Polimorfismo: mantiene la interfaz validada del estado del cliente."""
         if not isinstance(valor, bool):
             raise TypeError("tiene_mascotas debe ser booleano")
         self._tiene_mascotas = valor
 
     @property
     def cantidad_camaras(self):
+        """Encapsulamiento: getter de ``_cantidad_camaras`` controlado.
+        Composición: alimenta la regla de descuento progresivo."""
         return self._cantidad_camaras
 
     @cantidad_camaras.setter
     def cantidad_camaras(self, valor):
+        """Encapsulamiento: valida entero no negativo antes de guardar la cantidad.
+        Polimorfismo: usa el mismo validador que puertas y ventanas."""
         self._cantidad_camaras = self._validar_entero("cantidad_camaras", valor)
 
     @property
     def cantidad_sensores_movimiento(self):
+        """Encapsulamiento: getter de ``_cantidad_sensores_movimiento`` controlado.
+        Composición: se envía a la regla de sensores con mascotas."""
         return self._cantidad_sensores_movimiento
 
     @cantidad_sensores_movimiento.setter
     def cantidad_sensores_movimiento(self, valor):
+        """Encapsulamiento: valida dominio con ``_validar_entero`` antes de asignar.
+        Polimorfismo: mismo contrato que el resto de cantidades del cliente."""
         self._cantidad_sensores_movimiento = self._validar_entero(
             "cantidad_sensores_movimiento", valor
         )
 
     @property
     def avisos(self):
+        """Encapsulamiento: devuelve copia de ``_avisos`` para impedir mutación externa.
+        Composición: las reglas escriben en la lista real compartida en ``_parametros``.
+        Polimorfismo: cualquier regla puede aportar avisos con el mismo formato."""
         return list(self._avisos)
 
     @property
     def regalo(self):
+        """Encapsulamiento: devuelve copia de ``_regalo`` sin ceder el dict interno.
+        Composición: la regla del cartel actualiza este estado vía ``parametros``.
+        Polimorfismo: el repositorio serializa el regalo sin conocer la regla que lo creó."""
         return dict(self._regalo)
 
     @property
     def subtotal(self):
-        """Suma derivada de las líneas; no se almacena para evitar duplicar estado."""
+        """Encapsulamiento: suma importes derivados sin almacenar un estado redundante.
+        Composición: recorre los ``ItemCarrito`` contenidos y usa su propiedad ``subtotal``.
+        Polimorfismo: trata igual líneas de sensores, cámaras y regalo."""
         total = 0
         for item in self._items:
             total += item.subtotal
@@ -798,6 +1021,9 @@ class CarritoEventoEspecial:
 
     @property
     def descuento_total(self):
+        """Encapsulamiento: acumula los descuentos de las líneas sin exponer privados.
+        Composición: delega en ``ItemCarrito.descuento``.
+        Polimorfismo: funciona con reglas que descuentan y con reglas que no."""
         total = 0
         for item in self._items:
             total += item.descuento
@@ -805,17 +1031,25 @@ class CarritoEventoEspecial:
 
     @property
     def total_final(self):
+        """Encapsulamiento: deriva el neto de ``subtotal`` y ``descuento_total``.
+        Composición: concentra el resultado de todas las líneas y reglas ejecutadas.
+        Polimorfismo: es el valor que consumen ``__repr__``, ``__str__`` y el repositorio."""
         return self.subtotal - self.descuento_total
 
     def agregar_item(self, item):
-        """Incorpora una línea validada a la colección privada."""
+        """Encapsulamiento: valida el tipo antes de append en ``_items``.
+        Composición: incorpora un ``ItemCarrito`` ya construido al agregado.
+        Polimorfismo: acepta cualquier línea, sin importar la regla que la originó."""
         if not isinstance(item, ItemCarrito):
             raise TypeError("item debe ser una instancia de ItemCarrito")
         self._items.append(item)
         return item
 
     def _parametros(self):
-        """Traduce el estado privado al dict que espera ``ReglaConfiguracionKit``."""
+        """Encapsulamiento: traduce el estado privado al dict que esperan las reglas
+        y comparte la lista real de avisos y el dict de regalo.
+        Composición: arma los colaboradores ``carrito``, ``catalogo`` y ``parametros``.
+        Polimorfismo: el dict resultante es indistinto para cualquier regla concreta."""
         parametros = {}
         parametros["puertas"] = self._puertas
         parametros["ventanas"] = self._ventanas
@@ -829,12 +1063,12 @@ class CarritoEventoEspecial:
         return parametros
 
     def ejecutar_reglas(self, reglas):
-        """Aplica cada regla con el mismo mensaje y devuelve las que se ejecutaron.
-
-        El ``carrito`` y el ``catalogo`` que se pasan son los objetos privados
-        reales: las reglas agregan líneas y descuentan stock sobre el estado del
-        agregado, no sobre copias desechables.
-        """
+        """Polimorfismo: envía el mismo mensaje ``aplicar`` a cada regla sin conocer su
+        clase concreta, en el orden dado.
+        Encapsulamiento: pasa los objetos privados reales para que las reglas muten el
+        estado del agregado y no copias desechables.
+        Composición: coordina reglas, catálogo y líneas; vuelve a leer ``regalo`` tras cada regla.
+        Herencia: exige que cada elemento sea instancia de ``ReglaConfiguracionKit``."""
         if isinstance(reglas, (str, bytes)):
             raise TypeError("reglas debe ser una colección de ReglaConfiguracionKit")
 
@@ -851,7 +1085,10 @@ class CarritoEventoEspecial:
         return tuple(aplicadas)
 
     def a_dict(self):
-        """Exporta una vista completa y plana del estado del agregado."""
+        """Encapsulamiento: exporta una vista plana sin ceder referencias a privados.
+        Composición: delega en ``ItemCarrito.a_dict`` y construye cliente, regalo, resumen,
+        inventario y avisos.
+        Polimorfismo: el repositorio serializa el carrito usando solo esta interfaz pública."""
         vista = {}
 
         cliente = {}
@@ -883,7 +1120,9 @@ class CarritoEventoEspecial:
         return vista
 
     def __str__(self):
-        """Desglose completo del kit, listo para imprimir en consola."""
+        """Encapsulamiento: lee propiedades controladas para formatear el desglose.
+        Composición: muestra cliente, líneas contenido, regalo y avisos.
+        Polimorfismo: cada línea aporta su propio ``str`` sin que el carrito conozca su origen."""
         lineas = []
         lineas.append("Kit de Seguridad Residencial")
         cliente = "Cliente: " + str(self._puertas) + " puertas, " + str(self._ventanas)
@@ -917,7 +1156,9 @@ class CarritoEventoEspecial:
         return "\n".join(lineas)
 
     def __repr__(self):
-        """Representación unívoca del estado del cliente y del total."""
+        """Encapsulamiento: resume el estado privado del cliente y el total en una firma.
+        Polimorfismo: método especial estándar compartido con las otras clases.
+        Composición: incluye el número de líneas contenido."""
         return (
             "CarritoEventoEspecial(puertas=" + repr(self._puertas)
             + ", ventanas=" + repr(self._ventanas)
@@ -929,20 +1170,27 @@ class CarritoEventoEspecial:
         )
 
     def __len__(self):
-        """El largo del carrito es la cantidad de líneas que contiene."""
+        """Encapsulamiento: devuelve ``cantidad_items`` sin exponer la lista privada.
+        Polimorfismo: cada clase define una longitud acorde a su dominio.
+        Composición: ``ReglaCartelRegalo`` usa ``len(carrito)`` para decidir si hay artículos."""
         return self.cantidad_items
 
 
 class RepositorioShopifyJSON:
-    """Persistencia JSON: carga el catálogo y guarda el resultado del carrito.
+    """Persistencia JSON del catálogo y del resultado del carrito.
 
-    Mantiene privadas las rutas y expone solo dos operaciones: ``cargar_catalogo``
-    devuelve ``Producto`` ya instanciados y ``exportar_resultado`` escribe el
-    estado final del agregado con el mismo formato determinista en todas las
-    ejecuciones.
-    """
+    Encapsulamiento: ``_ruta_catalogo`` y ``_ruta_resultado`` son privados con
+    ``@property`` validados.
+    Composición: produce ``Producto`` y consume el estado de ``CarritoEventoEspecial``.
+    Herencia: no hereda de otra clase; es un colaborador de infraestructura.
+    Polimorfismo: depende solo de la interfaz pública ``a_dict`` del carrito, no de
+    su estructura interna."""
 
     def __init__(self, ruta_catalogo=None, ruta_resultado=None):
+        """Encapsulamiento: guarda rutas en privados y usa setters cuando se proporcionan.
+        Composición: mantiene referencias a los archivos de catálogo y resultado.
+        Herencia: no hereda; es un colaborador de infraestructura.
+        Polimorfismo: admite rutas como ``str`` o ``pathlib.Path`` desde el mismo constructor."""
         self._ruta_catalogo = RUTA_CATALOGO
         self._ruta_resultado = RUTA_CATALOGO.parent / "resultado_poo.json"
         if ruta_catalogo is not None:
@@ -952,7 +1200,9 @@ class RepositorioShopifyJSON:
 
     @staticmethod
     def _validar_ruta(nombre, valor):
-        """Acepta ``str`` o ``Path`` y exige extensión JSON."""
+        """Encapsulamiento: valida tipo y extensión antes de devolver la ``Path``.
+        Polimorfismo: acepta dos tipos de entrada distintos con la misma validación.
+        Composición: helper reutilizado por ambos setters de rutas."""
         if isinstance(valor, Path):
             ruta = valor
         elif isinstance(valor, str) and valor.strip():
@@ -965,22 +1215,33 @@ class RepositorioShopifyJSON:
 
     @property
     def ruta_catalogo(self):
+        """Encapsulamiento: getter de ``_ruta_catalogo`` controlado.
+        Composición: ``cargar_catalogo`` usa esta ruta para abrir el JSON."""
         return self._ruta_catalogo
 
     @ruta_catalogo.setter
     def ruta_catalogo(self, valor):
+        """Encapsulamiento: valida cadena o ``Path`` con extensión ``.json`` antes de asignar.
+        Polimorfismo: mismo contrato de validación que ``ruta_resultado``."""
         self._ruta_catalogo = self._validar_ruta("ruta_catalogo", valor)
 
     @property
     def ruta_resultado(self):
+        """Encapsulamiento: getter de ``_ruta_resultado`` controlado.
+        Composición: ``exportar_resultado`` usa esta ruta para escribir el archivo."""
         return self._ruta_resultado
 
     @ruta_resultado.setter
     def ruta_resultado(self, valor):
+        """Encapsulamiento: valida la ruta antes de guardarla en el privado.
+        Polimorfismo: comparte ``_validar_ruta`` con ``ruta_catalogo``."""
         self._ruta_resultado = self._validar_ruta("ruta_resultado", valor)
 
     def cargar_catalogo(self):
-        """Lee el archivo JSON y devuelve una lista de ``Producto``."""
+        """Composición: lee el JSON y construye objetos ``Producto`` con ``desde_dict``.
+        Encapsulamiento: no expone el dict crudo ni modifica los objetos devueltos por el carrito.
+        Polimorfismo: los productos devueltos sirven a cualquier regla y al agregado.
+        Herencia: no interviene; usa la interfaz pública de ``Producto``."""
         with self._ruta_catalogo.open(encoding="utf-8") as archivo:
             datos = json.load(archivo)
         if not isinstance(datos, dict) or not isinstance(datos.get("productos"), list):
@@ -992,7 +1253,10 @@ class RepositorioShopifyJSON:
         return productos
 
     def exportar_resultado(self, carrito):
-        """Serializa el estado final del agregado y devuelve la ruta escrita."""
+        """Encapsulamiento: valida el tipo del carrito y serializa solo su vista pública.
+        Composición: consume ``CarritoEventoEspecial.a_dict`` y escribe ``resultado_poo.json``.
+        Polimorfismo: depende de la interfaz ``a_dict`` y no de la estructura interna del carrito.
+        Herencia: no interviene; colabora con la jerarquía de reglas de forma indirecta."""
         if not isinstance(carrito, CarritoEventoEspecial):
             raise TypeError("carrito debe ser una instancia de CarritoEventoEspecial")
 
