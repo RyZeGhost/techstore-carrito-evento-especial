@@ -26,7 +26,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
-from functools import reduce
+from functools import partial, reduce
 from pathlib import Path
 from types import MappingProxyType
 from typing import Callable, NamedTuple
@@ -40,13 +40,21 @@ RUTA_RESULTADO = Path(__file__).resolve().parent / "resultado_funcional.json"
 # ---------------------------------------------------------------------------
 
 
-def compose(*funciones: Callable) -> Callable:
-    """Compone funciones de derecha a izquierda mediante ``reduce``."""
+def componer(*funciones: Callable) -> Callable:
+    """Compone transformadores de derecha a izquierda mediante ``reduce``.
+
+    ``componer(f, g)(x)`` equivale a ``f(g(x))``. Es pura: devuelve una nueva
+    función cerrada sobre las recibidas y no modifica ninguna de ellas.
+    """
     return reduce(
         lambda acumulada, siguiente: lambda valor: acumulada(siguiente(valor)),
         funciones,
         lambda valor: valor,
     )
+
+
+# Alias conservado para el código que ya usaba el nombre en inglés.
+compose = componer
 
 
 def sumar_atributo(items: tuple, atributo: str) -> int:
@@ -56,7 +64,7 @@ def sumar_atributo(items: tuple, atributo: str) -> int:
 
 def pesos(valor: int) -> str:
     """Formatea pesos chilenos con la composición de dos funciones puras."""
-    return compose(
+    return componer(
         lambda texto: "$" + texto.replace(",", "."),
         lambda numero: format(numero, ",.0f"),
     )(valor)
@@ -487,6 +495,105 @@ def items_sensores_movimiento(
 
 
 # ---------------------------------------------------------------------------
+# Reglas de negocio como transformadores: tupla de ítems -> tupla de ítems
+# ---------------------------------------------------------------------------
+
+
+def _es_camara(item: ItemCarrito, reglas: ReglasKit = REGLAS) -> bool:
+    """Indica si el ítem corresponde a una cámara."""
+    return item.producto.tiene_etiqueta(reglas.etiqueta_camara)
+
+
+def _item_con_descuento(item: ItemCarrito, porcentaje: float) -> ItemCarrito:
+    """Devuelve un ítem nuevo con el descuento calculado sobre el precio original."""
+    unitario = int(round(item.precio_unitario_original * porcentaje))
+    return replace(
+        item,
+        precio_unitario=item.precio_unitario_original - unitario,
+        descuento=unitario * item.cantidad,
+    )
+
+
+def aplicar_descuento_camaras(
+    items: tuple[ItemCarrito, ...], reglas: ReglasKit = REGLAS
+) -> tuple[ItemCarrito, ...]:
+    """Aplica 10% o 20% solo a cámaras y devuelve una nueva tupla de ítems."""
+    cantidad = sum(item.cantidad for item in items if _es_camara(item, reglas))
+    porcentaje = porcentaje_camaras(cantidad, reglas)
+    if porcentaje == 0.0:
+        return items
+    return tuple(
+        map(
+            lambda item: (
+                _item_con_descuento(item, porcentaje)
+                if _es_camara(item, reglas)
+                else item
+            ),
+            items,
+        )
+    )
+
+
+def agregar_cartel_regalo(
+    items: tuple[ItemCarrito, ...],
+    cartel: Producto | None,
+    reglas: ReglasKit = REGLAS,
+) -> tuple[ItemCarrito, ...]:
+    """Agrega el cartel a $0 si hay ítems, stock y todavía no hay regalo."""
+    if cartel is None or not items:
+        return items
+    if any(item.es_regalo for item in items):
+        return items
+    item = ItemCarrito(
+        producto=cartel.con_stock(cartel.stock - 1),
+        cantidad=1,
+        precio_unitario=0,
+        precio_unitario_original=0,
+        descuento=0,
+        es_regalo=True,
+    )
+    return items + (item,)
+
+
+def aplicar_transformaciones(
+    estado: Estado, reglas: ReglasKit = REGLAS
+) -> Estado:
+    """Encadena descuento y regalo con ``componer`` sobre los ítems del kit."""
+    cartel = cartel_disuasivo_disponible(estado.catalogo, reglas)
+    if cartel is None and len(estado.items) > 0:
+        return replace(
+            estado,
+            avisos=estado.avisos + (
+                "ReglaCartelRegalo omitida: no hay stock del cartel disuasivo",
+            ),
+        )
+
+    transformar = componer(
+        partial(agregar_cartel_regalo, cartel=cartel, reglas=reglas),
+        partial(aplicar_descuento_camaras, reglas=reglas),
+    )
+    items = transformar(estado.items)
+    if len(items) == len(estado.items):
+        return estado
+
+    regalo = Regalo(
+        incluido=True,
+        sku=cartel.sku,
+        titulo=cartel.titulo,
+        cantidad=1,
+        precio_original=cartel.precio,
+        precio_final=0,
+        subtotal=0,
+    )
+    return replace(
+        estado,
+        catalogo=reemplazar_producto(estado.catalogo, items[-1].producto),
+        items=items,
+        regalo=regalo,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Reglas puras: Estado -> Estado
 # ---------------------------------------------------------------------------
 
@@ -548,12 +655,11 @@ def regla_movimiento(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
 
 
 def regla_camaras(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
-    """Aplica 10% o 20% solo a cámaras, conservando el precio original."""
+    """Agrega cámaras a precio de lista; el descuento aplica después."""
     cantidad = estado.cliente.cantidad_camaras
     if cantidad == 0:
         return estado
 
-    porcentaje = porcentaje_camaras(cantidad, reglas)
     producto, cantidad, avisos = seleccionar(
         camaras_disponibles(estado.catalogo, reglas),
         cantidad,
@@ -569,14 +675,13 @@ def regla_camaras(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
             ),
         )
 
-    descuento_unitario = int(round(producto.precio * porcentaje))
     reservado = producto.con_stock(producto.stock - cantidad)
     item = ItemCarrito(
         producto=reservado,
         cantidad=cantidad,
-        precio_unitario=producto.precio - descuento_unitario,
+        precio_unitario=producto.precio,
         precio_unitario_original=producto.precio,
-        descuento=descuento_unitario * cantidad,
+        descuento=0,
     )
     return replace(
         estado,
@@ -586,51 +691,11 @@ def regla_camaras(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
     )
 
 
-def regla_regalo(estado: Estado, reglas: ReglasKit = REGLAS) -> Estado:
-    """Regala un cartel a $0 si hay artículos y stock del cartel."""
-    if len(estado.items) == 0:
-        return estado
-
-    cartel = cartel_disuasivo_disponible(estado.catalogo, reglas)
-    if cartel is None:
-        return replace(
-            estado,
-            avisos=estado.avisos + (
-                "ReglaCartelRegalo omitida: no hay stock del cartel disuasivo",
-            ),
-        )
-
-    reservado = cartel.con_stock(cartel.stock - 1)
-    item = ItemCarrito(
-        producto=reservado,
-        cantidad=1,
-        precio_unitario=0,
-        precio_unitario_original=0,
-        descuento=0,
-        es_regalo=True,
-    )
-    regalo = Regalo(
-        incluido=True,
-        sku=cartel.sku,
-        titulo=cartel.titulo,
-        cantidad=1,
-        precio_original=cartel.precio,
-        precio_final=0,
-        subtotal=0,
-    )
-    return replace(
-        estado,
-        catalogo=reemplazar_producto(estado.catalogo, reservado),
-        items=estado.items + (item,),
-        regalo=regalo,
-    )
-
-
 PIPELINE: tuple[Callable[..., Estado], ...] = (
     regla_apertura,
     regla_movimiento,
     regla_camaras,
-    regla_regalo,
+    aplicar_transformaciones,
 )
 
 
@@ -767,7 +832,7 @@ def resultado_a_mapping(resultado: ResultadoKit) -> Mapping:
     )
 
 
-procesar = compose(resultado_a_mapping, estado_a_resultado, resolver)
+procesar = componer(resultado_a_mapping, estado_a_resultado, resolver)
 
 
 # ---------------------------------------------------------------------------
