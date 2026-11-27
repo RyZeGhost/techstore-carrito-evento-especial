@@ -158,7 +158,7 @@ Ejemplo: en cumpleaños se sugieren `AURICULARES-DEPORTIVOS` ($19.990 → $16.99
 
 ## 11. Errores y supervisión de IA
 
-Se registraron **26 incidencias reales** en `errores_corregidos.md`, entre ellas:
+Se registraron **28 incidencias reales** en `errores_corregidos.md`, entre ellas:
 
 - confundir Client Secret (`shpss_`) con access token (`shpat_`);
 - scopes insuficientes en la app (incluidos `read_themes`/`write_themes` para la paginación);

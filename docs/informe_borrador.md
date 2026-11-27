@@ -185,7 +185,7 @@ Ejemplo de cuerpo: `{"evento":"cumpleanos","personas":10,"cupon":"FIESTA10","tip
 
 ## 7. Errores y prompts
 
-- `docs/errores_corregidos.md`: **26 incidencias documentadas**. Falta agregar la **#27: segmentación de clientes** (parámetro opcional, beneficios y estilos de recomendación).
+- `docs/errores_corregidos.md`: **28 incidencias documentadas** (hasta la #28: productos no publicados). Las incidencias #29 y #30 previstas en `CONTINUAR.md` se retiraron porque el catálogo de 34 SKU fue reemplazado por productos reales de Shopify.
 - `docs/prompts.md`: 27 prompts de los tres paradigmas + prompts de revisión (tienda tecnológica, imágenes/precios, recomendaciones, paginación/interfaz, catálogo extendido, segmentación). `[VERificar el conteo final]`.
 - `docs/explicacion_lineas.md`: generado automáticamente; **hay que regenerarlo** con `python -m scripts.generar_documentacion` después de la segmentación.
 

@@ -107,7 +107,7 @@ Detalle de la recomendación para el primer caso, ya con el catálogo ampliado: 
 
 ### Errores y correcciones
 
-Ver [`errores_corregidos.md`](errores_corregidos.md). Incluye 26 incidencias reales, desde credenciales y scopes de Shopify hasta cambios de la API 2026, imágenes, precios, limpieza del checkout, validación del catálogo, límites de tasa, registro de errores, la recomendación personalizada omitida en la primera versión, la paginación del tema y el campo `media` rechazado por `productCreate`.
+Ver [`errores_corregidos.md`](errores_corregidos.md). Incluye 28 incidencias reales, desde credenciales y scopes de Shopify hasta cambios de la API 2026, imágenes, precios, limpieza del checkout, validación del catálogo, límites de tasa, registro de errores, la recomendación personalizada omitida en la primera versión, la paginación del tema y el campo `media` rechazado por `productCreate`.
 
 ### Explicación del código
 

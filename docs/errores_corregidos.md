@@ -33,6 +33,10 @@ Este registro describe los fallos reales que aparecieron durante la construcció
 | 27 | Faltaba la segmentación de clientes por tipo de usuario | El enunciado pedía precios y beneficios diferenciados, pero la primera versión del carrito solo atendía evento, personas y cupón. | Se añadió `carrito/segmentos.py` y la configuración `segmentos` en `datos/catalogo.json`. Los tres paradigmas aceptan el parámetro opcional `tipo_usuario` (`nuevo`, `frecuente`, `mayorista`; `None` = invitado). El descuento se aplica después del 2x1 y del cupón, con envío gratis para nuevo y mayorista y estilos de recomendación distintos. La API expone `GET /segmentos` y `POST /carrito` acepta `tipo_usuario`. Se agregaron 4 pruebas (11 en total). |
 | 28 | Los 34 productos no aparecían en `/collections/all`; solo se veía la Gift Card | Los productos estaban `ACTIVE`, con precio, imagen y colección, pero tenían `publishedAt: null`. En Shopify, `ACTIVE` no equivale a publicado en el canal Online Store. | Se añadió `publishedAt` a `PRODUCTOS_QUERY` y la mutación `productUpdate(input: {id: $id, publishedAt: $fecha})` en `scripts/poblar_catalogo.py`. El script genera la fecha UTC con `fecha_publicacion()` y publica tanto productos nuevos como existentes que aún no estén publicados. Después de publicar, el catálogo se navega en páginas de 12 productos gracias al cambio del tema descrito en la incidencia 26. |
 
+## Incidencias retiradas
+
+Las incidencias **#29** (reemplazar fotos con objetos usados por fotos con fondo blanco) y **#30** (precios presentados 5 % más bajos por `presentmentPrices`) se habían previsto en `CONTINUAR.md` para el catálogo anterior de 34 SKU. **Ya no corresponden**: ese catálogo fue sustituido por 11 productos reales de Shopify y 3 SKU de prueba del kit, por lo que desaparecieron tanto los productos como los ajustes de mercado que las originaban. Por tanto, el registro queda en 28 incidencias reales.
+
 ## Estado final verificado
 
 - `python -m carrito.demo` → los cinco casos producen resultados idénticos en los tres paradigmas.
