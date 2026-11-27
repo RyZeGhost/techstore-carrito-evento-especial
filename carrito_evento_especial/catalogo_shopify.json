@@ -8,10 +8,10 @@
     "generado_utc": "2026-11-27T01:57:27.405450+00:00",
     "origen": "Shopify Admin API + datos de prueba del kit",
     "notas": [
-      "Los 11 productos con origen 'shopify' se leen de la tienda configurada: id, handle, título, categoría, precio, variantes e imagen.",
+      "Los 13 productos con origen 'shopify' se leen de la tienda configurada: id, handle, título, categoría, precio, variantes e imagen.",
       "Los productos nuevos no tenían SKU en Shopify: se asigna uno derivado del handle con prefijo por categoría (ALM, CAM, CAN, BIO).",
       "Shopify gestiona el inventario de estos productos; stock y stock_disponible se toman de inventory_quantity.",
-      "Se conservan 3 SKU de prueba (SEN-APERT1, SEN-APERT2, PROM-CARTEL1) necesarios para las reglas del kit. No se modificó Shopify.",
+      "Se conserva 1 SKU de prueba (SEN-APERT1) necesario para las reglas del kit. SEN-APERT2 y PROM-CARTEL1 ya existen en Shopify con ID de variante real.",
       "Las etiquetas funcionales se asignan en este archivo de prueba; las etiquetas reales de Shopify se conservan en tags_shopify.",
       "inmune_mascotas se aplica a ALM-SMARTLIFE, único sensor de movimiento con stock suficiente para la demo con mascotas."
     ]
@@ -99,10 +99,10 @@
       "cantidad_productos": 3
     },
     {
-      "id": "prueba-sensores-apertura",
+      "id": 649894986092,
       "titulo": "Sensores de apertura",
       "handle": "sensores-de-apertura",
-      "descripcion": "Categoría de prueba; no existe en la tienda.",
+      "descripcion": "Colección real de Shopify: Sensores de apertura.",
       "skus": [
         "SEN-APERT1",
         "SEN-APERT2"
@@ -601,12 +601,12 @@
       ]
     },
     {
-      "origen": "prueba",
-      "id": "prueba-SEN-APERT2",
+      "origen": "shopify",
+      "id": 15525561696620,
       "sku": "SEN-APERT2",
       "titulo": "Sensor de apertura para puerta",
-      "handle": "sensor-apertura-puerta",
-      "vendor": "SecureHome Seguridad",
+      "handle": "sensor-de-apertura-para-puerta",
+      "vendor": "SecureHome",
       "categoria": "Sensores de apertura",
       "categorias_coleccion": [
         "Sensores de apertura"
@@ -615,10 +615,13 @@
       "precio_formateado": "$9.990 CLP",
       "stock": 15,
       "stock_disponible": true,
-      "stock_origen": "catalogo_prueba",
-      "inventory_management": null,
-      "inventory_policy": "continue",
-      "tags_shopify": [],
+      "stock_origen": "Shopify inventory_quantity (15 unidades; el motor reserva 6 para el kit)",
+      "inventory_management": "shopify",
+      "inventory_policy": "deny",
+      "tags_shopify": [
+        "sensor_apertura",
+        "sensores-de-apertura"
+      ],
       "tags_funcionales": [
         "sensor_apertura"
       ],
@@ -628,7 +631,7 @@
       "imagen": null,
       "variantes": [
         {
-          "id": "prueba-SEN-APERT2-1",
+          "id": 68330993090924,
           "titulo": "Default Title",
           "sku": "SEN-APERT2",
           "precio": 9990,
