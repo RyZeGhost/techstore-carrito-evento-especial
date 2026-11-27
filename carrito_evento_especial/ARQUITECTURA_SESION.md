@@ -47,7 +47,7 @@ El motor produce cuatro líneas para la demo (`resultado_funcional.json`):
 | `CAM-EZVIZH6C` | 3 | Shopify | Sí: variante `68329691709804`, con 10 % vía `KIT10` |
 | `PROM-CARTEL1` | 1 | Shopify (regalo) | Sí: variante `68330868113772`, publicada a $0 |
 
-El descuento y el regalo ya se materializan en Shopify: la regla de precio `Kit Seguridad 10% camara` creó el código `KIT10` (`-10 %`) y el producto `Cartel disuasivo` está publicado a **$0** con SKU `PROM-CARTEL1`. El catálogo conserva el precio de referencia de $4.990 para que el informe siga indicando «normalmente $4.990», pero el cobro real es $0.
+El descuento y el regalo ya se materializan en Shopify: el descuento `Kit Seguridad 10% camara` (creado con GraphQL `discountCodeBasicCreate`) expone el código `KIT10` con un **10 % restringido únicamente a la variante `68329691709804`** de la cámara, y el producto `Cartel disuasivo` está publicado a **$0** con SKU `PROM-CARTEL1`. El catálogo conserva el precio de referencia de $4.990 para que el informe siga indicando «normalmente $4.990», pero el cobro real es $0.
 
 Comprando por separado las tres líneas reales serían `2 × $49.990 + 3 × $20.990 = $162.950`. Con el combo son **$156.653**: se descuentan $6.297 en la cámara y se lleva el cartel sin costo. El total del motor ($216.593) es mayor porque incluye además las 6 unidades de `SEN-APERT2`, que son un fixture del ejercicio y no se venden en la tienda.
 
