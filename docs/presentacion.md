@@ -1,4 +1,4 @@
-# Presentación — TechStore: Carrito Evento Especial
+# Presentación — SecureHome Seguridad: Carrito Evento Especial
 
 **Tarea 1: Desarrollo Multiparadigma en Python de un Componente de E-commerce con Asistencia de IA Generativa**
 
@@ -8,10 +8,10 @@ Formato: diapositivas en Markdown. Cada `---` separa una diapositiva.
 
 ## 1. Título
 
-**TechStore**
+**SecureHome Seguridad**
 Tienda de productos tecnológicos + Carrito Evento Especial en tres paradigmas
 
-- Shopify: `techstore-d8vn3rhk.myshopify.com`
+- Shopify: `games4you-k5xbi4h0.myshopify.com`
 - Repositorio: https://github.com/RyZeGhost/techstore-carrito-evento-especial
 - Fecha: 22–23 de noviembre de 2026
 
@@ -199,7 +199,7 @@ Cada respuesta generada con IA se **ejecutó, comparó y corrigió**. Los 27 pro
 
 Espacios reservados para la entrega presencial:
 
-1. **Catálogo TechStore:** `[captura: colecciones y productos con imagen y precio CLP]`
+1. **Catálogo SecureHome Seguridad:** `[captura: colecciones y productos con imagen y precio CLP]`
 2. **Carrito y checkout en modo prueba:** `[captura: carrito armado y pasarela de prueba]`
 3. **Repositorio GitHub:** `[captura: commits y rama main sincronizada]`
 4. **Validación con el docente:** `[captura o firma: resultado de la validación del evento]`

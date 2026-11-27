@@ -11,7 +11,7 @@ Este archivo reúne **todo lo verificado hasta hoy** para que solo tengas que re
 | Campo | Valor |
 |---|---|
 | Tarea | Tarea 1: Desarrollo Multiparadigma en Python de un Componente de E-commerce con Asistencia de IA Generativa |
-| Tienda | TechStore — `https://techstore-d8vn3rhk.myshopify.com` |
+| Tienda | SecureHome Seguridad — `https://games4you-k5xbi4h0.myshopify.com` |
 | Repositorio | https://github.com/RyZeGhost/techstore-carrito-evento-especial (público, rama `main`) |
 | Moneda | CLP |
 | Versión de API Shopify | `2026-01` |
@@ -174,7 +174,7 @@ Ejemplo de cuerpo: `{"evento":"cumpleanos","personas":10,"cupon":"FIESTA10","tip
 |---|---|
 | `python -m unittest discover -s tests -v` | **11/11 OK** |
 | `python -m carrito.demo` | `Resultado global: TODOS LOS CASOS COINCIDEN` (incluye los 4 perfiles) |
-| `python shopify_client.py` | `Conectado a: TechStore (techstore-d8vn3rhk.myshopify.com)` |
+| `python shopify_client.py` | `Conectado a: SecureHome Seguridad (games4you-k5xbi4h0.myshopify.com)` |
 | `python main.py --info` | API version `2026-01` |
 | `python -m scripts.poblar_catalogo --dry-run` | 34 SKUs existentes, 0 por crear |
 | `python -m scripts.actualizar_tema` | `paginate collection.products by 12`, control de páginas y CSS vinculado |

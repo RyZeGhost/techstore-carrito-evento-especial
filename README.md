@@ -1,8 +1,8 @@
-# TechStore — Tienda de productos tecnológicos + Carrito Evento Especial (Python + Shopify)
+# SecureHome Seguridad — Tienda de productos tecnológicos + Carrito Evento Especial (Python + Shopify)
 
 Proyecto de la **Tarea 1: Desarrollo Multiparadigma en Python de un Componente de E-commerce con Asistencia de IA Generativa**.
 
-TechStore es una tienda **de productos tecnológicos** con **34 SKU en 8 categorías** (audio, accesorios, energía, periféricos, almacenamiento, pantallas, computadores y redes). El catálogo completo está en `datos/catalogo.json`. El catálogo se muestra **paginado a 12 productos por página** y solo conserva la Gift Card de crédito como artículo no tecnológico.
+SecureHome Seguridad es una tienda **de productos tecnológicos** con **34 SKU en 8 categorías** (audio, accesorios, energía, periféricos, almacenamiento, pantallas, computadores y redes). El catálogo completo está en `datos/catalogo.json`. El catálogo se muestra **paginado a 12 productos por página** y solo conserva la Gift Card de crédito como artículo no tecnológico.
 
 Contiene:
 
@@ -32,12 +32,12 @@ Copy-Item .env.example .env
 Contenido de `.env`:
 
 ```ini
-SHOPIFY_SHOP=techstore-d8vn3rhk.myshopify.com
+SHOPIFY_SHOP=games4you-k5xbi4h0.myshopify.com
 SHOPIFY_CLIENT_ID=tu-client-id
 SHOPIFY_CLIENT_SECRET=shpss_...         # secreto de la app en el Dev Dashboard
 
 # Heredados del primer enfoque (REST). Ya no son necesarios:
-SHOPIFY_STORE_URL=techstore-d8vn3rhk.myshopify.com
+SHOPIFY_STORE_URL=games4you-k5xbi4h0.myshopify.com
 SHOPIFY_ACCESS_TOKEN=shpat_...
 SHOPIFY_API_VERSION=2026-10
 
@@ -61,7 +61,7 @@ La app de Shopify debe estar **instalada en la tienda** y tener los scopes de pr
 Salida esperada:
 
 ```
-Conectado a: TechStore (techstore-d8vn3rhk.myshopify.com)
+Conectado a: SecureHome Seguridad (games4you-k5xbi4h0.myshopify.com)
 ```
 
 También puedes verificarlo con `main.py` (muestra la versión de la API):
@@ -71,7 +71,7 @@ También puedes verificarlo con `main.py` (muestra la versión de la API):
 ```
 
 ```
-Conectado exitosamente a: TechStore (techstore-d8vn3rhk.myshopify.com)
+Conectado exitosamente a: SecureHome Seguridad (games4you-k5xbi4h0.myshopify.com)
   API version: 2026-01
 ```
 

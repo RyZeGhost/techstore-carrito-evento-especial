@@ -1,6 +1,6 @@
 # Informe final — Tarea 1: Desarrollo Multiparadigma en Python de un Componente de E-commerce
 
-**Tienda:** TechStore — `https://techstore-d8vn3rhk.myshopify.com`
+**Tienda:** SecureHome Seguridad — `https://games4you-k5xbi4h0.myshopify.com`
 **Grupo:** (completar con los integrantes)
 **Fecha:** 22–23 de noviembre de 2026
 
@@ -17,7 +17,7 @@ La tienda se montó sobre **Shopify**, plataforma validada por el enunciado.
 | Catálogo y navegación | Mínimo | Catálogo de **productos tecnológicos** definido en `datos/catalogo.json` (**34 SKU**, 8 categorías: Audio, Accesorios, Energía, Periféricos, Almacenamiento, Pantallas, Computadores y Redes). Cada SKU incluye precio en **CLP** y una imagen real libre de marca de agua. Carga a Shopify mediante `scripts/poblar_catalogo.py`. El catálogo se **divide en páginas de 12 productos** para no mostrar todo de una vez. |
 | Carrito y checkout | Mínimo | Provisto por Shopify en modo de prueba. |
 | Pasarela de pagos | Mínimo | Configurada en **Configuración → Pagos → Proveedores de pago de prueba** (Shopify Payments test mode / Bogus Gateway). |
-| Identidad visual (tema) | Mínimo | Tema coherente con TechStore configurado en **Online Store → Themes**. |
+| Identidad visual (tema) | Mínimo | Tema coherente con SecureHome Seguridad configurado en **Online Store → Themes**. |
 | Gestión de usuarios | Recomendado | Habilitar cuentas de cliente en **Configuración → Clientes**. |
 | Reseñas y prueba social | Recomendado | Instalar una app de reseñas; no exigible. |
 | Catálogo e inventario (backend) | Recomendado | Los productos se crean con `inventoryManagement: SHOPIFY` y stock inicial desde el JSON. |
@@ -42,7 +42,7 @@ Prueba ejecutada:
 
 ```
 $ python shopify_client.py
-Conectado a: TechStore (techstore-d8vn3rhk.myshopify.com)
+Conectado a: SecureHome Seguridad (games4you-k5xbi4h0.myshopify.com)
 ```
 
 ---

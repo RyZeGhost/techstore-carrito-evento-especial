@@ -25,7 +25,7 @@ Verificación inicial:
 .\.venv\Scripts\python.exe main.py --info
 ```
 
-Resultado esperado: **11/11 tests OK**, `Resultado global: TODOS LOS CASOS COINCIDEN`, conexión a `TechStore` y API `2026-01`.
+Resultado esperado: **11/11 tests OK**, `Resultado global: TODOS LOS CASOS COINCIDEN`, conexión a `SecureHome Seguridad` y API `2026-01`.
 
 ---
 
@@ -33,7 +33,7 @@ Resultado esperado: **11/11 tests OK**, `Resultado global: TODOS LOS CASOS COINC
 
 | Dato | Valor |
 |---|---|
-| Tienda | `techstore-d8vn3rhk.myshopify.com` |
+| Tienda | `games4you-k5xbi4h0.myshopify.com` |
 | Repositorio | `https://github.com/RyZeGhost/techstore-carrito-evento-especial` |
 | API Shopify | Admin GraphQL `2026-01` |
 | Tema activo | `test-data`, id `189417029881` |

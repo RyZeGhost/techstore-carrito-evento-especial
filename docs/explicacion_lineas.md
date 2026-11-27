@@ -11,7 +11,7 @@ comentario del bloque que le precede inmediatamente.
 | 1 | `"""Cliente para la Admin GraphQL API de Shopify usando client credentials.` | Docstring: describe el propósito del bloque. |
 | 2 | `` | Línea en blanco: separa bloques lógicos. |
 | 3 | `Variables esperadas en .env:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 4 | `SHOPIFY_SHOP=techstore-d8vn3rhk.myshopify.com` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
+| 4 | `SHOPIFY_SHOP=games4you-k5xbi4h0.myshopify.com` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 5 | `SHOPIFY_CLIENT_ID=...` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 6 | `SHOPIFY_CLIENT_SECRET=shpss_...` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 7 | `` | Línea en blanco: separa bloques lógicos. |
@@ -53,7 +53,7 @@ comentario del bloque que le precede inmediatamente.
 | 43 | `` | Línea en blanco: separa bloques lógicos. |
 | 44 | `` | Línea en blanco: separa bloques lógicos. |
 | 45 | `def normalizar_shop(shop: str) -> str:` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
-| 46 | `"""Acepta 'techstore', 'techstore.myshopify.com' o la URL completa con /admin."""` | Docstring: describe el propósito del bloque. |
+| 46 | `"""Acepta 'games4you-k5xbi4h0', 'games4you-k5xbi4h0.myshopify.com' o la URL completa con /admin."""` | Docstring: describe el propósito del bloque. |
 | 47 | `shop = shop.strip().replace("https://", "").replace("http://", "").rstrip("/")` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 48 | `if shop.endswith("/admin"):` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |
 | 49 | `shop = shop[: -len("/admin")]` | Declaración o expresión del algoritmo; ver el bloque comentado anterior. |

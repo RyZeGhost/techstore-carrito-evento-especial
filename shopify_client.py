@@ -1,7 +1,7 @@
 """Cliente para la Admin GraphQL API de Shopify usando client credentials.
 
 Variables esperadas en .env:
-    SHOPIFY_SHOP=techstore-d8vn3rhk.myshopify.com
+    SHOPIFY_SHOP=games4you-k5xbi4h0.myshopify.com
     SHOPIFY_CLIENT_ID=...
     SHOPIFY_CLIENT_SECRET=shpss_...
 
@@ -43,7 +43,7 @@ _TOKEN = None
 
 
 def normalizar_shop(shop: str) -> str:
-    """Acepta 'techstore', 'techstore.myshopify.com' o la URL completa con /admin."""
+    """Acepta 'games4you-k5xbi4h0', 'games4you-k5xbi4h0.myshopify.com' o la URL completa con /admin."""
     shop = shop.strip().replace("https://", "").replace("http://", "").rstrip("/")
     if shop.endswith("/admin"):
         shop = shop[: -len("/admin")]
