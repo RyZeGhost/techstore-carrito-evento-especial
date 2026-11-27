@@ -101,7 +101,7 @@ Resultado de la primera búsqueda en Openverse: las consultas con la frase compl
 
 ## 5. Pending crítico #2 — precios mostrados 5 % más bajos
 
-> **Cerrado / no aplica.** El catálogo de 34 SKU fue reemplazado por 11 productos reales de Shopify más 3 SKU de prueba del kit. Los SKU `PROYECTOR` y `AURICULARES` ya no existen y el ajuste de mercado que motivó este pendiente tampoco. Lo que sigue se conserva solo como historial; la incidencia #30 queda retirada.
+> **Cerrado / no aplica.** El catálogo de 34 SKU fue reemplazado por 11 productos reales de Shopify más 3 SKU de prueba del kit. Los SKU `PROYECTOR` y `AURICULARES` ya no existen y el ajuste de mercado que motivó este pendiente tampoco. Lo que sigue se conserva solo como historial; la incidencia #30 prevista para precios queda retirada y su número se reutiliza en `errores_corregidos.md` para documentar el fallo de CRLF.
 
 Los precios de `datos/catalogo.json` ya son realistas y terminan en `990` (ej.: notebook `599990`, monitor `139990`, cable HDMI `6990`). Pero la tienda muestra un 5 % menos:
 
@@ -195,7 +195,7 @@ Scripts principales:
 
 ## 8. Documentación pendiente
 
-- `docs/errores_corregidos.md`: tiene incidencias hasta la **#28** (productos no publicados). Las incidencias **#29** y **#30** que se habían previsto aquí **se retiran**: ya no corresponden porque el catálogo de 34 SKU fue reemplazado por 11 productos reales de Shopify más 3 SKU de prueba del kit. Desaparecieron los SKU y los objetos que motivaban esos pendientes (fotos con objetos usados y ajuste de `presentmentPrices`).
+- `docs/errores_corregidos.md`: tiene incidencias hasta la **#30**. Las incidencias **#29** y **#30** que se habían previsto aquí (fotos con fondo blanco y `presentmentPrices`) **se retiraron**: ya no corresponden porque el catálogo de 34 SKU fue reemplazado por 11 productos reales de Shopify más 3 SKU de prueba del kit. Sus números se reutilizan para documentar los dos fallos reales detectados al crear los tres paradigmas: desajuste de esquema y saltos CRLF.
 - `docs/informe_borrador.md`: borrador listo con datos verificados y huecos `[COMPLETAR]`.
 - Falta traspasar a `README.md`, `docs/informe.md` y `docs/presentacion.md` la segmentación y los cambios visuales.
 - Regenerar `docs/explicacion_lineas.md`:
@@ -218,7 +218,7 @@ Scripts principales:
 
 ## 10. Checklist para cerrar la entrega
 
-- [x] Incidencias #29 y #30 retiradas: no aplican tras el cambio de catálogo (ver sección 8).
+- [x] Incidencias #29 y #30 documentadas: desajuste de esquema y CRLF entre los tres paradigmas (las previstas para el catálogo anterior se retiraron).
 - [ ] Documentación y prompts actualizados.
 - [ ] `explicacion_lineas.md` regenerado.
 - [ ] Marketing, reseñas, cuentas e integraciones documentados o implementados.
