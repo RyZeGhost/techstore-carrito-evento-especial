@@ -639,12 +639,12 @@
       ]
     },
     {
-      "origen": "prueba",
-      "id": "prueba-PROM-CARTEL1",
+      "origen": "shopify",
+      "id": 15525547835756,
       "sku": "PROM-CARTEL1",
       "titulo": "Cartel disuasivo",
       "handle": "cartel-disuasivo",
-      "vendor": "SecureHome Seguridad",
+      "vendor": "SecureHome",
       "categoria": "Promociones",
       "categorias_coleccion": [
         "Promociones"
@@ -653,10 +653,14 @@
       "precio_formateado": "$4.990 CLP",
       "stock": 10,
       "stock_disponible": true,
-      "stock_origen": "catalogo_prueba",
-      "inventory_management": null,
-      "inventory_policy": "continue",
-      "tags_shopify": [],
+      "stock_origen": "Shopify inventory_quantity; publicado a $0 como regalo, precio de lista 4990 conservado para el informe",
+      "inventory_management": "shopify",
+      "inventory_policy": "deny",
+      "tags_shopify": [
+        "cartel_disuasivo",
+        "promocion",
+        "regalo"
+      ],
       "tags_funcionales": [
         "cartel_disuasivo"
       ],
@@ -666,7 +670,7 @@
       "imagen": null,
       "variantes": [
         {
-          "id": "prueba-PROM-CARTEL1-1",
+          "id": 68330868113772,
           "titulo": "Default Title",
           "sku": "PROM-CARTEL1",
           "precio": 4990,

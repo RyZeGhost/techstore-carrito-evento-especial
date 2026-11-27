@@ -33,7 +33,7 @@ CLIENTE_PRUEBA + catálogo  ->  motor Python (puro)  ->  JSON del combo (SKU, ca
                                    banner del tema (IDs de variante reales)
                                                             |
                                                             v
-                              /cart/add.js o /cart/{variant}:{qty}  ->  carrito de la sesión
+                              /cart/add.js + /discount/KIT10  o  /cart/{variant}:{qty}?discount=KIT10  ->  carrito de la sesión
 ```
 
 ## Productos del combo en la tienda
@@ -42,20 +42,23 @@ El motor produce cuatro líneas para la demo (`resultado_funcional.json`):
 
 | SKU | Cantidad | Origen | ¿Se agrega al carrito de Shopify? |
 |---|---:|---|---|
-| `SEN-APERT2` | 6 | Prueba local | No: no existe en Shopify (ID `prueba-SEN-APERT2-1`) |
+| `SEN-APERT2` | 6 | Prueba local | No: es el único fixture que sigue sin existir en tienda |
 | `ALM-SMARTLIFE` | 2 | Shopify | Sí: variante `68329720250732` |
-| `CAM-EZVIZH6C` | 3 | Shopify | Sí: variante `68329691709804` |
-| `PROM-CARTEL1` | 1 | Prueba local, regalo | No: no existe en Shopify (ID `prueba-PROM-CARTEL1-1`) |
+| `CAM-EZVIZH6C` | 3 | Shopify | Sí: variante `68329691709804`, con 10 % vía `KIT10` |
+| `PROM-CARTEL1` | 1 | Shopify (regalo) | Sí: variante `68330868113772`, publicada a $0 |
 
-Los dos SKU `prueba` son fixtures necesarios para evaluar las reglas del ejercicio; no son productos comprables en la tienda. Por eso el banner agrega únicamente las variantes reales con sus cantidades calculadas. El descuento del 10 % y el regalo siguen siendo resultados del motor en el informe; para cobrarlos en Shopify haría falta además un código de descuento o una Shopify Function de carrito, que no forma parte de este cambio.
+El descuento y el regalo ya se materializan en Shopify: la regla de precio `Kit Seguridad 10% camara` creó el código `KIT10` (`-10 %`) y el producto `Cartel disuasivo` está publicado a **$0** con SKU `PROM-CARTEL1`. El catálogo conserva el precio de referencia de $4.990 para que el informe siga indicando «normalmente $4.990», pero el cobro real es $0.
+
+Comprando por separado las tres líneas reales serían `2 × $49.990 + 3 × $20.990 = $162.950`. Con el combo son **$156.653**: se descuentan $6.297 en la cámara y se lleva el cartel sin costo. El total del motor ($216.593) es mayor porque incluye además las 6 unidades de `SEN-APERT2`, que son un fixture del ejercicio y no se venden en la tienda.
 
 ## Implementación en el tema
 
 - Sección nueva: `sections/combo_oferta.liquid`, visible solo en `templates/index.json`.
 - Texto: **「Oferta Especial: Kit de Seguridad Residencial」**.
-- Botón: enlace de *cart permalink* `/cart/68329720250732:2,68329691709804:3` como respaldo, mejorado con `POST /cart/add.js` para agregar los ítems a la sesión activa y abrir el carrito. Si `fetch` falla, se usa el permalink.
-- Los IDs de variante se obtuvieron de `catalogo_shopify.json`, que es la entrada real de los tres motores.
+- Botón: `POST /cart/add.js` con las tres variantes reales (alarma ×2, cámara ×3, regalo ×1). Al tener éxito navega a `/discount/KIT10?redirect=/cart` para aplicar el código a la sesión activa. Si `fetch` falla, se usa el *cart permalink* `/cart/68329720250732:2,68329691709804:3,68330868113772:1?discount=KIT10`.
+- Los IDs de variante se obtuvieron de `catalogo_shopify.json`, que es la entrada real de los tres motores. `PROM-CARTEL1` se sincronizó con el producto real creado en Shopify conservando los campos que consumen los motores.
+- La sesión sigue siendo propiedad del navegador: ni el código de descuento ni el regalo se calculan en Python con un `session_id`.
 
 ## Verificación
 
-Los archivos `imperativo.py`, `poo.py` y `funcional.py` **no se modificaron**. Los tres JSON siguen siendo byte-idénticos (SHA-256 `0B99768E…26093`), de modo que la igualdad de los paradigmas queda intacta. El estado anterior del catálogo, los resultados y el tema se respaldó en `versiones/v22_banner_sesion_<timestamp>/`.
+Los archivos `imperativo.py`, `poo.py` y `funcional.py` **no se modificaron**. Tras la creación del regalo y su sincronización se volvieron a ejecutar los tres motores: los JSON siguen siendo byte-idénticos (SHA-256 `0B99768E…26093`), de modo que la igualdad de los paradigmas queda intacta. El estado anterior se respaldó en `versiones/v22_banner_sesion_<timestamp>/` y, antes de la promoción real, en `versiones/v23_promo_real_<timestamp>/`.
